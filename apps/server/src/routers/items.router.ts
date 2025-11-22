@@ -20,7 +20,7 @@ export const itemsRouter = base.items.router({
       throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
     }
 
-    const items = await WorkspaceItemModel.find({ workspaceId }).sort({ createdAt: 1 });
+    const items = await WorkspaceItemModel.find({ workspaceId }).sort({ order: 1, createdAt: 1 });
 
     return items;
   }),
@@ -79,6 +79,8 @@ export const itemsRouter = base.items.router({
       }
     }
 
+    const order = await itemService.getNextOrderForParent(input.workspaceId, input.parentId ?? null);
+
     const item = await WorkspaceItemModel.create({
       workspaceId: input.workspaceId,
       name: input.name,
@@ -86,6 +88,7 @@ export const itemsRouter = base.items.router({
       acquireDate: input.acquireDate,
       assetId: input.assetId,
       parentId: input.parentId ?? null,
+      order,
     });
 
     return item;
@@ -243,5 +246,37 @@ export const itemsRouter = base.items.router({
     );
 
     return createdHierarchy;
+  }),
+
+  reorderItems: protectedProcedure.items.reorderItems.handler(async ({ context, input }) => {
+    const userId = context.session.user.id;
+    const { workspaceId, parentId, itemOrders } = input;
+
+    const workspace = await WorkspaceModel.findById(workspaceId);
+
+    if (!workspace || workspace.userId !== userId) {
+      throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
+    }
+
+    const itemIds = itemOrders.map((io) => io.itemId);
+    const items = await WorkspaceItemModel.find({
+      _id: { $in: itemIds },
+      workspaceId,
+    });
+
+    if (items.length !== itemIds.length) {
+      throw ORPCNotFoundError(errorCodes.ITEM_NOT_FOUND);
+    }
+
+    const normalizedParentId = parentId === undefined ? null : parentId;
+    const hasMatchingParents = items.every((item) => item.parentId === normalizedParentId);
+
+    if (!hasMatchingParents) {
+      throw ORPCBadRequestError(errorCodes.ITEM_PARENT_MISMATCH);
+    }
+
+    await itemService.reorderItems(workspaceId, normalizedParentId, itemOrders);
+
+    return { success: true };
   }),
 });
