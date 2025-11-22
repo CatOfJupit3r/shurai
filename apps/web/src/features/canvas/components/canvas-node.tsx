@@ -1,13 +1,12 @@
 /**
  * Canvas Node Component
- *
- * NOTE: This component requires react-konva to be installed
  */
+import { useAtom } from 'jotai';
+import type Konva from 'konva';
+import { useRef, useEffect } from 'react';
+import { Rect, Transformer } from 'react-konva';
 
-// import { Rect, Image, Transformer } from 'react-konva';
-// import { useAtom } from 'jotai';
-// import { selectedNodeIdAtom, hoveredNodeIdAtom } from '../store/canvas-atoms';
-// import { useRef, useEffect } from 'react';
+import { selectedNodeIdAtom, hoveredNodeIdAtom } from '../store/canvas-atoms';
 
 export interface iCanvasNodeData {
   id: string;
@@ -32,18 +31,11 @@ interface iCanvasNodeProps {
   ) => void;
 }
 
-export function CanvasNode(_props: iCanvasNodeProps) {
-  // Placeholder implementation
-  return null;
-}
-
-/*
-// Full implementation - uncomment when react-konva is installed
-export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }: CanvasNodeProps) {
+export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }: iCanvasNodeProps) {
   const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom);
   const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeIdAtom);
-  const shapeRef = useRef<any>(null);
-  const transformerRef = useRef<any>(null);
+  const shapeRef = useRef<Konva.Rect>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
 
   const isSelected = selectedNodeId === node.id;
   const isHovered = hoveredNodeId === node.id;
@@ -55,13 +47,13 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
     }
   }, [isSelected]);
 
-  const handleClick = (e: any) => {
+  const handleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
     e.cancelBubble = true;
     setSelectedNodeId(node.id);
     onNodeClick?.(node.id);
   };
 
-  const handleDragEnd = (e: any) => {
+  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
     const newPosition = {
       x: e.target.x(),
       y: e.target.y(),
@@ -69,8 +61,10 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
     onNodeDragEnd?.(node.id, newPosition);
   };
 
-  const handleTransformEnd = (e: any) => {
+  const handleTransformEnd = () => {
     const shapeNode = shapeRef.current;
+    if (!shapeNode) return;
+
     const scaleX = shapeNode.scaleX();
     const scaleY = shapeNode.scaleY();
 
@@ -88,7 +82,19 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
     onNodeTransform?.(node.id, newProps);
   };
 
-  const strokeColor = isSelected ? '#3b82f6' : isHovered ? '#60a5fa' : 'transparent';
+  let strokeColor = 'transparent';
+  if (isSelected) {
+    strokeColor = '#3b82f6';
+  } else if (isHovered) {
+    strokeColor = '#60a5fa';
+  }
+
+  let fillColor = '#f3f4f6';
+  if (node.type === 'ASSET') {
+    fillColor = '#dbeafe';
+  } else if (node.type === 'SUB_CANVAS') {
+    fillColor = '#fef3c7';
+  }
 
   return (
     <>
@@ -98,7 +104,7 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
         y={node.position.y}
         width={node.size.width}
         height={node.size.height}
-        fill={node.type === 'ITEM' ? '#f3f4f6' : node.type === 'ASSET' ? '#dbeafe' : '#fef3c7'}
+        fill={fillColor}
         stroke={strokeColor}
         strokeWidth={2}
         draggable
@@ -107,10 +113,10 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
         onMouseLeave={() => setHoveredNodeId(null)}
         onDragEnd={handleDragEnd}
         onTransformEnd={handleTransformEnd}
-        rotation={node.rotation || 0}
-        opacity={node.opacity || 1}
+        rotation={node.rotation ?? 0}
+        opacity={node.opacity ?? 1}
       />
-      {isSelected && (
+      {isSelected ? (
         <Transformer
           ref={transformerRef}
           boundBoxFunc={(oldBox, newBox) => {
@@ -120,8 +126,7 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
             return newBox;
           }}
         />
-      )}
+      ) : null}
     </>
   );
 }
-*/

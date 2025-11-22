@@ -1,35 +1,29 @@
 /**
  * Grid Overlay Component for Canvas
  */
+import { useAtomValue } from 'jotai';
+import React from 'react';
+import { Layer, Line } from 'react-konva';
 
-// import { Layer, Line } from 'react-konva';
-// import { useAtomValue } from 'jotai';
-// import { gridEnabledAtom, gridSizeAtom, scaleAtom } from '../store/canvas-atoms';
+import { gridEnabledAtom, gridSizeAtom, scaleAtom } from '../store/canvas-atoms';
 
 interface iGridOverlayProps {
   width: number;
   height: number;
 }
 
-export function GridOverlay(_props: iGridOverlayProps) {
-  // Placeholder implementation
-  return null;
-}
-
-/*
-// Full implementation - uncomment when react-konva is installed
-export function GridOverlay({ width, height }: GridOverlayProps) {
-  const gridEnabled = useAtomValue(gridEnabledAtom);
+export function GridOverlay({ width, height }: iGridOverlayProps) {
+  const isGridEnabled = useAtomValue(gridEnabledAtom);
   const gridSize = useAtomValue(gridSizeAtom);
   const scale = useAtomValue(scaleAtom);
 
-  if (!gridEnabled) return null;
+  if (!isGridEnabled) return null;
 
-  const lines: JSX.Element[] = [];
+  const lines: React.ReactElement[] = [];
   const scaledGridSize = gridSize * scale;
 
   // Vertical lines
-  for (let i = 0; i < width / scaledGridSize; i++) {
+  for (let i = 0; i < width / scaledGridSize; i += 1) {
     lines.push(
       <Line
         key={`v-${i}`}
@@ -37,12 +31,12 @@ export function GridOverlay({ width, height }: GridOverlayProps) {
         stroke="#e5e7eb"
         strokeWidth={1}
         opacity={0.5}
-      />
+      />,
     );
   }
 
   // Horizontal lines
-  for (let i = 0; i < height / scaledGridSize; i++) {
+  for (let i = 0; i < height / scaledGridSize; i += 1) {
     lines.push(
       <Line
         key={`h-${i}`}
@@ -50,10 +44,9 @@ export function GridOverlay({ width, height }: GridOverlayProps) {
         stroke="#e5e7eb"
         strokeWidth={1}
         opacity={0.5}
-      />
+      />,
     );
   }
 
   return <Layer listening={false}>{lines}</Layer>;
 }
-*/

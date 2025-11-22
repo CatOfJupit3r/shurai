@@ -1,14 +1,12 @@
 /**
  * Canvas Stage Component
- *
- * NOTE: This component requires react-konva to be installed
- * Uncomment the implementation once packages are available
  */
+import { useAtom } from 'jotai';
+import type Konva from 'konva';
 import type React from 'react';
+import { Stage, Layer } from 'react-konva';
 
-// import { Stage, Layer } from 'react-konva';
-// import { useAtom } from 'jotai';
-// import { scaleAtom, stagePositionAtom } from '../store/canvas-atoms';
+import { scaleAtom, stagePositionAtom } from '../store/canvas-atoms';
 
 interface iCanvasStageProps {
   width: number;
@@ -18,37 +16,19 @@ interface iCanvasStageProps {
 }
 
 export function CanvasStage({ width, height, children, onStageClick }: iCanvasStageProps) {
-  // Placeholder implementation
-  return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div className="rounded-lg border border-border bg-muted" style={{ width, height }} onClick={onStageClick}>
-      <div className="flex h-full items-center justify-center text-muted-foreground">
-        <div className="text-center">
-          <p className="text-lg font-semibold">Canvas View</p>
-          <p className="mt-2 text-sm">Install react-konva, konva, and jotai to enable canvas</p>
-          <p className="mt-4 max-w-md text-xs">
-            See /apps/web/src/features/canvas/README.md for installation instructions
-          </p>
-        </div>
-      </div>
-      {children}
-    </div>
-  );
-}
-
-/*
-// Full implementation - uncomment when react-konva is installed
-export function CanvasStage({ width, height, children, onStageClick }: CanvasStageProps) {
   const [scale, setScale] = useAtom(scaleAtom);
   const [stagePosition, setStagePosition] = useAtom(stagePositionAtom);
 
-  const handleWheel = (e: any) => {
+  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
 
     const scaleBy = 1.05;
     const stage = e.target.getStage();
+    if (!stage) return;
+
     const oldScale = stage.scaleX();
     const pointer = stage.getPointerPosition();
+    if (!pointer) return;
 
     const mousePointTo = {
       x: (pointer.x - stage.x()) / oldScale,
@@ -67,7 +47,7 @@ export function CanvasStage({ width, height, children, onStageClick }: CanvasSta
     setStagePosition(newPos);
   };
 
-  const handleDragEnd = (e: any) => {
+  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
     setStagePosition({
       x: e.target.x(),
       y: e.target.y(),
@@ -91,4 +71,3 @@ export function CanvasStage({ width, height, children, onStageClick }: CanvasSta
     </Stage>
   );
 }
-*/
