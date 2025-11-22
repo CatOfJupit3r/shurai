@@ -1,4 +1,4 @@
-import type { UserAchievementId } from '@startername/shared/constants/achievements';
+import type { UserAchievementId } from '@shurai/shared/constants/achievements';
 
 import type { iEventPayloadMap, EventType } from '@~/enums/events.enums';
 

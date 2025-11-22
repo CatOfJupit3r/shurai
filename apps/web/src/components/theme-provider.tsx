@@ -27,11 +27,7 @@ const ThemeProviderContext = createContext<iThemeProviderState>(initialState);
 
 const isBrowser = typeof window !== 'undefined';
 
-export function ThemeProvider({
-  children,
-  defaultTheme = 'system',
-  storageKey = 'startername.theme',
-}: iThemeProviderProps) {
+export function ThemeProvider({ children, defaultTheme = 'system', storageKey = 'shurai.theme' }: iThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(
     () => (isBrowser ? (localStorage.getItem(storageKey) as Theme) : defaultTheme) || defaultTheme,
   );

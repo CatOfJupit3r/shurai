@@ -1,5 +1,5 @@
 {
-  "name": "startername",
+  "name": "shurai",
   "private": true,
   "type": "module",
   "workspaces": {
@@ -54,7 +54,7 @@
     "lint": "turbo lint",
     "prepare": "husky",
     "commit": "cz",
-    "build:deps": "turbo run build --filter=@startername/shared"
+    "build:deps": "turbo run build --filter=@shurai/shared"
   },
   "devDependencies": {
     "@types/bun": "^1.3.2",

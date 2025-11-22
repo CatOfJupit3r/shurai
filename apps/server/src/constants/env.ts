@@ -29,10 +29,10 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.url(),
 
   // DB CONFIG
-  MONGO_URI: z.url().optional().default('mongodb://localhost:6060/startername'),
+  MONGO_URI: z.url().optional().default('mongodb://localhost:6060/shurai'),
   MONGO_USER: z.string().optional().default('username'),
   MONGO_PASSWORD: z.string().optional().default('password'),
-  MONGO_DATABASE_NAME: z.string().optional().default('startername'),
+  MONGO_DATABASE_NAME: z.string().optional().default('shurai'),
 
   // SERVER CONFIG
   SERVER_PORT: z.coerce.number().int().min(1).max(65535).optional().default(5050),

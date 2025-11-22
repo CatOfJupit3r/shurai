@@ -1,8 +1,8 @@
 import { call } from '@orpc/server';
 import { it, expect, describe, beforeEach } from 'bun:test';
 
-import { USER_ACHIEVEMENTS } from '@startername/shared';
-import { BADGE_IDS } from '@startername/shared/constants/badges';
+import { USER_ACHIEVEMENTS } from '@shurai/shared';
+import { BADGE_IDS } from '@shurai/shared/constants/badges';
 
 import { UserAchievementModel } from '@~/db/models/user-achievements.model';
 import { UserProfileModel } from '@~/db/models/user-profile.model';

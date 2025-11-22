@@ -2,7 +2,7 @@
 
 This starter is designed for me by me with all the shiny new things! (as of now)
 
-To finish setup, run `Replace All` to replace `startername` with name of your project.
+To finish setup, run `Replace All` to replace `shurai` with name of your project.
 Also, make sure to customize `.github/instructions/workspace.instructions.md` with description of you project
 so that agentic tools work efficiently.
 
@@ -18,7 +18,7 @@ so that agentic tools work efficiently.
 - **Runtime & Tooling:** Bun 1.2.21, Turborepo, Commitizen, Husky
 - **Backend:** TypeScript, Hono, oRPC, Typegoose/Mongoose, Better Auth, Zod
 - **Frontend:** React 19, Vite, TanStack Stack/Query/Form, Tailwind CSS
-- **Shared Contracts:** `@startername/shared` with oRPC + OpenAPI generation
+- **Shared Contracts:** `@shurai/shared` with oRPC + OpenAPI generation
 
 ## Repository Structure
 
@@ -48,8 +48,8 @@ Restart the terminal and verify with `bun --version`. Ensure `C:/Users/<you>/.bu
 ## Getting Started
 
 ```powershell
-git clone https://github.com/CatOfJupit3r/startername.git
-cd startername
+git clone https://github.com/CatOfJupit3r/shurai.git
+cd shurai
 bun install
 ```
 

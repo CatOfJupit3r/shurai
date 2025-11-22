@@ -20,7 +20,7 @@
 			"outputs": []
 		},
 		"dev": {
-			"dependsOn": ["@startername/shared#build"],
+			"dependsOn": ["@shurai/shared#build"],
 			"cache": false,
 			"persistent": true
 		},

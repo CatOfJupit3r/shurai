@@ -4,7 +4,7 @@ applyTo: "apps/web/**/*.ts,packages/shared/**/*.ts"
 
 ## Overview
 - The web client lives in `apps/web` and is powered by React 19, Vite, TanStack Router/Query/Form, Tailwind CSS, and Sonner for toasts.
-- Shared backend contracts are consumed through the generated oRPC client (`@startername/shared`) so API calls stay fully typed.
+- Shared backend contracts are consumed through the generated oRPC client (`@shurai/shared`) so API calls stay fully typed.
 - Authentication relies on Better Auth's React client (`apps/web/src/services/auth-service.ts`) and uses secure cookies issued by the backend.
 
 ## Environment & Bootstrapping

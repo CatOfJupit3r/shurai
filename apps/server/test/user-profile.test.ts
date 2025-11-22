@@ -1,7 +1,7 @@
 import { call } from '@orpc/server';
 import { it, expect, describe } from 'bun:test';
 
-import { errorCodes, errorMessages } from '@startername/shared/enums/errors.enums';
+import { errorCodes, errorMessages } from '@shurai/shared/enums/errors.enums';
 
 import { UserProfileModel } from '@~/db/models/user-profile.model';
 

@@ -1,4 +1,4 @@
-import { errorCodes } from '@startername/shared';
+import { errorCodes } from '@shurai/shared';
 
 import { BADGES_META } from '@~/constants/badges';
 import { generatePublicCode } from '@~/db/helpers';

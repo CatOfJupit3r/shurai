@@ -1,4 +1,4 @@
-import { USER_ACHIEVEMENTS } from '@startername/shared/constants/achievements';
+import { USER_ACHIEVEMENTS } from '@shurai/shared/constants/achievements';
 
 import { EVENTS } from '@~/enums/events.enums';
 

@@ -1,4 +1,4 @@
-import type { UserAchievementId } from '@startername/shared/constants/achievements';
+import type { UserAchievementId } from '@shurai/shared/constants/achievements';
 
 import type { iAchievementContext, iAchievementDefinition } from '@~/achievements/base-achievement';
 import { betaTesterAchievement } from '@~/achievements/betaTester.achievement';

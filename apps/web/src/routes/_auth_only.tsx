@@ -1,6 +1,6 @@
 import { createFileRoute, Navigate, Outlet, redirect } from '@tanstack/react-router';
 
-import { tryCatch } from '@startername/shared/helpers/std-utils';
+import { tryCatch } from '@shurai/shared/helpers/std-utils';
 
 import PseudoPage from '@~/components/pseudo-page';
 import { useMe, meQueryOptions } from '@~/features/user';

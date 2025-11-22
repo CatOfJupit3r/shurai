@@ -1,5 +1,5 @@
-import type { UserAchievementMeta } from '@startername/shared/constants/achievements';
-import { USER_ACHIEVEMENTS } from '@startername/shared/constants/achievements';
+import type { UserAchievementMeta } from '@shurai/shared/constants/achievements';
+import { USER_ACHIEVEMENTS } from '@shurai/shared/constants/achievements';
 
 export const USER_ACHIEVEMENTS_META: UserAchievementMeta[] = [
   {
