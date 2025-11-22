@@ -51,15 +51,9 @@ export function SortableItemNode({
     >
       {/* Expand/Collapse Button */}
       <Button variant="ghost" size="sm" className="size-6 p-0" onClick={onToggleExpand} disabled={!hasChildren}>
-        {hasChildren ? (
-          isExpanded ? (
-            <FiChevronDown className="size-3" />
-          ) : (
-            <FiChevronRight className="size-3" />
-          )
-        ) : (
-          <span className="size-3" />
-        )}
+        {hasChildren && !isExpanded ? <FiChevronRight className="size-3" /> : null}
+        {hasChildren && isExpanded ? <FiChevronDown className="size-3" /> : null}
+        {!hasChildren ? <span className="size-3" /> : null}
       </Button>
 
       {/* Drag Handle */}

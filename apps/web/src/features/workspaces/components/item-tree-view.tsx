@@ -1,26 +1,18 @@
+import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core';
 import {
-  DndContext,
   closestCenter,
+  DndContext,
+  DragOverlay,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  DragOverlay,
-  type DragEndEvent,
-  type DragStartEvent,
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useState } from 'react';
-import { FiChevronDown, FiChevronRight, FiMoreVertical, FiPlus } from 'react-icons/fi';
+import { FiPlus } from 'react-icons/fi';
 
 import { Button } from '@~/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@~/components/ui/dropdown-menu';
 import type { ORPCOutputs } from '@~/utils/orpc';
 
 import { SortableItemNode } from './sortable-item-node';
@@ -55,9 +47,7 @@ export function ItemTreeView({
         distance: 8,
       },
     }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    }),
+    useSensor(KeyboardSensor),
   );
 
   const toggleExpanded = (itemId: string) => {

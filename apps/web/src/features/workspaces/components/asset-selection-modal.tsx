@@ -8,22 +8,34 @@ import { Skeleton } from '@~/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 import { useAssetsList } from '@~/features/workspaces';
 
-interface AssetSelectionModalProps {
+interface iAssetSelectionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (assetId: string) => void;
   selectedAssetId?: string;
 }
 
-export function AssetSelectionModal({ isOpen, onClose, onSelect, selectedAssetId }: AssetSelectionModalProps) {
-  const [activeTab, setActiveTab] = useState<'ICON' | 'IMAGE' | 'ALL'>('ALL');
+export function AssetSelectionModal({ isOpen, onClose, onSelect, selectedAssetId }: iAssetSelectionModalProps) {
+  const [activeTab, setActiveTab] = useState<'ALL' | 'ICON' | 'IMAGE'>('ALL');
 
   const { assets: allAssets, isPending: isLoadingAll } = useAssetsList();
   const { assets: iconAssets, isPending: isLoadingIcons } = useAssetsList('ICON');
   const { assets: imageAssets, isPending: isLoadingImages } = useAssetsList('IMAGE');
 
-  const assets = activeTab === 'ALL' ? allAssets : activeTab === 'ICON' ? iconAssets : imageAssets;
-  const isPending = activeTab === 'ALL' ? isLoadingAll : activeTab === 'ICON' ? isLoadingIcons : isLoadingImages;
+  const getActiveAssets = () => {
+    if (activeTab === 'ALL') return allAssets;
+    if (activeTab === 'ICON') return iconAssets;
+    return imageAssets;
+  };
+
+  const getActivePending = () => {
+    if (activeTab === 'ALL') return isLoadingAll;
+    if (activeTab === 'ICON') return isLoadingIcons;
+    return isLoadingImages;
+  };
+
+  const assets = getActiveAssets();
+  const isPending = getActivePending();
 
   const handleSelect = (assetId: string) => {
     onSelect(assetId);
@@ -39,7 +51,11 @@ export function AssetSelectionModal({ isOpen, onClose, onSelect, selectedAssetId
           </DialogDescription>
         </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as any)} className="w-full">
+        <Tabs
+          value={activeTab}
+          onValueChange={(value) => setActiveTab(value as 'ALL' | 'ICON' | 'IMAGE')}
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="ALL">All</TabsTrigger>
             <TabsTrigger value="ICON">Icons</TabsTrigger>
@@ -84,14 +100,19 @@ export function AssetSelectionModal({ isOpen, onClose, onSelect, selectedAssetId
   );
 }
 
-interface AssetGridProps {
-  assets: any[];
+interface iAssetGridProps {
+  assets: Array<{
+    _id: string;
+    name: string;
+    iconUrl?: string;
+    imageUrl?: string;
+  }>;
   isPending: boolean;
   selectedAssetId?: string;
   onSelect: (assetId: string) => void;
 }
 
-function AssetGrid({ assets, isPending, selectedAssetId, onSelect }: AssetGridProps) {
+function AssetGrid({ assets, isPending, selectedAssetId, onSelect }: iAssetGridProps) {
   if (isPending) {
     return (
       <div className="grid grid-cols-3 gap-4">
@@ -114,10 +135,11 @@ function AssetGrid({ assets, isPending, selectedAssetId, onSelect }: AssetGridPr
   }
 
   return (
-    <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+    <div className="max-h-96 grid grid-cols-3 gap-4 overflow-y-auto">
       {assets.map((asset) => (
         <button
           key={asset._id}
+          type="button"
           className={`group relative aspect-square rounded-lg border-2 transition-all hover:border-primary ${
             selectedAssetId === asset._id ? 'border-primary bg-primary/10' : 'border-border'
           }`}
@@ -125,9 +147,9 @@ function AssetGrid({ assets, isPending, selectedAssetId, onSelect }: AssetGridPr
         >
           {/* Asset Preview */}
           <div className="flex h-full flex-col items-center justify-center p-4">
-            {asset.iconUrl || asset.imageUrl ? (
+            {asset.iconUrl ?? asset.imageUrl ? (
               <img
-                src={asset.iconUrl || asset.imageUrl}
+                src={asset.iconUrl ?? asset.imageUrl}
                 alt={asset.name}
                 className="max-h-full max-w-full object-contain"
               />

@@ -20,25 +20,34 @@ import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import { AssetSelectionModal } from './asset-selection-modal';
 
-interface ItemDetailsPanelProps {
+interface iItemDetailsPanelProps {
   workspaceId: string;
   itemId: string;
   onClose: () => void;
-  onUpdate: (itemId: string, updates: any) => void;
+  onUpdate: (
+    itemId: string,
+    updates: {
+      name?: string;
+      description?: string;
+      acquireDate?: Date;
+      assetId?: string;
+      parentId?: string | null;
+    },
+  ) => void;
   onDelete: (itemId: string) => void;
   isUpdating?: boolean;
   isDeleting?: boolean;
 }
 
 export function ItemDetailsPanel({
-  workspaceId,
+  workspaceId: _workspaceId,
   itemId,
   onClose,
   onUpdate,
   onDelete,
   isUpdating = false,
   isDeleting = false,
-}: ItemDetailsPanelProps) {
+}: iItemDetailsPanelProps) {
   const { data: item, isPending } = useQuery(
     tanstackRPC.items.getItem.queryOptions({
       input: { itemId },
@@ -54,21 +63,24 @@ export function ItemDetailsPanel({
   const [hasChanges, setHasChanges] = useState(false);
 
   // Update local state when item loads
-  useState(() => {
-    if (item) {
-      setName(item.name);
-      setDescription(item.description || '');
-      setAcquireDate(item.acquireDate ? new Date(item.acquireDate).toISOString().split('T')[0] : '');
-      setAssetId(item.assetId);
-    }
-  });
+  if (item && !name) {
+    setName(item.name);
+    setDescription(item.description ?? '');
+    setAcquireDate(item.acquireDate ? new Date(item.acquireDate).toISOString().split('T')[0] : '');
+    setAssetId(item.assetId);
+  }
 
   const handleSave = () => {
     if (!item) return;
 
-    const updates: any = {};
+    const updates: {
+      name?: string;
+      description?: string;
+      acquireDate?: Date;
+      assetId?: string;
+    } = {};
     if (name !== item.name) updates.name = name;
-    if (description !== (item.description || '')) updates.description = description;
+    if (description !== (item.description ?? '')) updates.description = description;
     if (acquireDate !== (item.acquireDate ? new Date(item.acquireDate).toISOString().split('T')[0] : '')) {
       updates.acquireDate = acquireDate ? new Date(acquireDate) : undefined;
     }
@@ -129,11 +141,11 @@ export function ItemDetailsPanel({
 
   return (
     <>
-      <div className="w-96 border-l bg-card overflow-y-auto">
-        <div className="sticky top-0 z-10 border-b bg-card px-6 py-4">
+      <div className="w-96 overflow-y-auto border-l bg-card">
+        <div className="sticky top-0 z-10 bg-card border-b px-6 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Item Details</h2>
-            <Button variant="ghost" size="sm" onClick={onClose}>
+            <Button type="button" variant="ghost" size="sm" onClick={onClose}>
               <FiX />
             </Button>
           </div>
@@ -171,12 +183,18 @@ export function ItemDetailsPanel({
 
           {/* Asset Selection */}
           <div className="space-y-2">
-            <Label>Asset</Label>
-            <Button variant="outline" className="w-full justify-start" onClick={() => setIsAssetModalOpen(true)}>
+            <Label htmlFor="asset-button">Asset</Label>
+            <Button
+              id="asset-button"
+              type="button"
+              variant="outline"
+              className="w-full justify-start"
+              onClick={() => setIsAssetModalOpen(true)}
+            >
               <FiImage className="mr-2" />
               {assetId ? 'Change Asset' : 'Select Asset'}
             </Button>
-            {assetId && <p className="text-xs text-muted-foreground">Asset ID: {assetId}</p>}
+            {!!assetId && <p className="text-xs text-muted-foreground">Asset ID: {assetId}</p>}
           </div>
 
           <Separator />
@@ -213,8 +231,8 @@ export function ItemDetailsPanel({
           <DialogHeader>
             <DialogTitle>Delete Item</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{item.name}"? This will also delete all child items. This action cannot
-              be undone.
+              Are you sure you want to delete &ldquo;{item.name}&rdquo;? This will also delete all child items. This
+              action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
