@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { FiChevronLeft, FiCopy, FiPlus } from 'react-icons/fi';
+import { FiChevronLeft, FiCopy, FiPlus, FiMaximize2 } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
 import { Button } from '@~/components/ui/button';
@@ -203,6 +203,13 @@ function RouteComponent() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={async () => navigate({ to: '/workspace/$workspaceId/canvas', params: { workspaceId } })}
+            >
+              <FiMaximize2 />
+              Canvas View
+            </Button>
             {items.length > 0 && (
               <Button variant="outline" onClick={() => setIsCreateTemplateModalOpen(true)}>
                 <FiCopy />

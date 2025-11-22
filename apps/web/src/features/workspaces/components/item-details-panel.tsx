@@ -142,7 +142,7 @@ export function ItemDetailsPanel({
   return (
     <>
       <div className="w-96 overflow-y-auto border-l bg-card">
-        <div className="sticky top-0 z-10 bg-card border-b px-6 py-4">
+        <div className="sticky top-0 z-10 border-b bg-card px-6 py-4">
           <div className="flex items-center justify-between">
             <h2 className="text-lg font-semibold">Item Details</h2>
             <Button type="button" variant="ghost" size="sm" onClick={onClose}>
@@ -151,7 +151,7 @@ export function ItemDetailsPanel({
           </div>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="space-y-6 p-6">
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">Name</Label>
