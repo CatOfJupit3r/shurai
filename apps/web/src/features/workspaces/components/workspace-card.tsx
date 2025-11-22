@@ -1,3 +1,4 @@
+import { Link } from '@tanstack/react-router';
 import { FiEdit, FiExternalLink, FiEye, FiEyeOff } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
@@ -64,14 +65,11 @@ export function WorkspaceCard({ workspace }: iWorkspaceCardProps) {
       </CardContent>
 
       <CardFooter className="flex gap-2">
-        <Button
-          variant="default"
-          size="sm"
-          className="flex-1"
-          onClick={() => console.log('Edit workspace:', workspace._id)}
-        >
-          <FiEdit />
-          Edit
+        <Button variant="default" size="sm" className="flex-1" asChild>
+          <Link to="/workspace/$workspaceId/builder" params={{ workspaceId: workspace._id }}>
+            <FiEdit />
+            Edit
+          </Link>
         </Button>
         {isPublic && workspace.shareableSlug ? (
           <Button
