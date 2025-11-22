@@ -3,6 +3,7 @@ import { errorCodes } from '@shurai/shared';
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
 import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+import { activityService } from '@~/services/activity.service';
 import { itemService } from '@~/services/item.service';
 import { templateService } from '@~/services/template.service';
 
@@ -88,6 +89,14 @@ export const templatesRouter = base.templates.router({
 
     const rootItem = await templateService.getRootTemplateItem(template._id);
 
+    await activityService.logActivity({
+      userId,
+      action: 'CREATE',
+      entityType: 'TEMPLATE',
+      entityId: template._id,
+      entityName: template.name,
+    });
+
     return {
       _id: template._id,
       userId: template.userId,
@@ -129,6 +138,15 @@ export const templatesRouter = base.templates.router({
 
     const rootItem = await templateService.getRootTemplateItem(template._id);
 
+    await activityService.logActivity({
+      userId,
+      action: 'UPDATE',
+      entityType: 'TEMPLATE',
+      entityId: template._id,
+      entityName: template.name,
+      metadata: updates,
+    });
+
     return {
       _id: template._id,
       userId: template.userId,
@@ -150,6 +168,14 @@ export const templatesRouter = base.templates.router({
     if (!template || template.userId !== userId) {
       throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
     }
+
+    await activityService.logActivity({
+      userId,
+      action: 'DELETE',
+      entityType: 'TEMPLATE',
+      entityId: template._id,
+      entityName: template.name,
+    });
 
     await templateService.deleteTemplateItems(templateId);
     await WorkspaceTemplateModel.findByIdAndDelete(templateId);

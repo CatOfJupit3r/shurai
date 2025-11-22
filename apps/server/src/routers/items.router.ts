@@ -4,6 +4,7 @@ import { WorkspaceItemModel } from '@~/db/models/workspace-item.model';
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
 import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+import { activityService } from '@~/services/activity.service';
 import { itemService } from '@~/services/item.service';
 import { templateService } from '@~/services/template.service';
 
@@ -91,6 +92,15 @@ export const itemsRouter = base.items.router({
       order,
     });
 
+    await activityService.logActivity({
+      userId,
+      workspaceId: input.workspaceId,
+      action: 'CREATE',
+      entityType: 'ITEM',
+      entityId: item._id,
+      entityName: item.name,
+    });
+
     return item;
   }),
 
@@ -144,6 +154,16 @@ export const itemsRouter = base.items.router({
     }
 
     await item.save();
+
+    await activityService.logActivity({
+      userId,
+      workspaceId: item.workspaceId,
+      action: 'UPDATE',
+      entityType: 'ITEM',
+      entityId: item._id,
+      entityName: item.name,
+      metadata: updates,
+    });
 
     return item;
   }),
@@ -201,6 +221,15 @@ export const itemsRouter = base.items.router({
     if (!workspace || workspace.userId !== userId) {
       throw ORPCNotFoundError(errorCodes.ITEM_NOT_FOUND);
     }
+
+    await activityService.logActivity({
+      userId,
+      workspaceId: item.workspaceId,
+      action: 'DELETE',
+      entityType: 'ITEM',
+      entityId: item._id,
+      entityName: item.name,
+    });
 
     await itemService.deleteItemWithChildren(itemId);
 

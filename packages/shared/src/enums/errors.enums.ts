@@ -33,6 +33,7 @@ const workspaceErrorCodes = {
   INVALID_WORKSPACE_VISIBILITY: 'INVALID_WORKSPACE_VISIBILITY',
   INVALID_ASSET_TYPE: 'INVALID_ASSET_TYPE',
   INVALID_TEMPLATE_SCOPE: 'INVALID_TEMPLATE_SCOPE',
+  ACTIVITY_NOT_FOUND: 'ACTIVITY_NOT_FOUND',
 } as const;
 
 const workspaceErrorMessages = {
@@ -52,6 +53,7 @@ const workspaceErrorMessages = {
   [workspaceErrorCodes.INVALID_WORKSPACE_VISIBILITY]: 'Invalid workspace visibility',
   [workspaceErrorCodes.INVALID_ASSET_TYPE]: 'Invalid asset type',
   [workspaceErrorCodes.INVALID_TEMPLATE_SCOPE]: 'Invalid template scope',
+  [workspaceErrorCodes.ACTIVITY_NOT_FOUND]: 'Activity not found',
 };
 
 export const errorCodes = {

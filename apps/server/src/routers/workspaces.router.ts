@@ -3,6 +3,7 @@ import { errorCodes } from '@shurai/shared';
 import { WorkspaceItemModel } from '@~/db/models/workspace-item.model';
 import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { ORPCBadRequestError, ORPCInternalServerError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+import { activityService } from '@~/services/activity.service';
 import { workspaceService } from '@~/services/workspace.service';
 
 import { base, protectedProcedure, publicProcedure } from '../lib/orpc';
@@ -89,6 +90,15 @@ export const workspacesRouter = base.workspaces.router({
       shareableSlug,
     });
 
+    await activityService.logActivity({
+      userId,
+      workspaceId: workspace._id,
+      action: 'CREATE',
+      entityType: 'WORKSPACE',
+      entityId: workspace._id,
+      entityName: workspace.title,
+    });
+
     return workspace;
   }),
 
@@ -125,6 +135,16 @@ export const workspacesRouter = base.workspaces.router({
 
     await workspace.save();
 
+    await activityService.logActivity({
+      userId,
+      workspaceId: workspace._id,
+      action: 'UPDATE',
+      entityType: 'WORKSPACE',
+      entityId: workspace._id,
+      entityName: workspace.title,
+      metadata: updates,
+    });
+
     return workspace;
   }),
 
@@ -137,6 +157,15 @@ export const workspacesRouter = base.workspaces.router({
     if (!workspace || workspace.userId !== userId) {
       throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
     }
+
+    await activityService.logActivity({
+      userId,
+      workspaceId: workspace._id,
+      action: 'DELETE',
+      entityType: 'WORKSPACE',
+      entityId: workspace._id,
+      entityName: workspace.title,
+    });
 
     await workspaceService.deleteWorkspaceWithItems(workspaceId);
 
