@@ -7,7 +7,7 @@ import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrappe
 import { itemService } from '@~/services/item.service';
 import { templateService } from '@~/services/template.service';
 
-import { base, protectedProcedure } from '../lib/orpc';
+import { base, protectedProcedure, publicProcedure } from '../lib/orpc';
 
 export const itemsRouter = base.items.router({
   listItems: protectedProcedure.items.listItems.handler(async ({ context, input }) => {
@@ -278,5 +278,22 @@ export const itemsRouter = base.items.router({
     await itemService.reorderItems(workspaceId, normalizedParentId, itemOrders);
 
     return { success: true };
+  }),
+
+  getPublicItemHierarchy: publicProcedure.items.getPublicItemHierarchy.handler(async ({ input }) => {
+    const { slug } = input;
+
+    const workspace = await WorkspaceModel.findOne({
+      shareableSlug: slug,
+      visibility: 'PUBLIC',
+    });
+
+    if (!workspace) {
+      throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
+    }
+
+    const hierarchy = await itemService.buildItemHierarchy(workspace._id);
+
+    return hierarchy;
   }),
 });

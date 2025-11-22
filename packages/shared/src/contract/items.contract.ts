@@ -185,6 +185,21 @@ const reorderItems = authProcedure
   .input(REORDER_ITEMS_INPUT_SCHEMA)
   .output(z.object({ success: z.boolean() }));
 
+const getPublicItemHierarchy = oc
+  .route({
+    path: '/public/:slug/hierarchy',
+    method: 'GET',
+    summary: 'Get public item hierarchy by workspace slug',
+    description:
+      'Returns the complete item hierarchy tree for a public workspace identified by its slug. This endpoint is publicly accessible and does not require authentication. Returns WORKSPACE_NOT_FOUND if the workspace does not exist or is not public.',
+  })
+  .input(
+    z.object({
+      slug: z.string(),
+    }),
+  )
+  .output(z.array(ITEM_WITH_CHILDREN_SCHEMA));
+
 const itemsContract = oc.prefix('/items').router({
   listItems,
   getItemHierarchy,
@@ -195,6 +210,7 @@ const itemsContract = oc.prefix('/items').router({
   deleteItem,
   createFromTemplate,
   reorderItems,
+  getPublicItemHierarchy,
 });
 
 export default itemsContract;

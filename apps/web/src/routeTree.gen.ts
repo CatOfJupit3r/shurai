@@ -17,6 +17,7 @@ import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profil
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
 import { Route as Auth_onlyAssetsRouteImport } from './routes/_auth_only/assets';
 import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
+import { Route as generalWorkspaceSlugRouteImport } from './routes/(general)/workspace.$slug';
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
 import { Route as Auth_onlyWorkspaceWorkspaceIdBuilderRouteImport } from './routes/_auth_only/workspace.$workspaceId.builder';
 
@@ -58,6 +59,11 @@ const generalTo_dashboardRoute = generalTo_dashboardRouteImport.update({
   id: '/(general)/_to_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any);
+const generalWorkspaceSlugRoute = generalWorkspaceSlugRouteImport.update({
+  id: '/(general)/workspace/$slug',
+  path: '/workspace/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any);
 const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
   id: '/auth',
   path: '/auth',
@@ -78,6 +84,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof Auth_onlySettingsRoute;
   '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/workspace/$slug': typeof generalWorkspaceSlugRoute;
   '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
 export interface FileRoutesByTo {
@@ -88,6 +95,7 @@ export interface FileRoutesByTo {
   '/settings': typeof Auth_onlySettingsRoute;
   '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
+  '/workspace/$slug': typeof generalWorkspaceSlugRoute;
   '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
 export interface FileRoutesById {
@@ -101,6 +109,7 @@ export interface FileRoutesById {
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
   '/_auth_only/templates': typeof Auth_onlyTemplatesRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
+  '/(general)/workspace/$slug': typeof generalWorkspaceSlugRoute;
   '/_auth_only/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
 export interface FileRouteTypes {
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/auth'
+    | '/workspace/$slug'
     | '/workspace/$workspaceId/builder';
   fileRoutesByTo: FileRoutesByTo;
   to:
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/auth'
+    | '/workspace/$slug'
     | '/workspace/$workspaceId/builder';
   id:
     | '__root__'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_auth_only/settings'
     | '/_auth_only/templates'
     | '/(general)/_to_dashboard/auth'
+    | '/(general)/workspace/$slug'
     | '/_auth_only/workspace/$workspaceId/builder';
   fileRoutesById: FileRoutesById;
 }
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   Auth_onlyRoute: typeof Auth_onlyRouteWithChildren;
   generalTo_dashboardRoute: typeof generalTo_dashboardRouteWithChildren;
+  generalWorkspaceSlugRoute: typeof generalWorkspaceSlugRoute;
 }
 
 declare module '@tanstack/react-router' {
@@ -202,6 +215,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardRouteImport;
       parentRoute: typeof rootRouteImport;
     };
+    '/(general)/workspace/$slug': {
+      id: '/(general)/workspace/$slug';
+      path: '/workspace/$slug';
+      fullPath: '/workspace/$slug';
+      preLoaderRoute: typeof generalWorkspaceSlugRouteImport;
+      parentRoute: typeof rootRouteImport;
+    };
     '/(general)/_to_dashboard/auth': {
       id: '/(general)/_to_dashboard/auth';
       path: '/auth';
@@ -257,6 +277,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Auth_onlyRoute: Auth_onlyRouteWithChildren,
   generalTo_dashboardRoute: generalTo_dashboardRouteWithChildren,
+  generalWorkspaceSlugRoute: generalWorkspaceSlugRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
