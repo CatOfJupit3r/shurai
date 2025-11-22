@@ -20,8 +20,15 @@ applyTo: '**/*.ts'
 ### Environment and Configuration
 - Copy `.env.example` to `.env` in `apps/server` and `apps/web`; server validates configuration with `zod` in `src/constants/env.ts`.
 - The Better Auth server is mounted under `/auth/*` and expects HTTPS cookies (`sameSite: 'none'`, `secure: true`); keep this in mind when testing locally.
-- Aliases: `@~/` resolves to `apps/server/src` or `apps/web/src` depending on the package; `@startername/shared` surfaces shared types.
-- MongoDB runs at `mongodb://localhost:6060/startername` by default; adjust via env vars and update docker-compose if ports change.
+- Aliases: `@~/` resolves to `apps/server/src` or `apps/web/src` depending on the package; `@shurai/shared` surfaces shared types.
+- MongoDB runs at `mongodb://localhost:6060/shurai` by default; adjust via env vars and update docker-compose if ports change.
+
+### Product Context: PC Workspace Showcase
+- Platform helps users curate and present personal PC workspaces with rich storytelling and visuals.
+- Each workspace contains a tree of abstract items that can represent hardware, peripherals, décor, or any user-defined element.
+- Items reference assets that supply icons, imagery, and configuration styling, enabling polished presentations.
+- Users can build once or reuse template blueprints that stamp out entire item hierarchies from a single modal.
+- Dashboards list every workspace, while shareable links expose curated builds for public viewing.
 
 ## Specialized Guides
 - Backend-specific processes: see `server.instructions.md` for contract extensions, router wiring, authentication context, and Typegoose modeling patterns.

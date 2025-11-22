@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 
-import { USER_ACHIEVEMENTS } from '@startername/shared/constants/achievements';
+import { USER_ACHIEVEMENTS } from '@shurai/shared/constants/achievements';
 
 import { UserAchievementModel } from '@~/db/models/user-achievements.model';
 import { EVENTS } from '@~/enums/events.enums';

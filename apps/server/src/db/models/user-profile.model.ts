@@ -1,7 +1,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
-import type { BadgeId } from '@startername/shared/constants/badges';
+import type { BadgeId } from '@shurai/shared/constants/badges';
 
 import { generatePublicCode, ObjectIdString } from '../helpers';
 

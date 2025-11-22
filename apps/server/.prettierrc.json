@@ -8,5 +8,5 @@
   "endOfLine": "lf",
   "importOrderParserPlugins": ["typescript", "decorators"],
   "importOrderSeparation": true,
-  "importOrder": ["<THIRD_PARTY_MODULES>", "@startername/(.*)$", "^@~/(.*)$", "^[./]"]
+  "importOrder": ["<THIRD_PARTY_MODULES>", "@shurai/(.*)$", "^@~/(.*)$", "^[./]"]
 }

@@ -77,7 +77,7 @@ const silenceOpinions = [
       'import-x/no-unresolved': [
         'error',
         {
-          ignore: ['^@startername/', '^@~/'],
+          ignore: ['^@shurai/', '^@~/'],
         },
       ],
       'import-x/order': [
@@ -89,12 +89,12 @@ const silenceOpinions = [
           // 👇 define your path groups
           pathGroups: [
             {
-              pattern: '@startername/**',
+              pattern: '@shurai/**',
               group: 'internal',
               position: 'before',
             },
             {
-              pattern: '@startername/shared',
+              pattern: '@shurai/shared',
               group: 'internal',
               position: 'after',
             },

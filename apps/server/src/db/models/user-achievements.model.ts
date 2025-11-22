@@ -1,7 +1,7 @@
 import { getModelForClass, index, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
-import type { UserAchievementId } from '@startername/shared/constants/achievements';
+import type { UserAchievementId } from '@shurai/shared/constants/achievements';
 
 import { ObjectIdString } from '../helpers';
 

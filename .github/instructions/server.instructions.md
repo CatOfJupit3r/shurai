@@ -13,7 +13,7 @@ applyTo: "apps/server/**/*.ts,packages/shared/**/*.ts"
 
 - Start the stack with `bun run dev`; it launches the API at `http://localhost:3000` and MongoDB via `docker-compose.dev.yml`.
 - Copy `.env.example` to `.env` inside `apps/server` and adjust values; `src/constants/env.ts` validates them with `zod` at boot.
-- Default Mongo connection: `mongodb://localhost:6060/startername` with credentials `username/password`. Update the compose file if you change ports or users.
+- Default Mongo connection: `mongodb://localhost:6060/shurai` with credentials `username/password`. Update the compose file if you change ports or users.
 - The Better Auth server issues secure (`sameSite: 'none'`, `secure: true`) cookies; use HTTPS (or Chrome flags) when testing cross-origin.
 
 ## Contract-First Endpoint Flow

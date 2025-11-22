@@ -19,7 +19,7 @@ export default function Header() {
         <div className="flex items-center gap-2">
           <Link to="/" className="flex items-center gap-2 text-lg font-semibold transition-opacity hover:opacity-80">
             <Logo className="h-6 w-6 text-primary" />
-            <span className="hidden sm:inline-block">startername</span>
+            <span className="hidden sm:inline-block">shurai</span>
           </Link>
         </div>
 

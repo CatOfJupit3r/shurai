@@ -1,17 +1,17 @@
 name:
-  startername
+  shurai
 services:
   mongo:
     image: mongo:8.0
-    container_name: startername-mongo
+    container_name: shurai-mongo
     restart: unless-stopped
     environment:
-      - MONGO_INITDB_DATABASE=startername
+      - MONGO_INITDB_DATABASE=shurai
       - MONGO_INITDB_ROOT_USERNAME=root
       - MONGO_INITDB_ROOT_PASSWORD=verysecretpassword
       - MONGO_USER=username
       - MONGO_PASSWORD=password
-      - MONGO_DB=startername
+      - MONGO_DB=shurai
     ports:
       - 6060:27017
     volumes:

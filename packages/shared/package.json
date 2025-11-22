@@ -1,5 +1,5 @@
 {
-  "name": "@startername/shared",
+  "name": "@shurai/shared",
   "version": "0.0.0",
   "type": "module",
   "main": "./dist/index.mjs",
