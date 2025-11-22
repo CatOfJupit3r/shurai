@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { LuHouse, LuImage } from 'react-icons/lu';
+import { LuHouse, LuImage, LuLayoutTemplate } from 'react-icons/lu';
 
 import { useMe } from '@~/features/user';
 
@@ -10,6 +10,7 @@ import UserMenu from './user-menu';
 const HEADER_LINKS = [
   { to: '/dashboard', label: 'Dashboard', authRequired: true, icon: LuHouse },
   { to: '/assets', label: 'Assets', authRequired: true, icon: LuImage },
+  { to: '/templates', label: 'Templates', authRequired: true, icon: LuLayoutTemplate },
 ] as const;
 
 export default function Header() {

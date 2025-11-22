@@ -1,11 +1,14 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
-import { FiChevronLeft, FiPlus } from 'react-icons/fi';
+import { FiChevronLeft, FiCopy, FiPlus } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
 import { Button } from '@~/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { useApplyTemplate } from '@~/features/templates';
+import { CreateTemplateModal } from '@~/features/templates/components/create-template-modal';
+import { TemplatePreviewModal } from '@~/features/templates/components/template-preview-modal';
 import {
   useCreateItem,
   useDeleteItem,
@@ -71,12 +74,16 @@ function RouteComponent() {
 
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [isDetailsPanelOpen, setIsDetailsPanelOpen] = useState(false);
+  const [isCreateTemplateModalOpen, setIsCreateTemplateModalOpen] = useState(false);
+  const [isApplyTemplateModalOpen, setIsApplyTemplateModalOpen] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(null);
 
   const { createItem } = useCreateItem();
   const { updateItem, isPending: isUpdating } = useUpdateItem();
   const { deleteItem, isPending: isDeleting } = useDeleteItem();
   const { moveItem, isPending: isMoving } = useMoveItem();
   const { reorderItems, isPending: isReordering } = useReorderItems();
+  const { applyTemplate, isPending: isApplyingTemplate } = useApplyTemplate();
 
   const handleAddItem = (parentId?: string) => {
     createItem({
@@ -134,6 +141,25 @@ function RouteComponent() {
     void navigate({ to: '/dashboard' });
   };
 
+  const handleApplyTemplate = (templateId: string) => {
+    applyTemplate(
+      {
+        templateId,
+        workspaceId,
+      },
+      {
+        onSuccess: () => {
+          setIsApplyTemplateModalOpen(false);
+          setSelectedTemplateId(null);
+        },
+      },
+    );
+  };
+
+  const handleOpenTemplateGallery = () => {
+    void navigate({ to: '/templates' });
+  };
+
   if (isLoadingWorkspace || isLoadingItems) {
     return (
       <div className="min-h-screen bg-background">
@@ -176,10 +202,21 @@ function RouteComponent() {
               </p>
             </div>
           </div>
-          <Button onClick={() => handleAddItem()}>
-            <FiPlus />
-            Add Item
-          </Button>
+          <div className="flex gap-2">
+            {items.length > 0 && (
+              <Button variant="outline" onClick={() => setIsCreateTemplateModalOpen(true)}>
+                <FiCopy />
+                Create Template
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleOpenTemplateGallery}>
+              Apply Template
+            </Button>
+            <Button onClick={() => handleAddItem()}>
+              <FiPlus />
+              Add Item
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -238,6 +275,27 @@ function RouteComponent() {
           />
         )}
       </div>
+
+      {/* Create Template Modal */}
+      <CreateTemplateModal
+        isOpen={isCreateTemplateModalOpen}
+        onClose={() => setIsCreateTemplateModalOpen(false)}
+        items={items}
+      />
+
+      {/* Apply Template Preview Modal */}
+      {!!selectedTemplateId && (
+        <TemplatePreviewModal
+          isOpen={isApplyTemplateModalOpen}
+          onClose={() => {
+            setIsApplyTemplateModalOpen(false);
+            setSelectedTemplateId(null);
+          }}
+          templateId={selectedTemplateId}
+          onApply={handleApplyTemplate}
+          isApplying={isApplyingTemplate}
+        />
+      )}
     </div>
   );
 }
