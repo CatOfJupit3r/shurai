@@ -4,6 +4,7 @@ import env from '@~/constants/env';
 
 class DatabaseService {
   public async connect() {
+    if (process.env.NODE_ENV === 'test') return;
     await this.connectToExternalDatabase();
   }
 
