@@ -1,11 +1,18 @@
 import { useState } from 'react';
 
 import { Button } from '@~/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@~/components/ui/dialog';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@~/components/ui/dialog';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
-import { Textarea } from '@~/components/ui/textarea';
 import { SingleSelect } from '@~/components/ui/select';
+import { Textarea } from '@~/components/ui/textarea';
 import { useCreateTemplate } from '@~/features/templates';
 
 interface iCreateTemplateModalProps {
@@ -16,20 +23,18 @@ interface iCreateTemplateModalProps {
     name: string;
     description?: string;
     assetId?: string;
-    parentId: string | null;
-    children: unknown[];
+    children?: unknown[];
+    [key: string]: unknown;
   }>;
 }
 
-function convertItemToTemplateStructure(
-  item: {
-    _id: string;
-    name: string;
-    description?: string;
-    assetId?: string;
-    children: unknown[];
-  }
-): {
+function convertItemToTemplateStructure(item: {
+  _id: string;
+  name: string;
+  description?: string;
+  assetId?: string;
+  children?: unknown[];
+}): {
   name: string;
   description?: string;
   assetId?: string;
@@ -39,19 +44,20 @@ function convertItemToTemplateStructure(
     name: item.name,
     description: item.description,
     assetId: item.assetId,
-    children: item.children.length > 0
-      ? item.children.map((child) =>
-          convertItemToTemplateStructure(
-            child as {
-              _id: string;
-              name: string;
-              description?: string;
-              assetId?: string;
-              children: unknown[];
-            },
-          ),
-        )
-      : undefined,
+    children:
+      item.children && item.children.length > 0
+        ? item.children.map((child) =>
+            convertItemToTemplateStructure(
+              child as {
+                _id: string;
+                name: string;
+                description?: string;
+                assetId?: string;
+                children?: unknown[];
+              },
+            ),
+          )
+        : undefined,
   };
 }
 
@@ -64,7 +70,7 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
   const { createTemplate, isPending } = useCreateTemplate();
 
   const itemOptions = items.map((item) => ({
-    label: `${item.name}${item.children.length > 0 ? ` (${countItems(item)} ${countItems(item) === 1 ? 'item' : 'items'})` : ''}`,
+    label: `${item.name}${item.children && item.children.length > 0 ? ` (${countItems(item)} ${countItems(item) === 1 ? 'item' : 'items'})` : ''}`,
     value: item._id,
   }));
 
@@ -118,7 +124,8 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
         <DialogHeader>
           <DialogTitle>Create Template from Workspace</DialogTitle>
           <DialogDescription>
-            Select an item to create a template. The selected item and all its children will be included in the template.
+            Select an item to create a template. The selected item and all its children will be included in the
+            template.
           </DialogDescription>
         </DialogHeader>
 
@@ -185,15 +192,15 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
 }
 
 function findItemById(
-  items: Array<{ _id: string; children: unknown[] }>,
+  items: Array<{ _id: string; children?: unknown[] }>,
   itemId: string,
-): { _id: string; name: string; description?: string; assetId?: string; children: unknown[] } | null {
+): { _id: string; name: string; description?: string; assetId?: string; children?: unknown[] } | null {
   for (const item of items) {
     if (item._id === itemId) {
-      return item as { _id: string; name: string; description?: string; assetId?: string; children: unknown[] };
+      return item as { _id: string; name: string; description?: string; assetId?: string; children?: unknown[] };
     }
-    if (item.children.length > 0) {
-      const found = findItemById(item.children as Array<{ _id: string; children: unknown[] }>, itemId);
+    if (item.children && item.children.length > 0) {
+      const found = findItemById(item.children as Array<{ _id: string; children?: unknown[] }>, itemId);
       if (found) return found;
     }
   }

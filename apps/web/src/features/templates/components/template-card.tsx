@@ -39,7 +39,7 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-1">
             <CardTitle className="text-lg">{template.name}</CardTitle>
-            {template.description && (
+            {!!template.description && (
               <CardDescription className="line-clamp-2">{template.description}</CardDescription>
             )}
           </div>
@@ -70,7 +70,7 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
             {itemCount} {itemCount === 1 ? 'item' : 'items'}
           </div>
           <div className="flex gap-2">
-            {isOwner && onDelete && (
+            {!!(isOwner && onDelete) && (
               <Button variant="ghost" size="sm" onClick={() => onDelete(template._id)} disabled={isDeleting}>
                 <FiTrash2 />
               </Button>

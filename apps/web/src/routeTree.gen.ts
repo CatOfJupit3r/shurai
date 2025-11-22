@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root';
 import { Route as Auth_onlyRouteImport } from './routes/_auth_only';
 import { Route as IndexRouteImport } from './routes/index';
+import { Route as Auth_onlyTemplatesRouteImport } from './routes/_auth_only/templates';
 import { Route as Auth_onlySettingsRouteImport } from './routes/_auth_only/settings';
 import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profile';
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
@@ -27,6 +28,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any);
+const Auth_onlyTemplatesRoute = Auth_onlyTemplatesRouteImport.update({
+  id: '/templates',
+  path: '/templates',
+  getParentRoute: () => Auth_onlyRoute,
 } as any);
 const Auth_onlySettingsRoute = Auth_onlySettingsRouteImport.update({
   id: '/settings',
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof Auth_onlyDashboardRoute;
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
+  '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
   '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof Auth_onlyDashboardRoute;
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
+  '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
   '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/_auth_only/dashboard': typeof Auth_onlyDashboardRoute;
   '/_auth_only/profile': typeof Auth_onlyProfileRoute;
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
+  '/_auth_only/templates': typeof Auth_onlyTemplatesRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
   '/_auth_only/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
@@ -102,6 +111,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/templates'
     | '/auth'
     | '/workspace/$workspaceId/builder';
   fileRoutesByTo: FileRoutesByTo;
@@ -111,6 +121,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/profile'
     | '/settings'
+    | '/templates'
     | '/auth'
     | '/workspace/$workspaceId/builder';
   id:
@@ -122,6 +133,7 @@ export interface FileRouteTypes {
     | '/_auth_only/dashboard'
     | '/_auth_only/profile'
     | '/_auth_only/settings'
+    | '/_auth_only/templates'
     | '/(general)/_to_dashboard/auth'
     | '/_auth_only/workspace/$workspaceId/builder';
   fileRoutesById: FileRoutesById;
@@ -147,6 +159,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/';
       preLoaderRoute: typeof IndexRouteImport;
       parentRoute: typeof rootRouteImport;
+    };
+    '/_auth_only/templates': {
+      id: '/_auth_only/templates';
+      path: '/templates';
+      fullPath: '/templates';
+      preLoaderRoute: typeof Auth_onlyTemplatesRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
     };
     '/_auth_only/settings': {
       id: '/_auth_only/settings';
@@ -205,6 +224,7 @@ interface Auth_onlyRouteChildren {
   Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute;
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
+  Auth_onlyTemplatesRoute: typeof Auth_onlyTemplatesRoute;
   Auth_onlyWorkspaceWorkspaceIdBuilderRoute: typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
 }
 
@@ -213,6 +233,7 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlyDashboardRoute: Auth_onlyDashboardRoute,
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
+  Auth_onlyTemplatesRoute: Auth_onlyTemplatesRoute,
   Auth_onlyWorkspaceWorkspaceIdBuilderRoute:
     Auth_onlyWorkspaceWorkspaceIdBuilderRoute,
 };

@@ -6,7 +6,11 @@ import { tanstackRPC } from '@~/utils/tanstack-orpc';
 export type TemplatesListQueryReturnType = ORPCOutputs['templates']['listTemplates'];
 
 export default function useTemplatesList(scope?: 'PERSONAL' | 'COMMUNITY') {
-  const { data: templates, isPending, error } = useQuery(
+  const {
+    data: templates,
+    isPending,
+    error,
+  } = useQuery(
     tanstackRPC.templates.listTemplates.queryOptions({
       input: { scope },
     }),

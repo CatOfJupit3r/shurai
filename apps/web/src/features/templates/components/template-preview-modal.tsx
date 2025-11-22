@@ -54,16 +54,16 @@ function TemplateItemNode({ item, level = 0 }: { item: iTemplateItemNode; level?
         )}
         <FiBox className="size-4 text-muted-foreground" />
         <span className="flex-1 text-sm">{item.name}</span>
-        {hasChildren && (
+        {!!hasChildren && (
           <span className="text-xs text-muted-foreground">
             {item.children?.length ?? 0} {(item.children?.length ?? 0) === 1 ? 'item' : 'items'}
           </span>
         )}
       </div>
-      {isExpanded && hasChildren && item.children && (
+      {!!(isExpanded && hasChildren && item.children) && (
         <div className="space-y-1">
-          {item.children.map((child, idx) => (
-            <TemplateItemNode key={`${item.name}-${idx}`} item={child} level={level + 1} />
+          {item.children.map((child) => (
+            <TemplateItemNode key={`${item.name}-${child.name}`} item={child} level={level + 1} />
           ))}
         </div>
       )}
@@ -96,7 +96,7 @@ export function TemplatePreviewModal({
         </DialogHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto">
-          {isPending && (
+          {!!isPending && (
             <div className="space-y-3">
               <Skeleton className="h-6 w-1/2" />
               <Skeleton className="h-4 w-3/4" />
@@ -108,7 +108,7 @@ export function TemplatePreviewModal({
             </div>
           )}
 
-          {error && (
+          {!!error && (
             <Empty>
               <EmptyHeader>
                 <EmptyMedia variant="icon">
@@ -120,11 +120,11 @@ export function TemplatePreviewModal({
             </Empty>
           )}
 
-          {template && (
+          {!!template && (
             <div className="space-y-4">
               <div>
                 <h3 className="text-lg font-semibold">{template.name}</h3>
-                {template.description && <p className="text-sm text-muted-foreground">{template.description}</p>}
+                {!!template.description && <p className="text-sm text-muted-foreground">{template.description}</p>}
               </div>
 
               <div className="rounded-lg border bg-card p-4">
@@ -144,12 +144,12 @@ export function TemplatePreviewModal({
           )}
         </div>
 
-        {showApplyButton && (
+        {!!showApplyButton && (
           <DialogFooter>
             <Button variant="outline" onClick={onClose} disabled={isApplying}>
               Cancel
             </Button>
-            <Button onClick={handleApply} disabled={isApplying || !template}>
+            <Button onClick={handleApply} disabled={(isApplying ?? false) || !template}>
               {isApplying ? 'Applying...' : 'Apply Template'}
             </Button>
           </DialogFooter>

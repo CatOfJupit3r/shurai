@@ -37,6 +37,12 @@ function TemplateListSkeleton() {
   );
 }
 
+function getEmptyTitle(searchQuery: string, activeTab: string) {
+  if (searchQuery) return 'No templates found';
+  if (activeTab === 'ALL') return 'No templates yet';
+  return `No ${activeTab.toLowerCase()} templates`;
+}
+
 export function TemplateGallery({ currentUserId, onSelectTemplate }: iTemplateGalleryProps) {
   const [activeTab, setActiveTab] = useState<'ALL' | 'PERSONAL' | 'COMMUNITY'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -54,7 +60,7 @@ export function TemplateGallery({ currentUserId, onSelectTemplate }: iTemplateGa
     : templates;
 
   const handleDelete = (templateId: string) => {
-    // eslint-disable-next-line no-restricted-globals, no-alert
+    // eslint-disable-next-line no-alert
     if (window.confirm('Are you sure you want to delete this template? This action cannot be undone.')) {
       deleteTemplate({ templateId });
     }
@@ -106,13 +112,7 @@ export function TemplateGallery({ currentUserId, onSelectTemplate }: iTemplateGa
             <EmptyMedia variant="icon">
               <HiOutlineCube className="size-10" />
             </EmptyMedia>
-            <EmptyTitle>
-              {searchQuery
-                ? 'No templates found'
-                : activeTab === 'ALL'
-                  ? 'No templates yet'
-                  : `No ${activeTab.toLowerCase()} templates`}
-            </EmptyTitle>
+            <EmptyTitle>{getEmptyTitle(searchQuery, activeTab)}</EmptyTitle>
             <EmptyDescription>
               {searchQuery
                 ? 'Try adjusting your search query'
