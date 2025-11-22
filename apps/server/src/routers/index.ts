@@ -2,6 +2,7 @@ import { base } from '../lib/orpc';
 import { achievementsRouter } from './achievements.router';
 import { assetsRouter } from './assets.router';
 import { badgesRouter } from './badges.router';
+import { canvasRouter } from './canvas.router';
 import { indexRouter } from './index.router';
 import { itemsRouter } from './items.router';
 import { templatesRouter } from './templates.router';
@@ -17,6 +18,7 @@ export const appRouter = base.router({
   items: itemsRouter,
   assets: assetsRouter,
   templates: templatesRouter,
+  canvas: canvasRouter,
 });
 
 export type AppRouter = typeof appRouter;
