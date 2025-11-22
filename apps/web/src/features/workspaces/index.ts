@@ -1,6 +1,8 @@
 export { default as useWorkspacesList } from './hooks/use-workspaces-list';
 export { default as useWorkspace } from './hooks/use-workspace';
+export { default as usePublicWorkspace } from './hooks/use-public-workspace';
 export { default as useItemHierarchy } from './hooks/use-item-hierarchy';
+export { default as usePublicItemHierarchy } from './hooks/use-public-item-hierarchy';
 export { default as useAssetsList } from './hooks/use-assets-list';
 export { default as useCreateItem } from './hooks/use-create-item';
 export { default as useUpdateItem } from './hooks/use-update-item';

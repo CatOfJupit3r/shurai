@@ -487,4 +487,120 @@ describe('Items API', () => {
       }
     });
   });
+
+  describe('getPublicItemHierarchy', () => {
+    it('should get item hierarchy for public workspace by slug without authentication', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        { title: 'Public Test', visibility: 'PUBLIC' },
+        ctx(),
+      );
+
+      const parent = await call(
+        appRouter.items.createItem,
+        {
+          workspaceId: workspace._id,
+          name: 'PC Case',
+        },
+        ctx(),
+      );
+
+      const child = await call(
+        appRouter.items.createItem,
+        {
+          workspaceId: workspace._id,
+          name: 'Motherboard',
+          parentId: parent._id,
+        },
+        ctx(),
+      );
+
+      const hierarchy = await call(
+        appRouter.items.getPublicItemHierarchy,
+        {
+          slug: workspace.shareableSlug!,
+        },
+        { context: { session: null } },
+      );
+
+      expect(hierarchy).toBeArray();
+      expect(hierarchy.length).toBe(1);
+      expect(hierarchy[0]._id).toBe(parent._id);
+      expect(hierarchy[0].name).toBe('PC Case');
+      expect(hierarchy[0].children).toBeArray();
+      expect(hierarchy[0].children.length).toBe(1);
+      expect(hierarchy[0].children[0]._id).toBe(child._id);
+      expect(hierarchy[0].children[0].name).toBe('Motherboard');
+    });
+
+    it('should fail for private workspace', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        { title: 'Private Test', visibility: 'PRIVATE' },
+        ctx(),
+      );
+
+      await call(
+        appRouter.items.createItem,
+        {
+          workspaceId: workspace._id,
+          name: 'Item',
+        },
+        ctx(),
+      );
+
+      try {
+        await call(
+          appRouter.items.getPublicItemHierarchy,
+          {
+            slug: workspace.shareableSlug || 'fake-slug',
+          },
+          { context: { session: null } },
+        );
+        expect(true).toBe(false);
+      } catch (error: any) {
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should fail for non-existent slug', async () => {
+      try {
+        await call(
+          appRouter.items.getPublicItemHierarchy,
+          {
+            slug: 'nonexistent-slug',
+          },
+          { context: { session: null } },
+        );
+        expect(true).toBe(false);
+      } catch (error: any) {
+        expect(error).toBeDefined();
+      }
+    });
+
+    it('should return empty array for public workspace with no items', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        { title: 'Empty Public', visibility: 'PUBLIC' },
+        ctx(),
+      );
+
+      const hierarchy = await call(
+        appRouter.items.getPublicItemHierarchy,
+        {
+          slug: workspace.shareableSlug!,
+        },
+        { context: { session: null } },
+      );
+
+      expect(hierarchy).toBeArray();
+      expect(hierarchy.length).toBe(0);
+    });
+  });
 });
