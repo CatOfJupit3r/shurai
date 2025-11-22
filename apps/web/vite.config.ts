@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => {
   const processEnv = loadEnv(mode, process.cwd());
 
   const VITE_CONFIG_SCHEMA = z.object({
-    VITE_SERVER_URL: z.string(),
+    VITE_SERVER_URL: z.string().default('http://localhost:5050'),
     VITE_HOST: z.string().default('localhost'),
     VITE_PORT: z.coerce.number().default(3030),
   });
