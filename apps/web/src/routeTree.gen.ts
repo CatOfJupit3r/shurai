@@ -14,6 +14,7 @@ import { Route as IndexRouteImport } from './routes/index';
 import { Route as Auth_onlySettingsRouteImport } from './routes/_auth_only/settings';
 import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profile';
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
+import { Route as Auth_onlyAssetsRouteImport } from './routes/_auth_only/assets';
 import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
 import { Route as Auth_onlyWorkspaceWorkspaceIdBuilderRouteImport } from './routes/_auth_only/workspace.$workspaceId.builder';
@@ -42,6 +43,11 @@ const Auth_onlyDashboardRoute = Auth_onlyDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => Auth_onlyRoute,
 } as any);
+const Auth_onlyAssetsRoute = Auth_onlyAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => Auth_onlyRoute,
+} as any);
 const generalTo_dashboardRoute = generalTo_dashboardRouteImport.update({
   id: '/(general)/_to_dashboard',
   getParentRoute: () => rootRouteImport,
@@ -60,6 +66,7 @@ const Auth_onlyWorkspaceWorkspaceIdBuilderRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute;
+  '/assets': typeof Auth_onlyAssetsRoute;
   '/dashboard': typeof Auth_onlyDashboardRoute;
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
@@ -68,6 +75,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
+  '/assets': typeof Auth_onlyAssetsRoute;
   '/dashboard': typeof Auth_onlyDashboardRoute;
   '/profile': typeof Auth_onlyProfileRoute;
   '/settings': typeof Auth_onlySettingsRoute;
@@ -79,6 +87,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute;
   '/_auth_only': typeof Auth_onlyRouteWithChildren;
   '/(general)/_to_dashboard': typeof generalTo_dashboardRouteWithChildren;
+  '/_auth_only/assets': typeof Auth_onlyAssetsRoute;
   '/_auth_only/dashboard': typeof Auth_onlyDashboardRoute;
   '/_auth_only/profile': typeof Auth_onlyProfileRoute;
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
@@ -89,6 +98,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
   fullPaths:
     | '/'
+    | '/assets'
     | '/dashboard'
     | '/profile'
     | '/settings'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
+    | '/assets'
     | '/dashboard'
     | '/profile'
     | '/settings'
@@ -107,6 +118,7 @@ export interface FileRouteTypes {
     | '/'
     | '/_auth_only'
     | '/(general)/_to_dashboard'
+    | '/_auth_only/assets'
     | '/_auth_only/dashboard'
     | '/_auth_only/profile'
     | '/_auth_only/settings'
@@ -157,6 +169,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof Auth_onlyDashboardRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
+    '/_auth_only/assets': {
+      id: '/_auth_only/assets';
+      path: '/assets';
+      fullPath: '/assets';
+      preLoaderRoute: typeof Auth_onlyAssetsRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
     '/(general)/_to_dashboard': {
       id: '/(general)/_to_dashboard';
       path: '';
@@ -182,6 +201,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface Auth_onlyRouteChildren {
+  Auth_onlyAssetsRoute: typeof Auth_onlyAssetsRoute;
   Auth_onlyDashboardRoute: typeof Auth_onlyDashboardRoute;
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
@@ -189,6 +209,7 @@ interface Auth_onlyRouteChildren {
 }
 
 const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
+  Auth_onlyAssetsRoute: Auth_onlyAssetsRoute,
   Auth_onlyDashboardRoute: Auth_onlyDashboardRoute,
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,

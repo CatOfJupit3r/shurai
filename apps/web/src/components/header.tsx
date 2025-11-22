@@ -1,5 +1,5 @@
 import { Link } from '@tanstack/react-router';
-import { LuHouse } from 'react-icons/lu';
+import { LuHouse, LuImage } from 'react-icons/lu';
 
 import { useMe } from '@~/features/user';
 
@@ -7,7 +7,10 @@ import { ModeToggle } from './mode-toggle';
 import { Logo } from './ui/logo';
 import UserMenu from './user-menu';
 
-const HEADER_LINKS = [{ to: '/dashboard', label: 'Dashboard', authRequired: true, icon: LuHouse }] as const;
+const HEADER_LINKS = [
+  { to: '/dashboard', label: 'Dashboard', authRequired: true, icon: LuHouse },
+  { to: '/assets', label: 'Assets', authRequired: true, icon: LuImage },
+] as const;
 
 export default function Header() {
   const { isLoggedIn } = useMe();
