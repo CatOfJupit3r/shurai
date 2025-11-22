@@ -11,6 +11,7 @@ const ITEM_SCHEMA = z.object({
   acquireDate: z.coerce.date().optional(),
   assetId: z.string().optional(),
   parentId: z.string().optional().nullable(),
+  order: z.number(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -23,6 +24,7 @@ const ITEM_WITH_CHILDREN_SCHEMA = z.object({
   acquireDate: z.coerce.date().optional(),
   assetId: z.string().optional(),
   parentId: z.string().optional().nullable(),
+  order: z.number(),
   children: z.lazy(() => z.array(ITEM_WITH_CHILDREN_SCHEMA)),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
@@ -55,6 +57,17 @@ const CREATE_FROM_TEMPLATE_INPUT_SCHEMA = z.object({
   workspaceId: z.string(),
   templateId: z.string(),
   parentId: z.string().optional(),
+});
+
+const REORDER_ITEMS_INPUT_SCHEMA = z.object({
+  workspaceId: z.string(),
+  parentId: z.string().optional().nullable(),
+  itemOrders: z.array(
+    z.object({
+      itemId: z.string(),
+      order: z.number().int().min(0),
+    }),
+  ),
 });
 
 const listItems = authProcedure
@@ -161,6 +174,17 @@ const createFromTemplate = authProcedure
   .input(CREATE_FROM_TEMPLATE_INPUT_SCHEMA)
   .output(ITEM_WITH_CHILDREN_SCHEMA);
 
+const reorderItems = authProcedure
+  .route({
+    path: '/reorder',
+    method: 'PUT',
+    summary: 'Reorder items within a parent',
+    description:
+      'Reorders sibling items by updating their order field. Only the workspace owner can reorder items. All items must belong to the same workspace and have the same parentId. Returns success status.',
+  })
+  .input(REORDER_ITEMS_INPUT_SCHEMA)
+  .output(z.object({ success: z.boolean() }));
+
 const itemsContract = oc.prefix('/items').router({
   listItems,
   getItemHierarchy,
@@ -170,6 +194,7 @@ const itemsContract = oc.prefix('/items').router({
   moveItem,
   deleteItem,
   createFromTemplate,
+  reorderItems,
 });
 
 export default itemsContract;

@@ -10,6 +10,7 @@ export interface iItemWithChildren {
   acquireDate?: Date;
   assetId?: string;
   parentId?: string | null;
+  order: number;
   children: iItemWithChildren[];
   createdAt: Date;
   updatedAt: Date;
@@ -17,7 +18,7 @@ export interface iItemWithChildren {
 
 class ItemService {
   async buildItemHierarchy(workspaceId: string): Promise<iItemWithChildren[]> {
-    const allItems = await WorkspaceItemModel.find({ workspaceId }).lean();
+    const allItems = await WorkspaceItemModel.find({ workspaceId }).sort({ order: 1 }).lean();
 
     const itemMap = new Map<string, iItemWithChildren>();
     const rootItems: iItemWithChildren[] = [];
@@ -45,7 +46,19 @@ class ItemService {
       }
     }
 
+    rootItems.sort((a, b) => a.order - b.order);
+    for (const root of rootItems) {
+      this.sortChildren(root);
+    }
+
     return rootItems;
+  }
+
+  private sortChildren(item: iItemWithChildren) {
+    item.children.sort((a, b) => a.order - b.order);
+    for (const child of item.children) {
+      this.sortChildren(child);
+    }
   }
 
   async checkCircularReference(itemId: string, newParentId: string): Promise<boolean> {
@@ -87,12 +100,15 @@ class ItemService {
     templateItem: iTemplateItemWithChildren,
     parentId?: string,
   ): Promise<iItemWithChildren> {
+    const order = await this.getNextOrderForParent(workspaceId, parentId ?? null);
+
     const createdItem = await WorkspaceItemModel.create({
       workspaceId,
       name: templateItem.name,
       description: templateItem.description,
       assetId: templateItem.assetId,
       parentId: parentId ?? null,
+      order,
     });
 
     const children: iItemWithChildren[] = [];
@@ -112,10 +128,41 @@ class ItemService {
       acquireDate: createdItem.acquireDate,
       assetId: createdItem.assetId,
       parentId: createdItem.parentId,
+      order: createdItem.order,
       children,
       createdAt: createdItem.createdAt,
       updatedAt: createdItem.updatedAt,
     };
+  }
+
+  async getNextOrderForParent(workspaceId: string, parentId: string | null): Promise<number> {
+    const lastItem = await WorkspaceItemModel.findOne({
+      workspaceId,
+      parentId: parentId ?? null,
+    })
+      .sort({ order: -1 })
+      .lean();
+
+    return lastItem ? lastItem.order + 1 : 0;
+  }
+
+  async reorderItems(
+    workspaceId: string,
+    parentId: string | null | undefined,
+    itemOrders: Array<{ itemId: string; order: number }>,
+  ) {
+    const updatePromises = itemOrders.map(async ({ itemId, order }) => {
+      await WorkspaceItemModel.updateOne(
+        {
+          _id: itemId,
+          workspaceId,
+          parentId: parentId ?? null,
+        },
+        { $set: { order } },
+      );
+    });
+
+    await Promise.all(updatePromises);
   }
 }
 

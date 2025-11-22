@@ -26,6 +26,9 @@ class WorkspaceItemClass {
   @prop({ index: true })
   public parentId?: string | null;
 
+  @prop({ required: true, default: 0 })
+  public order!: number;
+
   public createdAt!: Date;
 
   public updatedAt!: Date;
