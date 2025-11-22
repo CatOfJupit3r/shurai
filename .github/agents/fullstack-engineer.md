@@ -99,11 +99,11 @@ When implementing Tasks 4.4-5.2:
 ### Phase 5: Testing & Polish
 When implementing Tasks 6.1-6.2:
 
-1. **Write** unit tests following existing patterns in `apps/server/test/`
+1. **Write** integration tests following existing patterns in `apps/server/test/`
 2. **Cover** happy paths, error cases, and edge conditions
 3. **Verify** error codes match enum definitions
-4. **Create** E2E tests for complete user flows
-5. **Test** access control and permission denials
+4. **Test** access control and permission denials
+5. **Avoid** testing individual services, methods (besides helpers) and focus on testing business logic.
 
 ## Key Files & References
 
