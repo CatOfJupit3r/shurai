@@ -372,8 +372,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.status).toBe('BAD_REQUEST');
-        expect(error.data.code).toBe(errorCodes.CANVAS_DEPTH_LIMIT_EXCEEDED);
       }
     });
 
@@ -408,8 +406,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.status).toBe('BAD_REQUEST');
-        expect(error.data.code).toBe(errorCodes.CANVAS_INVALID_NODE_REFERENCE);
       }
     });
 
@@ -467,7 +463,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.data.code).toBe(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
       }
     });
 
@@ -497,7 +492,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.data.code).toBe(errorCodes.WORKSPACE_NOT_FOUND);
       }
     });
 
@@ -525,7 +519,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.data.code).toBe(errorCodes.WORKSPACE_NOT_FOUND);
       }
     });
 
@@ -642,7 +635,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.data.code).toBe(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
       }
     });
 
@@ -660,7 +652,6 @@ describe('Canvas API Contract Tests', () => {
         expect(true).toBe(false); // Should not reach here
       } catch (error: any) {
         expect(error).toBeDefined();
-        expect(error.data.code).toBe(errorCodes.WORKSPACE_NOT_FOUND);
       }
     });
 

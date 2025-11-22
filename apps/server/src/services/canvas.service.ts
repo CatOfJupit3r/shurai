@@ -1,5 +1,6 @@
 import { errorCodes } from '@shurai/shared/enums/errors.enums';
 
+import { ObjectIdString } from '@~/db/helpers';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
 import { WorkspaceContentCanvasModel } from '../db/models/canvas-layout.model';
@@ -209,7 +210,7 @@ class CanvasService {
 
     // Update or create embedded canvas layout
     workspace.canvasLayout = {
-      _id: workspace.canvasLayout?._id ?? new Date().getTime().toString(),
+      _id: workspace.canvasLayout?._id ?? ObjectIdString(),
       nodes: nodes as CanvasNodeClass[],
       canvasSize,
       backgroundColor,

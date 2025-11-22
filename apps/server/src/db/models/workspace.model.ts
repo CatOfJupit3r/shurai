@@ -29,7 +29,7 @@ class WorkspaceClass {
   @prop({ index: true, unique: true, sparse: true })
   public shareableSlug?: string;
 
-  @prop({ _id: false, type: () => CanvasLayoutClass })
+  @prop({ type: () => CanvasLayoutClass })
   public canvasLayout?: CanvasLayoutClass;
 
   public createdAt!: Date;
