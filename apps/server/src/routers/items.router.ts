@@ -4,8 +4,8 @@ import { WorkspaceItemModel } from '@~/db/models/workspace-item.model';
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
 import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
-import type { iTemplateItemStructure } from '@~/services/item.service';
 import { itemService } from '@~/services/item.service';
+import { templateService } from '@~/services/template.service';
 
 import { base, protectedProcedure } from '../lib/orpc';
 
@@ -230,10 +230,15 @@ export const itemsRouter = base.items.router({
       }
     }
 
-    // Type assertion needed because Mongoose Schema.Types.Mixed doesn't preserve recursive structure
-    const createdHierarchy = await itemService.instantiateTemplate(
+    const rootTemplateItem = await templateService.getRootTemplateItem(template._id);
+
+    if (!rootTemplateItem) {
+      throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
+    }
+
+    const createdHierarchy = await itemService.instantiateTemplateFromHierarchy(
       input.workspaceId,
-      template.rootItem as iTemplateItemStructure,
+      rootTemplateItem,
       input.parentId,
     );
 

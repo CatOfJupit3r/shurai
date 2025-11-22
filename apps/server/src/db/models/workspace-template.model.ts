@@ -1,6 +1,5 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
-import { Schema } from 'mongoose';
 
 import type { TemplateScope } from '@shurai/shared/enums/workspace.enums';
 
@@ -23,13 +22,8 @@ class WorkspaceTemplateClass {
   @prop({ required: true, index: true, enum: ['PERSONAL', 'COMMUNITY'] })
   public scope!: TemplateScope;
 
-  @prop({ required: true, type: Schema.Types.Mixed })
-  public rootItem!: {
-    name: string;
-    description?: string;
-    assetId?: string;
-    children?: unknown[];
-  };
+  @prop({ required: true, index: true })
+  public rootItemId!: string;
 
   public createdAt!: Date;
 

@@ -1,5 +1,7 @@
 import { WorkspaceItemModel } from '@~/db/models/workspace-item.model';
 
+import type { iTemplateItemWithChildren } from './template.service';
+
 export interface iItemWithChildren {
   _id: string;
   workspaceId: string;
@@ -11,13 +13,6 @@ export interface iItemWithChildren {
   children: iItemWithChildren[];
   createdAt: Date;
   updatedAt: Date;
-}
-
-export interface iTemplateItemStructure {
-  name: string;
-  description?: string;
-  assetId?: string;
-  children?: iTemplateItemStructure[];
 }
 
 class ItemService {
@@ -87,9 +82,9 @@ class ItemService {
     return true;
   }
 
-  async instantiateTemplate(
+  async instantiateTemplateFromHierarchy(
     workspaceId: string,
-    templateItem: iTemplateItemStructure,
+    templateItem: iTemplateItemWithChildren,
     parentId?: string,
   ): Promise<iItemWithChildren> {
     const createdItem = await WorkspaceItemModel.create({
@@ -104,7 +99,7 @@ class ItemService {
 
     if (templateItem.children && Array.isArray(templateItem.children)) {
       const childPromises = templateItem.children.map(async (childTemplate) =>
-        this.instantiateTemplate(workspaceId, childTemplate, createdItem._id),
+        this.instantiateTemplateFromHierarchy(workspaceId, childTemplate, createdItem._id),
       );
       children.push(...(await Promise.all(childPromises)));
     }
