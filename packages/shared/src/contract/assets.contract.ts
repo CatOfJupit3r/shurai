@@ -19,6 +19,7 @@ const ASSET_SCHEMA = z.object({
       accentColor: z.string().optional(),
     })
     .optional(),
+  isGlobal: z.boolean(),
   createdAt: z.coerce.date(),
   updatedAt: z.coerce.date(),
 });
@@ -36,6 +37,7 @@ const CREATE_ASSET_INPUT_SCHEMA = z.object({
       accentColor: z.string().optional(),
     })
     .optional(),
+  isGlobal: z.boolean().optional(),
 });
 
 const UPDATE_ASSET_INPUT_SCHEMA = z.object({
@@ -112,7 +114,7 @@ const deleteAsset = authProcedure
     method: 'DELETE',
     summary: 'Delete an asset',
     description:
-      'Deletes an asset. Only the owner can delete their assets. Returns ASSET_NOT_FOUND if the asset does not exist or does not belong to the authenticated user. Note: Deleting an asset may affect items and workspaces that reference it.',
+      'Deletes an asset. Only the owner can delete their assets. Returns ASSET_NOT_FOUND if the asset does not exist or does not belong to the authenticated user. Prevents deletion if the asset is referenced by any items or workspaces.',
   })
   .input(
     z.object({
@@ -121,12 +123,52 @@ const deleteAsset = authProcedure
   )
   .output(z.object({ success: z.boolean() }));
 
+const listGlobalAssets = oc
+  .route({
+    path: '/global',
+    method: 'GET',
+    summary: 'List global assets',
+    description:
+      'Returns all globally available assets that can be used by any user. These are curated assets marked as global by administrators or the system. No authentication required.',
+  })
+  .input(
+    z.object({
+      type: AssetTypeSchema.optional(),
+    }),
+  )
+  .output(z.array(ASSET_SCHEMA));
+
+const generateUploadUrl = authProcedure
+  .route({
+    path: '/upload-url',
+    method: 'POST',
+    summary: 'Generate presigned upload URL',
+    description:
+      'Generates a presigned URL for uploading asset files (icons, images, covers). Returns a URL that can be used to upload the file directly to storage. This is a stub implementation for future file upload integration.',
+  })
+  .input(
+    z.object({
+      fileName: z.string(),
+      fileType: z.string(),
+      assetType: AssetTypeSchema,
+    }),
+  )
+  .output(
+    z.object({
+      uploadUrl: z.string(),
+      fileUrl: z.string(),
+      expiresAt: z.coerce.date(),
+    }),
+  );
+
 const assetsContract = oc.prefix('/assets').router({
   listAssets,
   getAsset,
   createAsset,
   updateAsset,
   deleteAsset,
+  listGlobalAssets,
+  generateUploadUrl,
 });
 
 export default assetsContract;

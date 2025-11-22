@@ -43,6 +43,9 @@ class WorkspaceAssetClass {
   @prop({ type: () => ThemeConfigClass })
   public themeConfig?: ThemeConfigClass;
 
+  @prop({ default: false, index: true })
+  public isGlobal!: boolean;
+
   public createdAt!: Date;
 
   public updatedAt!: Date;
