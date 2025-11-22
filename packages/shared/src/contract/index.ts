@@ -1,6 +1,7 @@
 import achievementsContract from './achievements.contract';
 import assetsContract from './assets.contract';
 import badgesContract from './badges.contract';
+import canvasContract from './canvas.contract';
 import indexContract from './index.contract';
 import itemsContract from './items.contract';
 import templatesContract from './templates.contract';
@@ -16,6 +17,7 @@ export const CONTRACT = {
   items: itemsContract,
   assets: assetsContract,
   templates: templatesContract,
+  canvas: canvasContract,
 };
 
 export type AppContract = typeof CONTRACT;

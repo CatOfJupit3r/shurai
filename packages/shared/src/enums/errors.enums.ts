@@ -33,6 +33,9 @@ const workspaceErrorCodes = {
   INVALID_WORKSPACE_VISIBILITY: 'INVALID_WORKSPACE_VISIBILITY',
   INVALID_ASSET_TYPE: 'INVALID_ASSET_TYPE',
   INVALID_TEMPLATE_SCOPE: 'INVALID_TEMPLATE_SCOPE',
+  CANVAS_LAYOUT_NOT_FOUND: 'CANVAS_LAYOUT_NOT_FOUND',
+  CANVAS_DEPTH_LIMIT_EXCEEDED: 'CANVAS_DEPTH_LIMIT_EXCEEDED',
+  CANVAS_INVALID_NODE_REFERENCE: 'CANVAS_INVALID_NODE_REFERENCE',
 } as const;
 
 const workspaceErrorMessages = {
@@ -52,6 +55,9 @@ const workspaceErrorMessages = {
   [workspaceErrorCodes.INVALID_WORKSPACE_VISIBILITY]: 'Invalid workspace visibility',
   [workspaceErrorCodes.INVALID_ASSET_TYPE]: 'Invalid asset type',
   [workspaceErrorCodes.INVALID_TEMPLATE_SCOPE]: 'Invalid template scope',
+  [workspaceErrorCodes.CANVAS_LAYOUT_NOT_FOUND]: 'Canvas layout not found',
+  [workspaceErrorCodes.CANVAS_DEPTH_LIMIT_EXCEEDED]: 'Canvas depth limit exceeded (max depth: 1)',
+  [workspaceErrorCodes.CANVAS_INVALID_NODE_REFERENCE]: 'Canvas node contains invalid item, asset, or sub-canvas reference',
 };
 
 export const errorCodes = {
