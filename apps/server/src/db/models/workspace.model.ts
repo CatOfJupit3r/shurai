@@ -4,6 +4,7 @@ import type { DocumentType } from '@typegoose/typegoose';
 import type { WorkspaceVisibility } from '@shurai/shared/enums/workspace.enums';
 
 import { ObjectIdString } from '../helpers';
+import { CanvasLayoutClass } from './canvas-layout.model';
 
 @modelOptions({ schemaOptions: { collection: 'workspaces', timestamps: true } })
 class WorkspaceClass {
@@ -27,6 +28,9 @@ class WorkspaceClass {
 
   @prop({ index: true, unique: true, sparse: true })
   public shareableSlug?: string;
+
+  @prop({ _id: false, type: () => CanvasLayoutClass })
+  public canvasLayout?: CanvasLayoutClass;
 
   public createdAt!: Date;
 
