@@ -1,7 +1,9 @@
 import { errorCodes } from '@shurai/shared';
 
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
+import { WorkspaceModel } from '@~/db/models/workspace.model';
 import { ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
+import { itemService } from '@~/services/item.service';
 import { templateService } from '@~/services/template.service';
 
 import { base, protectedProcedure } from '../lib/orpc';
@@ -153,5 +155,33 @@ export const templatesRouter = base.templates.router({
     await WorkspaceTemplateModel.findByIdAndDelete(templateId);
 
     return { success: true };
+  }),
+
+  applyTemplate: protectedProcedure.templates.applyTemplate.handler(async ({ context, input }) => {
+    const userId = context.session.user.id;
+    const { templateId, workspaceId, parentId } = input;
+
+    // Verify workspace exists and user owns it
+    const workspace = await WorkspaceModel.findById(workspaceId);
+    if (!workspace || workspace.userId !== userId) {
+      throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
+    }
+
+    // Verify template exists and is accessible (owned or community)
+    const template = await WorkspaceTemplateModel.findById(templateId);
+    if (!template || (template.scope === 'PERSONAL' && template.userId !== userId)) {
+      throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
+    }
+
+    // Get the template root item with its full hierarchy
+    const rootTemplateItem = await templateService.getRootTemplateItem(template._id);
+    if (!rootTemplateItem) {
+      throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
+    }
+
+    // Instantiate the template into workspace items
+    const createdRootItem = await itemService.instantiateTemplateFromHierarchy(workspaceId, rootTemplateItem, parentId);
+
+    return createdRootItem;
   }),
 });

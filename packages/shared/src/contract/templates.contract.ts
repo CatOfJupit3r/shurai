@@ -104,12 +104,44 @@ const deleteTemplate = authProcedure
   )
   .output(z.object({ success: z.boolean() }));
 
+const WORKSPACE_ITEM_SCHEMA = z.object({
+  _id: z.string(),
+  workspaceId: z.string(),
+  name: z.string(),
+  description: z.string().optional(),
+  acquireDate: z.coerce.date().optional(),
+  assetId: z.string().optional(),
+  parentId: z.string().nullable().optional(),
+  order: z.number(),
+  children: z.lazy(() => z.array(WORKSPACE_ITEM_SCHEMA)),
+  createdAt: z.coerce.date(),
+  updatedAt: z.coerce.date(),
+});
+
+const applyTemplate = authProcedure
+  .route({
+    path: '/:templateId/apply',
+    method: 'POST',
+    summary: 'Apply template to workspace',
+    description:
+      'Applies a template to a workspace by creating the root item plus all descendants in one operation. The user must own the workspace and have access to the template (owned by user or has COMMUNITY scope). Returns the created root item with its full hierarchy. Optionally accepts a parentId to nest the template under an existing item.',
+  })
+  .input(
+    z.object({
+      templateId: z.string(),
+      workspaceId: z.string(),
+      parentId: z.string().optional(),
+    }),
+  )
+  .output(WORKSPACE_ITEM_SCHEMA);
+
 const templatesContract = oc.prefix('/templates').router({
   listTemplates,
   getTemplate,
   createTemplate,
   updateTemplate,
   deleteTemplate,
+  applyTemplate,
 });
 
 export default templatesContract;
