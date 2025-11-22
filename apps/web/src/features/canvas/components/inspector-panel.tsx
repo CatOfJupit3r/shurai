@@ -1,0 +1,209 @@
+/**
+ * Inspector Panel Component
+ * Displays and allows editing of selected canvas node properties
+ */
+import { useState } from 'react';
+import { FiX } from 'react-icons/fi';
+
+import { Button } from '@~/components/ui/button';
+import { Input } from '@~/components/ui/input';
+import { Label } from '@~/components/ui/label';
+
+import type { iCanvasNodeData } from './canvas-node';
+
+interface iInspectorPanelProps {
+  node: iCanvasNodeData | null;
+  onClose: () => void;
+  onUpdate: (nodeId: string, updates: Partial<iCanvasNodeData>) => void;
+}
+
+export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps) {
+  const [localPosition, setLocalPosition] = useState(node?.position ?? { x: 0, y: 0 });
+  const [localSize, setLocalSize] = useState(node?.size ?? { width: 100, height: 100 });
+  const [localRotation, setLocalRotation] = useState(node?.rotation ?? 0);
+  const [localOpacity, setLocalOpacity] = useState(node?.opacity ?? 1);
+
+  if (!node) return null;
+
+  const handlePositionChange = (axis: 'x' | 'y', value: string) => {
+    const numValue = parseFloat(value) || 0;
+    const newPosition = { ...localPosition, [axis]: numValue };
+    setLocalPosition(newPosition);
+    onUpdate(node.id, { position: newPosition });
+  };
+
+  const handleSizeChange = (dimension: 'width' | 'height', value: string) => {
+    const numValue = Math.max(10, parseFloat(value) || 10);
+    const newSize = { ...localSize, [dimension]: numValue };
+    setLocalSize(newSize);
+    onUpdate(node.id, { size: newSize });
+  };
+
+  const handleRotationChange = (value: string) => {
+    const numValue = parseFloat(value) || 0;
+    setLocalRotation(numValue);
+    onUpdate(node.id, { rotation: numValue });
+  };
+
+  const handleOpacityChange = (value: string) => {
+    const numValue = Math.max(0, Math.min(1, parseFloat(value) || 0));
+    setLocalOpacity(numValue);
+    onUpdate(node.id, { opacity: numValue });
+  };
+
+  return (
+    <div className="w-80 overflow-y-auto border-l bg-card">
+      {/* Header */}
+      <div className="border-b p-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Inspector</h2>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <FiX />
+          </Button>
+        </div>
+        <p className="mt-1 text-sm text-muted-foreground">Node ID: {node.id}</p>
+      </div>
+
+      {/* Properties */}
+      <div className="space-y-6 p-4">
+        {/* Node Type */}
+        <div>
+          <div className="text-xs text-muted-foreground">Type</div>
+          <p className="mt-1 text-sm font-medium">{node.type}</p>
+        </div>
+
+        {/* Position */}
+        <div className="space-y-3">
+          <div className="text-sm font-semibold">Position</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="pos-x" className="text-xs text-muted-foreground">
+                X
+              </Label>
+              <Input
+                id="pos-x"
+                type="number"
+                value={localPosition.x}
+                onChange={(e) => handlePositionChange('x', e.target.value)}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="pos-y" className="text-xs text-muted-foreground">
+                Y
+              </Label>
+              <Input
+                id="pos-y"
+                type="number"
+                value={localPosition.y}
+                onChange={(e) => handlePositionChange('y', e.target.value)}
+                className="mt-1"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Size */}
+        <div className="space-y-3">
+          <div className="text-sm font-semibold">Size</div>
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <Label htmlFor="size-w" className="text-xs text-muted-foreground">
+                Width
+              </Label>
+              <Input
+                id="size-w"
+                type="number"
+                value={localSize.width}
+                onChange={(e) => handleSizeChange('width', e.target.value)}
+                className="mt-1"
+                min={10}
+              />
+            </div>
+            <div>
+              <Label htmlFor="size-h" className="text-xs text-muted-foreground">
+                Height
+              </Label>
+              <Input
+                id="size-h"
+                type="number"
+                value={localSize.height}
+                onChange={(e) => handleSizeChange('height', e.target.value)}
+                className="mt-1"
+                min={10}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Rotation */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="rotation" className="text-sm font-semibold">
+              Rotation
+            </Label>
+            <span className="text-xs text-muted-foreground">{Math.round(localRotation)}°</span>
+          </div>
+          <Input
+            id="rotation"
+            type="range"
+            value={localRotation}
+            onChange={(e) => handleRotationChange(e.target.value)}
+            min={0}
+            max={360}
+            step={1}
+            className="mt-2"
+          />
+        </div>
+
+        {/* Opacity */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="opacity" className="text-sm font-semibold">
+              Opacity
+            </Label>
+            <span className="text-xs text-muted-foreground">{Math.round(localOpacity * 100)}%</span>
+          </div>
+          <Input
+            id="opacity"
+            type="range"
+            value={localOpacity}
+            onChange={(e) => handleOpacityChange(e.target.value)}
+            min={0}
+            max={1}
+            step={0.01}
+            className="mt-2"
+          />
+        </div>
+
+        {/* Z-Index */}
+        {node.zIndex !== undefined && (
+          <div>
+            <div className="text-xs text-muted-foreground">Z-Index</div>
+            <p className="mt-1 text-sm font-medium">{node.zIndex}</p>
+          </div>
+        )}
+
+        {/* References */}
+        {node.itemId ? (
+          <div>
+            <div className="text-xs text-muted-foreground">Item ID</div>
+            <p className="mt-1 truncate text-sm font-medium">{node.itemId}</p>
+          </div>
+        ) : null}
+        {node.assetId ? (
+          <div>
+            <div className="text-xs text-muted-foreground">Asset ID</div>
+            <p className="mt-1 truncate text-sm font-medium">{node.assetId}</p>
+          </div>
+        ) : null}
+        {node.subCanvasId ? (
+          <div>
+            <div className="text-xs text-muted-foreground">Sub-Canvas ID</div>
+            <p className="mt-1 truncate text-sm font-medium">{node.subCanvasId}</p>
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
