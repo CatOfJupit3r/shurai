@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
 import env from '@~/constants/env';
+import { createLogger } from '@~/lib/logger';
 
 class DatabaseService {
+  private logger = createLogger('database');
+
   public async connect() {
     if (process.env.NODE_ENV === 'test') return;
     await this.connectToExternalDatabase();
@@ -18,7 +21,9 @@ class DatabaseService {
         },
       })
       .catch((error) => {
-        console.log('Error connecting to database:', error);
+        this.logger.error('Error connecting to database', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       });
   }
 

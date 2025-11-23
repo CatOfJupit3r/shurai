@@ -1,28 +1,32 @@
+import { createLogger } from '@~/lib/logger';
+
 import achievementsLoader from './achievements.loader';
 import authLoader from './auth.loader';
 import databaseLoader from './database.loader';
 import honoLoader from './hono.loader';
 
+const logger = createLogger('loaders');
+
 export default async function loaders() {
-  console.log('Starting loaders...');
+  logger.info('Starting loaders...');
 
-  console.log('Loading database...');
+  logger.info('Loading database...');
   const db = await databaseLoader();
-  console.log('Database loaded.');
+  logger.info('Database loaded.');
 
-  console.log('Loading authentication...');
+  logger.info('Loading authentication...');
   const instance = await authLoader(db);
-  console.log('Authentication loaded.');
+  logger.info('Authentication loaded.');
 
-  console.log('Loading achievements...');
+  logger.info('Loading achievements...');
   await achievementsLoader();
-  console.log('Achievements loaded.');
+  logger.info('Achievements loaded.');
 
-  console.log('Loading Hono framework...');
+  logger.info('Loading Hono framework...');
   const { app, appRouter } = await honoLoader(instance);
-  console.log('Hono framework loaded.');
+  logger.info('Hono framework loaded.');
 
-  console.log('All loaders completed.');
+  logger.info('All loaders completed.');
 
   return { app, auth: instance, appRouter };
 }

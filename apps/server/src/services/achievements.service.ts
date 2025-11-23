@@ -5,8 +5,11 @@ import { betaTesterAchievement } from '@~/achievements/betaTester.achievement';
 import { USER_ACHIEVEMENTS_META } from '@~/constants/achievements';
 import { UserAchievementModel } from '@~/db/models/user-achievements.model';
 import { eventBus } from '@~/lib/event-bus';
+import { createLogger } from '@~/lib/logger';
 
 class AchievementsService {
+  private logger = createLogger('achievements');
+
   private achievements: iAchievementDefinition[] = [betaTesterAchievement];
 
   private context: iAchievementContext = {
@@ -33,7 +36,11 @@ class AchievementsService {
           try {
             await achievement.handle(payload, this.context);
           } catch (error) {
-            console.error(`Error handling achievement ${achievement.id} for event ${event}:`, error);
+            this.logger.error(`Error handling achievement ${achievement.id} for event ${event}`, {
+              achievementId: achievement.id,
+              event,
+              error: error instanceof Error ? error.message : String(error),
+            });
           }
         });
       }

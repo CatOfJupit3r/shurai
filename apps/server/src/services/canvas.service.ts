@@ -1,6 +1,7 @@
 import { errorCodes } from '@shurai/shared/enums/errors.enums';
 
 import { ObjectIdString } from '@~/db/helpers';
+import { createLogger } from '@~/lib/logger';
 import { ORPCBadRequestError, ORPCNotFoundError } from '@~/lib/orpc-error-wrapper';
 
 import { WorkspaceContentCanvasModel } from '../db/models/canvas-layout.model';
@@ -52,6 +53,8 @@ interface iSaveLayoutInput {
 }
 
 class CanvasService {
+  private logger = createLogger('canvas');
+
   /**
    * Calculate the approximate size of a payload in bytes
    */
@@ -66,7 +69,7 @@ class CanvasService {
     const payloadSize = this.calculatePayloadSize(input);
 
     if (payloadSize > MAX_PAYLOAD_SIZE_BYTES) {
-      console.error('Canvas layout payload too large', {
+      this.logger.error('Canvas layout payload too large', {
         workspaceId,
         userId,
         payloadSize,
@@ -78,7 +81,7 @@ class CanvasService {
     }
 
     if (payloadSize > PAYLOAD_SIZE_WARNING_THRESHOLD) {
-      console.warn('Canvas layout payload approaching size limit', {
+      this.logger.warn('Canvas layout payload approaching size limit', {
         workspaceId,
         userId,
         payloadSize,
@@ -140,7 +143,9 @@ class CanvasService {
       const missingItemIds = itemIds.filter((id) => !existingItemIds.has(id));
 
       if (missingItemIds.length > 0) {
-        console.warn(`Canvas layout references non-existent items in workspace ${workspaceId}:`, missingItemIds);
+        this.logger.warn(`Canvas layout references non-existent items in workspace ${workspaceId}:`, {
+          missingItemIds,
+        });
       }
     }
   }
@@ -155,7 +160,7 @@ class CanvasService {
       const workspace = await WorkspaceModel.findById(workspaceId);
 
       if (!workspace) {
-        console.warn('Canvas layout retrieval failed - workspace not found', {
+        this.logger.warn('Canvas layout retrieval failed - workspace not found', {
           workspaceId,
           userId,
           duration: Date.now() - startTime,
@@ -165,7 +170,7 @@ class CanvasService {
 
       // Check access: user must own the workspace or it must be public
       if (workspace.userId !== userId && workspace.visibility !== 'PUBLIC') {
-        console.warn('Canvas layout retrieval failed - access denied', {
+        this.logger.warn('Canvas layout retrieval failed - access denied', {
           workspaceId,
           userId,
           ownerId: workspace.userId,
@@ -176,7 +181,7 @@ class CanvasService {
       }
 
       if (!workspace.canvasLayout) {
-        console.warn('Canvas layout retrieval failed - layout not found', {
+        this.logger.warn('Canvas layout retrieval failed - layout not found', {
           workspaceId,
           userId,
           duration: Date.now() - startTime,
@@ -210,7 +215,7 @@ class CanvasService {
         updatedAt: workspace.canvasLayout.updatedAt,
       };
 
-      console.info('Canvas layout retrieved successfully', {
+      this.logger.info('Canvas layout retrieved successfully', {
         workspaceId,
         userId,
         revision: workspace.canvasLayout.revision,
@@ -225,7 +230,7 @@ class CanvasService {
         // Re-throw known errors
         throw error;
       }
-      console.error('Canvas layout retrieval failed - unexpected error', {
+      this.logger.error('Canvas layout retrieval failed - unexpected error', {
         workspaceId,
         userId,
         error: error instanceof Error ? error.message : String(error),
@@ -245,7 +250,7 @@ class CanvasService {
       const workspace = await WorkspaceModel.findOne({ shareableSlug: slug, visibility: 'PUBLIC' });
 
       if (!workspace) {
-        console.warn('Public canvas layout retrieval failed - workspace not found', {
+        this.logger.warn('Public canvas layout retrieval failed - workspace not found', {
           slug,
           duration: Date.now() - startTime,
         });
@@ -253,7 +258,7 @@ class CanvasService {
       }
 
       if (!workspace.canvasLayout) {
-        console.warn('Public canvas layout retrieval failed - layout not found', {
+        this.logger.warn('Public canvas layout retrieval failed - layout not found', {
           slug,
           workspaceId: workspace._id,
           duration: Date.now() - startTime,
@@ -287,7 +292,7 @@ class CanvasService {
         updatedAt: workspace.canvasLayout.updatedAt,
       };
 
-      console.info('Public canvas layout retrieved successfully', {
+      this.logger.info('Public canvas layout retrieved successfully', {
         slug,
         workspaceId: workspace._id,
         revision: workspace.canvasLayout.revision,
@@ -302,7 +307,7 @@ class CanvasService {
         // Re-throw known errors
         throw error;
       }
-      console.error('Public canvas layout retrieval failed - unexpected error', {
+      this.logger.error('Public canvas layout retrieval failed - unexpected error', {
         slug,
         error: error instanceof Error ? error.message : String(error),
         duration: Date.now() - startTime,
@@ -326,7 +331,7 @@ class CanvasService {
       const workspace = await WorkspaceModel.findById(workspaceId);
 
       if (!workspace || workspace.userId !== userId) {
-        console.warn('Canvas layout save failed - workspace not found or access denied', {
+        this.logger.warn('Canvas layout save failed - workspace not found or access denied', {
           workspaceId,
           userId,
           found: !!workspace,
@@ -404,7 +409,7 @@ class CanvasService {
         updatedAt: workspace.canvasLayout.updatedAt,
       };
 
-      console.info('Canvas layout saved successfully', {
+      this.logger.info('Canvas layout saved successfully', {
         workspaceId,
         userId,
         revision: newRevision,
@@ -421,7 +426,7 @@ class CanvasService {
         // Re-throw known errors (already logged)
         throw error;
       }
-      console.error('Canvas layout save failed - unexpected error', {
+      this.logger.error('Canvas layout save failed - unexpected error', {
         workspaceId,
         userId,
         error: error instanceof Error ? error.message : String(error),
@@ -441,7 +446,7 @@ class CanvasService {
       const workspace = await WorkspaceModel.findById(workspaceId);
 
       if (!workspace || workspace.userId !== userId) {
-        console.warn('Canvas layout reset failed - workspace not found or access denied', {
+        this.logger.warn('Canvas layout reset failed - workspace not found or access denied', {
           workspaceId,
           userId,
           found: !!workspace,
@@ -457,7 +462,7 @@ class CanvasService {
 
       await WorkspaceContentCanvasModel.deleteMany({ workspaceId });
 
-      console.info('Canvas layout reset successfully', {
+      this.logger.info('Canvas layout reset successfully', {
         workspaceId,
         userId,
         duration: Date.now() - startTime,
@@ -469,7 +474,7 @@ class CanvasService {
         // Re-throw known errors
         throw error;
       }
-      console.error('Canvas layout reset failed - unexpected error', {
+      this.logger.error('Canvas layout reset failed - unexpected error', {
         workspaceId,
         userId,
         error: error instanceof Error ? error.message : String(error),
@@ -489,7 +494,7 @@ class CanvasService {
       const contentCanvas = await WorkspaceContentCanvasModel.findById(contentCanvasId);
 
       if (!contentCanvas) {
-        console.warn('Content canvas retrieval failed - not found', {
+        this.logger.warn('Content canvas retrieval failed - not found', {
           contentCanvasId,
           userId,
           duration: Date.now() - startTime,
@@ -500,7 +505,7 @@ class CanvasService {
       // Check access: user must own the workspace or it must be public
       const workspace = await WorkspaceModel.findById(contentCanvas.workspaceId);
       if (!workspace) {
-        console.warn('Content canvas retrieval failed - parent workspace not found', {
+        this.logger.warn('Content canvas retrieval failed - parent workspace not found', {
           contentCanvasId,
           workspaceId: contentCanvas.workspaceId,
           userId,
@@ -510,7 +515,7 @@ class CanvasService {
       }
 
       if (workspace.userId !== userId && workspace.visibility !== 'PUBLIC') {
-        console.warn('Content canvas retrieval failed - access denied', {
+        this.logger.warn('Content canvas retrieval failed - access denied', {
           contentCanvasId,
           workspaceId: contentCanvas.workspaceId,
           userId,
@@ -531,7 +536,7 @@ class CanvasService {
         updatedAt: contentCanvas.updatedAt,
       };
 
-      console.info('Content canvas retrieved successfully', {
+      this.logger.info('Content canvas retrieved successfully', {
         contentCanvasId,
         workspaceId: contentCanvas.workspaceId,
         userId,
@@ -545,7 +550,7 @@ class CanvasService {
         // Re-throw known errors
         throw error;
       }
-      console.error('Content canvas retrieval failed - unexpected error', {
+      this.logger.error('Content canvas retrieval failed - unexpected error', {
         contentCanvasId,
         userId,
         error: error instanceof Error ? error.message : String(error),

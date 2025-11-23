@@ -5,6 +5,9 @@ import { username } from 'better-auth/plugins';
 
 import { UserProfileModel } from '@~/db/models/user-profile.model';
 import { devImpersonatePlugin } from '@~/lib/auth-plugins/dev-impersonate.plugin';
+import { createLogger } from '@~/lib/logger';
+
+const logger = createLogger('auth');
 
 const createInstance = (db: mongoose.mongo.Db) =>
   betterAuth({
@@ -32,7 +35,10 @@ const createInstance = (db: mongoose.mongo.Db) =>
             try {
               await UserProfileModel.create({ userId: user.id });
             } catch (e) {
-              console.error('Please pay attention to this error! User profile creation failed.', e);
+              logger.error('User profile creation failed', {
+                userId: user.id,
+                error: e instanceof Error ? e.message : String(e),
+              });
             }
           },
         },
