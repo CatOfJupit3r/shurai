@@ -5,7 +5,11 @@ import { useAppForm } from '@~/components/ui/field';
 
 import useRegister from '../hooks/use-register';
 
-export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () => unknown }) {
+interface iSignUpFormProps {
+  onSwitchToSignIn: () => unknown;
+}
+
+export default function SignUpForm({ onSwitchToSignIn }: iSignUpFormProps) {
   const { mutate } = useRegister();
 
   const form = useAppForm({
@@ -23,6 +27,7 @@ export default function SignUpForm({ onSwitchToSignIn }: { onSwitchToSignIn: () 
         name: value.name,
         username: value.username,
       });
+      // Redirect will happen automatically via beforeLoad hook in _to_dashboard route
     },
     validators: {
       onSubmit: z
