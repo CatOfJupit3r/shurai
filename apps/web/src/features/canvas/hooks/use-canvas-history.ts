@@ -2,7 +2,9 @@
  * Canvas History Hook
  * Manages undo/redo functionality for canvas changes
  */
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
+
+import useStableCallback from '@~/hooks/use-stable-callback';
 
 import type { iCanvasNodeData } from '../components/canvas-node';
 
@@ -20,43 +22,40 @@ export function useCanvasHistory({ maxHistorySize = 50 }: iUseCanvasHistoryOptio
   const [currentIndex, setCurrentIndex] = useState(-1);
   const isUndoingRef = useRef(false);
 
-  const pushState = useCallback(
-    (nodes: iCanvasNodeData[]) => {
-      // Don't push if we're in the middle of an undo operation
-      if (isUndoingRef.current) {
-        return;
+  const pushState = useStableCallback((nodes: iCanvasNodeData[]) => {
+    // Don't push if we're in the middle of an undo operation
+    if (isUndoingRef.current) {
+      return;
+    }
+
+    setHistory((prev) => {
+      // Remove any states after current index (for redo after new changes)
+      const newHistory = prev.slice(0, currentIndex + 1);
+
+      // Add new state
+      const newState: iHistoryState = {
+        nodes: JSON.parse(JSON.stringify(nodes)), // Deep clone
+        timestamp: Date.now(),
+      };
+
+      newHistory.push(newState);
+
+      // Limit history size
+      if (newHistory.length > maxHistorySize) {
+        newHistory.shift();
+        return newHistory;
       }
 
-      setHistory((prev) => {
-        // Remove any states after current index (for redo after new changes)
-        const newHistory = prev.slice(0, currentIndex + 1);
+      return newHistory;
+    });
 
-        // Add new state
-        const newState: iHistoryState = {
-          nodes: JSON.parse(JSON.stringify(nodes)), // Deep clone
-          timestamp: Date.now(),
-        };
+    setCurrentIndex((prev) => {
+      const newIndex = Math.min(prev + 1, maxHistorySize - 1);
+      return newIndex;
+    });
+  });
 
-        newHistory.push(newState);
-
-        // Limit history size
-        if (newHistory.length > maxHistorySize) {
-          newHistory.shift();
-          return newHistory;
-        }
-
-        return newHistory;
-      });
-
-      setCurrentIndex((prev) => {
-        const newIndex = Math.min(prev + 1, maxHistorySize - 1);
-        return newIndex;
-      });
-    },
-    [currentIndex, maxHistorySize],
-  );
-
-  const undo = useCallback(() => {
+  const undo = useStableCallback(() => {
     if (currentIndex <= 0) {
       return null;
     }
@@ -74,9 +73,9 @@ export function useCanvasHistory({ maxHistorySize = 50 }: iUseCanvasHistoryOptio
     }, 100);
 
     return previousState ? previousState.nodes : null;
-  }, [currentIndex, history]);
+  });
 
-  const redo = useCallback(() => {
+  const redo = useStableCallback(() => {
     if (currentIndex >= history.length - 1) {
       return null;
     }
@@ -87,17 +86,17 @@ export function useCanvasHistory({ maxHistorySize = 50 }: iUseCanvasHistoryOptio
     // Return the next state
     const nextState = history[newIndex];
     return nextState ? nextState.nodes : null;
-  }, [currentIndex, history]);
+  });
 
   const canUndo = currentIndex > 0;
   const canRedo = currentIndex < history.length - 1;
 
-  const clear = useCallback(() => {
+  const clear = useStableCallback(() => {
     setHistory([]);
     setCurrentIndex(-1);
-  }, []);
+  });
 
-  const reset = useCallback((nodes: iCanvasNodeData[]) => {
+  const reset = useStableCallback((nodes: iCanvasNodeData[]) => {
     setHistory([
       {
         nodes: JSON.parse(JSON.stringify(nodes)),
@@ -105,7 +104,7 @@ export function useCanvasHistory({ maxHistorySize = 50 }: iUseCanvasHistoryOptio
       },
     ]);
     setCurrentIndex(0);
-  }, []);
+  });
 
   return {
     pushState,

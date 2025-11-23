@@ -25,7 +25,10 @@ export const TextField = ({ label, description, ...inputProps }: TextFieldProps)
         <Input
           id={field.name}
           value={field.state.value}
-          onChange={(e) => field.handleChange(e.target.value)}
+          onChange={(e) => {
+            console.log(e.target.value);
+            field.handleChange(e.target.value);
+          }}
           onBlur={field.handleBlur}
           {...inputProps}
         />
@@ -99,6 +102,7 @@ export const SelectField = ({ label, options, ...selectProps }: iSelectFieldProp
           value={field.state.value}
           onValueChange={(value) => (value ? field.handleChange(value) : undefined)}
           onBlur={field.handleBlur}
+          options={options}
           {...selectProps}
         />
       </div>

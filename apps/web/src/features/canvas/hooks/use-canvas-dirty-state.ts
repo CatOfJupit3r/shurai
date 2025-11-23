@@ -1,5 +1,8 @@
 import { useAtom } from 'jotai';
-import { useCallback, useEffect } from 'react';
+import { isEqual } from 'lodash-es';
+import { useEffect } from 'react';
+
+import useStableCallback from '@~/hooks/use-stable-callback';
 
 import { isDirtyAtom, lastSavedContentCanvasesAtom, lastSavedNodesAtom } from '../store/canvas-atoms';
 import type { iCanvasNode, iContentCanvas } from '../store/canvas-atoms';
@@ -48,9 +51,8 @@ export function useCanvasDirtyState({
 
   // Compare current state with last saved state
   useEffect(() => {
-    const hasNodesChanged = JSON.stringify(currentNodes) !== JSON.stringify(lastSavedNodes);
-    const hasContentCanvasesChanged =
-      JSON.stringify(currentContentCanvases ?? []) !== JSON.stringify(lastSavedContentCanvases);
+    const hasNodesChanged = !isEqual(currentNodes, lastSavedNodes);
+    const hasContentCanvasesChanged = !isEqual(currentContentCanvases ?? [], lastSavedContentCanvases);
 
     if (hasNodesChanged || hasContentCanvasesChanged) {
       setIsDirty(true);
@@ -59,7 +61,7 @@ export function useCanvasDirtyState({
     }
   }, [currentNodes, currentContentCanvases, lastSavedNodes, lastSavedContentCanvases, setIsDirty]);
 
-  const save = useCallback(() => {
+  const save = useStableCallback(() => {
     saveLayout(
       {
         workspaceId,
@@ -79,21 +81,9 @@ export function useCanvasDirtyState({
         },
       },
     );
-  }, [
-    saveLayout,
-    workspaceId,
-    currentNodes,
-    currentContentCanvases,
-    canvasSize,
-    backgroundColor,
-    gridEnabled,
-    gridSize,
-    setLastSavedNodes,
-    setLastSavedContentCanvases,
-    setIsDirty,
-  ]);
+  });
 
-  const reset = useCallback(() => {
+  const reset = useStableCallback(() => {
     resetLayout(
       { workspaceId },
       {
@@ -105,17 +95,17 @@ export function useCanvasDirtyState({
         },
       },
     );
-  }, [resetLayout, workspaceId, setLastSavedNodes, setLastSavedContentCanvases, setIsDirty]);
+  });
 
-  const markClean = useCallback(() => {
+  const markClean = useStableCallback(() => {
     setLastSavedNodes(currentNodes);
     setLastSavedContentCanvases(currentContentCanvases ?? []);
     setIsDirty(false);
-  }, [currentNodes, currentContentCanvases, setLastSavedNodes, setLastSavedContentCanvases, setIsDirty]);
+  });
 
-  const markDirty = useCallback(() => {
+  const markDirty = useStableCallback(() => {
     setIsDirty(true);
-  }, [setIsDirty]);
+  });
 
   return {
     isDirty,

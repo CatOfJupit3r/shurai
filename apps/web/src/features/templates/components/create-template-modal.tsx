@@ -1,5 +1,8 @@
 import { useState } from 'react';
 
+import { TEMPLATE_SCOPE } from '@shurai/shared';
+import type { TemplateScope } from '@shurai/shared';
+
 import { Button } from '@~/components/ui/button';
 import {
   Dialog,
@@ -64,7 +67,7 @@ function convertItemToTemplateStructure(item: {
 export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateModalProps) {
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [scope, setScope] = useState<'PERSONAL' | 'COMMUNITY'>('PERSONAL');
+  const [scope, setScope] = useState<TemplateScope>(TEMPLATE_SCOPE.PERSONAL);
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   const { createTemplate, isPending } = useCreateTemplate();
@@ -75,8 +78,8 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
   }));
 
   const scopeOptions = [
-    { label: 'Personal - Only visible to you', value: 'PERSONAL' },
-    { label: 'Community - Visible to all users', value: 'COMMUNITY' },
+    { label: 'Personal - Only visible to you', value: TEMPLATE_SCOPE.PERSONAL },
+    { label: 'Community - Visible to all users', value: TEMPLATE_SCOPE.COMMUNITY },
   ];
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -100,7 +103,7 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
         onSuccess: () => {
           setName('');
           setDescription('');
-          setScope('PERSONAL');
+          setScope(TEMPLATE_SCOPE.PERSONAL);
           setSelectedItemId(null);
           onClose();
         },
@@ -112,7 +115,7 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
     if (!isPending) {
       setName('');
       setDescription('');
-      setScope('PERSONAL');
+      setScope(TEMPLATE_SCOPE.PERSONAL);
       setSelectedItemId(null);
       onClose();
     }
@@ -172,7 +175,7 @@ export function CreateTemplateModal({ isOpen, onClose, items }: iCreateTemplateM
               id="template-scope"
               options={scopeOptions}
               value={scope}
-              onValueChange={(value: string | null) => setScope((value as 'PERSONAL' | 'COMMUNITY') ?? 'PERSONAL')}
+              onValueChange={(value: string | null) => setScope((value as TemplateScope) ?? TEMPLATE_SCOPE.PERSONAL)}
               isDisabled={isPending}
             />
           </div>

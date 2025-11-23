@@ -1,18 +1,20 @@
 import { useState } from 'react';
 import { FiCheck, FiImage, FiPlus, FiSearch } from 'react-icons/fi';
 
+import { ASSET_TYPE } from '@shurai/shared';
+import type { AssetType } from '@shurai/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@~/components/ui/dialog';
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@~/components/ui/empty';
 import { Input } from '@~/components/ui/input';
+import { SingleSelect } from '@~/components/ui/select';
 import { Skeleton } from '@~/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
 
 import useAssetsList from '../hooks/use-assets-list';
 import useGlobalAssetsList from '../hooks/use-global-assets-list';
 import { AssetUploadModal } from './asset-upload-modal';
-
-type AssetType = 'ICON' | 'IMAGE' | 'COVER' | 'THEME_PRESET';
 
 interface iAsset {
   _id: string;
@@ -32,6 +34,14 @@ interface iAssetPickerModalProps {
   filterTypes?: AssetType[];
   allowUpload?: boolean;
 }
+
+const SELECT_OPTIONS = [
+  { label: 'All Types', value: 'ALL' },
+  { label: 'Icons', value: ASSET_TYPE.ICON },
+  { label: 'Images', value: ASSET_TYPE.IMAGE },
+  { label: 'Covers', value: ASSET_TYPE.COVER },
+  { label: 'Theme Presets', value: ASSET_TYPE.THEME_PRESET },
+];
 
 export function AssetPickerModal({
   isOpen,
@@ -79,8 +89,6 @@ export function AssetPickerModal({
     onClose();
   };
 
-  const availableTypes: AssetType[] = filterTypes ?? ['ICON', 'IMAGE', 'COVER', 'THEME_PRESET'];
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={onClose}>
@@ -120,17 +128,11 @@ export function AssetPickerModal({
                   className="pl-9"
                 />
               </div>
-              <select
+              <SingleSelect
                 value={filterType}
-                onChange={(e) => setFilterType(e.target.value as AssetType | 'ALL')}
-                className="rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-              >
-                <option value="ALL">All Types</option>
-                {availableTypes.includes('ICON') && <option value="ICON">Icons</option>}
-                {availableTypes.includes('IMAGE') && <option value="IMAGE">Images</option>}
-                {availableTypes.includes('COVER') && <option value="COVER">Covers</option>}
-                {availableTypes.includes('THEME_PRESET') && <option value="THEME_PRESET">Theme Presets</option>}
-              </select>
+                onValueChange={(value) => setFilterType(value as AssetType | 'ALL')}
+                options={SELECT_OPTIONS}
+              />
             </div>
 
             <TabsContent value="MY_ASSETS" className="mt-4 flex-1 overflow-auto">

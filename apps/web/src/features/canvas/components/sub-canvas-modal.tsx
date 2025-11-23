@@ -2,7 +2,7 @@
  * Sub-Canvas Modal Component
  * Provides a modal interface for editing content canvases (one-level-deep nested layouts)
  */
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiChevronRight, FiSave, FiX } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
@@ -11,6 +11,7 @@ import { Button } from '@~/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@~/components/ui/dialog';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import useStableCallback from '@~/hooks/use-stable-callback';
 
 import { useContentCanvas } from '../hooks/use-content-canvas';
 import type { iCanvasNodeData } from './canvas-node';
@@ -65,7 +66,7 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
     }
   }, [contentCanvas]);
 
-  const handleClose = () => {
+  const handleClose = useStableCallback(() => {
     if (hasUnsavedChanges) {
       // eslint-disable-next-line no-alert
       const hasConfirmed = window.confirm('You have unsaved changes. Are you sure you want to close?');
@@ -73,9 +74,9 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
     }
     setHasUnsavedChanges(false);
     onClose();
-  };
+  });
 
-  const handleSave = () => {
+  const handleSave = useStableCallback(() => {
     if (!contentCanvas) return;
 
     // Note: We need to update the entire layout to save content canvas changes
@@ -87,18 +88,16 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
     );
 
     setHasUnsavedChanges(false);
-  };
+  });
 
-  const handleNodeClick = useCallback((_nodeId: string) => {
+  const handleNodeClick = useStableCallback((_nodeId: string) => {
     // Currently no-op, but kept for future implementation
-  }, []);
-
-  const handleNodeDragEnd = useCallback((nodeId: string, newPosition: { x: number; y: number }) => {
+  });
+  const handleNodeDragEnd = useStableCallback((nodeId: string, newPosition: { x: number; y: number }) => {
     setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, position: newPosition } : node)));
     setHasUnsavedChanges(true);
-  }, []);
-
-  const handleNodeTransform = useCallback(
+  });
+  const handleNodeTransform = useStableCallback(
     (nodeId: string, newProps: { x: number; y: number; width: number; height: number; rotation: number }) => {
       setNodes((prev) =>
         prev.map((node) =>
@@ -114,12 +113,11 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
       );
       setHasUnsavedChanges(true);
     },
-    [],
   );
 
-  const handleStageClick = useCallback(() => {
+  const handleStageClick = useStableCallback(() => {
     // Currently no-op, kept for consistency
-  }, []);
+  });
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -171,15 +169,17 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
             <div className="flex h-full items-center justify-center">
               <CanvasStage width={canvasSize.width} height={canvasSize.height} onStageClick={handleStageClick}>
                 <GridOverlay width={canvasSize.width} height={canvasSize.height} />
-                {nodes.map((node) => (
-                  <CanvasNode
-                    key={node.id}
-                    node={node}
-                    onNodeClick={handleNodeClick}
-                    onNodeDragEnd={handleNodeDragEnd}
-                    onNodeTransform={handleNodeTransform}
-                  />
-                ))}
+                {[...nodes]
+                  .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+                  .map((node) => (
+                    <CanvasNode
+                      key={node.id}
+                      node={node}
+                      onNodeClick={handleNodeClick}
+                      onNodeDragEnd={handleNodeDragEnd}
+                      onNodeTransform={handleNodeTransform}
+                    />
+                  ))}
               </CanvasStage>
             </div>
           )}

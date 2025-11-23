@@ -1,4 +1,4 @@
-import { errorCodes } from '@shurai/shared';
+import { errorCodes, TEMPLATE_SCOPE } from '@shurai/shared';
 
 import { WorkspaceItemModel } from '@~/db/models/workspace-item.model';
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
@@ -218,7 +218,7 @@ export const itemsRouter = base.items.router({
 
     const template = await WorkspaceTemplateModel.findById(input.templateId);
 
-    if (!template || (template.scope === 'PERSONAL' && template.userId !== userId)) {
+    if (!template || (template.scope === TEMPLATE_SCOPE.PERSONAL && template.userId !== userId)) {
       throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
     }
 

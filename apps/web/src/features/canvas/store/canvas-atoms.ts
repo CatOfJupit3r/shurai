@@ -4,10 +4,12 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
+import type { CanvasNodeType } from '@shurai/shared';
+
 // Type definitions for canvas state
 export interface iCanvasNode {
   id: string;
-  type: 'ITEM' | 'ASSET' | 'SUB_CANVAS';
+  type: CanvasNodeType;
   position: { x: number; y: number };
   size: { width: number; height: number };
   itemId?: string;
@@ -47,8 +49,8 @@ export const isResizingAtom = atom<boolean>(false);
 export const isRotatingAtom = atom<boolean>(false);
 
 // Canvas view state
-export const scaleAtom = atomWithStorage<number>('canvas-scale', 1);
-export const stagePositionAtom = atomWithStorage<{ x: number; y: number }>('canvas-position', {
+export const scaleAtom = atom<number>(1);
+export const stagePositionAtom = atom<{ x: number; y: number }>({
   x: 0,
   y: 0,
 });

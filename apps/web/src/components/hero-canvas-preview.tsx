@@ -5,8 +5,9 @@
  * All state is local - no server interaction.
  */
 import type Konva from 'konva';
-import React, { useState, useCallback, useMemo } from 'react';
-import { FiPlus, FiTrash2, FiMove, FiMaximize2 } from 'react-icons/fi';
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import type { Ref } from 'react';
+import { FiPlus, FiTrash2, FiMove, FiMaximize2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 import { Stage, Layer, Rect, Image as KonvaImage, Transformer, Text } from 'react-konva';
 
@@ -15,6 +16,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/co
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import type { iCanvasNode } from '@~/features/canvas';
+
+import { SingleSelect } from './ui/select';
 
 // Predefined global assets for the preview
 const PREVIEW_ASSETS = [
@@ -103,11 +106,11 @@ interface iCanvasNodeProps {
 
 function CanvasNodeImage({ node, isSelected, onSelect, onDragEnd, onTransformEnd }: iCanvasNodeProps) {
   const asset = PREVIEW_ASSETS.find((a) => a.id === node.assetId);
-  const [image, setImage] = React.useState<HTMLImageElement | null>(null);
-  const transformerRef = React.useRef<Konva.Transformer>(null);
-  const nodeRef = React.useRef<Konva.Rect | Konva.Image>(null);
+  const [image, setImage] = useState<HTMLImageElement | null>(null);
+  const transformerRef = useRef<Konva.Transformer>(null);
+  const nodeRef = useRef<Konva.Rect | Konva.Image>(null);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (asset?.imageUrl) {
       const img = new Image();
       img.crossOrigin = 'anonymous';
@@ -116,7 +119,7 @@ function CanvasNodeImage({ node, isSelected, onSelect, onDragEnd, onTransformEnd
     }
   }, [asset?.imageUrl]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (isSelected && transformerRef.current && nodeRef.current) {
       transformerRef.current.nodes([nodeRef.current]);
       transformerRef.current.getLayer()?.batchDraw();
@@ -128,7 +131,7 @@ function CanvasNodeImage({ node, isSelected, onSelect, onDragEnd, onTransformEnd
     return (
       <>
         <Rect
-          ref={nodeRef as React.Ref<Konva.Rect>}
+          ref={nodeRef as Ref<Konva.Rect>}
           x={node.position.x}
           y={node.position.y}
           width={node.size.width}
@@ -161,7 +164,7 @@ function CanvasNodeImage({ node, isSelected, onSelect, onDragEnd, onTransformEnd
   return (
     <>
       <KonvaImage
-        ref={nodeRef as React.Ref<Konva.Image>}
+        ref={nodeRef as Ref<Konva.Image>}
         image={image}
         x={node.position.x}
         y={node.position.y}
@@ -250,6 +253,15 @@ export function HeroCanvasPreview() {
 
   const handleNodeTransformEnd = useCallback((nodeId: string, e: Konva.KonvaEventObject<Event>) => {
     const node = e.target;
+    const newWidth = node.width() * node.scaleX();
+    const newHeight = node.height() * node.scaleY();
+
+    // Update width and height, then reset scale
+    node.width(newWidth);
+    node.height(newHeight);
+    node.scaleX(1);
+    node.scaleY(1);
+
     setCanvasNodes((prev) =>
       prev.map((n) =>
         n.id === nodeId
@@ -257,17 +269,33 @@ export function HeroCanvasPreview() {
               ...n,
               position: { x: node.x(), y: node.y() },
               size: {
-                width: node.width() * node.scaleX(),
-                height: node.height() * node.scaleY(),
+                width: newWidth,
+                height: newHeight,
               },
               rotation: node.rotation(),
             }
           : n,
       ),
     );
-    // Reset scale after applying
-    node.scaleX(1);
-    node.scaleY(1);
+  }, []);
+
+  const handleNodeZIndexChange = useCallback((nodeId: string, direction: 'up' | 'down') => {
+    setCanvasNodes((prev) => {
+      const currentIndex = prev.findIndex((n) => n.id === nodeId);
+      if (currentIndex === -1) return prev;
+
+      const newNodes = [...prev];
+      if (direction === 'up' && currentIndex < prev.length - 1) {
+        // Move up in visual layer (increase zIndex)
+        [newNodes[currentIndex], newNodes[currentIndex + 1]] = [newNodes[currentIndex + 1], newNodes[currentIndex]];
+      } else if (direction === 'down' && currentIndex > 0) {
+        // Move down in visual layer (decrease zIndex)
+        [newNodes[currentIndex], newNodes[currentIndex - 1]] = [newNodes[currentIndex - 1], newNodes[currentIndex]];
+      }
+
+      // Update zIndex values based on new order
+      return newNodes.map((n, idx) => ({ ...n, zIndex: idx }));
+    });
   }, []);
 
   const handleDeleteNode = useCallback(() => {
@@ -282,6 +310,32 @@ export function HeroCanvasPreview() {
 
   const selectedNode = useMemo(() => canvasNodes.find((n) => n.id === selectedNodeId), [canvasNodes, selectedNodeId]);
 
+  // Keyboard interactions
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedNodeId) return;
+
+      // ESC to deselect
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSelectedNodeId(null);
+      }
+
+      // Delete or Backspace to remove node
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        const node = canvasNodes.find((n) => n.id === selectedNodeId);
+        if (node?.itemId) {
+          setItems((prev) => prev.map((i) => (i.id === node.itemId ? { ...i, addedToCanvas: false } : i)));
+        }
+        setCanvasNodes((prev) => prev.filter((n) => n.id !== selectedNodeId));
+        setSelectedNodeId(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNodeId, canvasNodes]);
   return (
     <section className="border-b border-border py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -316,19 +370,15 @@ export function HeroCanvasPreview() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="item-asset">Select Asset</Label>
-                  <select
+                  <SingleSelect
                     id="item-asset"
                     value={newItemAsset}
-                    onChange={(e) => setNewItemAsset(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Choose an asset</option>
-                    {PREVIEW_ASSETS.map((asset) => (
-                      <option key={asset.id} value={asset.id}>
-                        {asset.iconUrl} {asset.name}
-                      </option>
-                    ))}
-                  </select>
+                    onValueChange={(value) => (value ? setNewItemAsset(value) : undefined)}
+                    options={PREVIEW_ASSETS.map((asset) => ({
+                      value: asset.id,
+                      label: `${asset.iconUrl} ${asset.name}`,
+                    }))}
+                  />
                 </div>
                 <Button onClick={handleAddItem} disabled={!newItemName || !newItemAsset} className="w-full">
                   <FiPlus className="mr-2 h-4 w-4" />
@@ -339,7 +389,7 @@ export function HeroCanvasPreview() {
               {/* Items List */}
               <div className="space-y-2">
                 <Label htmlFor="items-list">Your Items</Label>
-                <div id="items-list" className="max-h-[300px] space-y-2 overflow-y-auto">
+                <div id="items-list" className="h-[300px] max-h-[300px] space-y-2 overflow-y-auto">
                   {items.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                       No items yet. Add some to get started!
@@ -407,7 +457,7 @@ export function HeroCanvasPreview() {
                 >
                   <Layer>
                     {/* Background */}
-                    <Rect x={0} y={0} width={800} height={450} fill="#fafafa" />
+                    <Rect x={0} y={0} width={800} height={450} fill="#fafafa" onClick={() => setSelectedNodeId(null)} />
 
                     {/* Grid Pattern - Vertical Lines */}
                     {Array.from({ length: 40 }, (_, i) => i).map((i) => (
@@ -419,16 +469,18 @@ export function HeroCanvasPreview() {
                     ))}
 
                     {/* Canvas Nodes */}
-                    {canvasNodes.map((node) => (
-                      <CanvasNodeImage
-                        key={node.id}
-                        node={node}
-                        isSelected={selectedNodeId === node.id}
-                        onSelect={() => setSelectedNodeId(node.id)}
-                        onDragEnd={(e) => handleNodeDragEnd(node.id, e)}
-                        onTransformEnd={(e) => handleNodeTransformEnd(node.id, e)}
-                      />
-                    ))}
+                    {[...canvasNodes]
+                      .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+                      .map((node) => (
+                        <CanvasNodeImage
+                          key={node.id}
+                          node={node}
+                          isSelected={selectedNodeId === node.id}
+                          onSelect={() => setSelectedNodeId(node.id)}
+                          onDragEnd={(e) => handleNodeDragEnd(node.id, e)}
+                          onTransformEnd={(e) => handleNodeTransformEnd(node.id, e)}
+                        />
+                      ))}
                   </Layer>
                 </Stage>
 
@@ -443,7 +495,7 @@ export function HeroCanvasPreview() {
               </div>
 
               {/* Inspector Panel */}
-              {selectedNode ? (
+              {selectedNode && selectedNodeId ? (
                 <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/30 p-4">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="inspector-details" className="text-sm font-semibold">
@@ -470,6 +522,33 @@ export function HeroCanvasPreview() {
                     <div>
                       <span className="text-muted-foreground">Rotation:</span> {Math.round(selectedNode.rotation ?? 0)}°
                     </div>
+                    <div>
+                      <span className="text-muted-foreground">Z-Index:</span> {selectedNode.zIndex ?? 0}
+                    </div>
+                  </div>
+
+                  {/* Z-Index Controls */}
+                  <div className="flex gap-2 border-t border-border pt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNodeZIndexChange(selectedNodeId, 'down')}
+                      disabled={selectedNode.zIndex === 0}
+                      title="Send backward"
+                    >
+                      <FiArrowDown className="mr-1 h-3 w-3" />
+                      Send Back
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNodeZIndexChange(selectedNodeId, 'up')}
+                      disabled={selectedNode.zIndex === canvasNodes.length - 1}
+                      title="Bring forward"
+                    >
+                      <FiArrowUp className="mr-1 h-3 w-3" />
+                      Bring Forward
+                    </Button>
                   </div>
                 </div>
               ) : null}
@@ -480,6 +559,9 @@ export function HeroCanvasPreview() {
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
             💡 <strong>Tip:</strong> This is a live preview. Changes are not saved. Sign up to create real workspaces!
+          </p>
+          <p className="mt-2 text-xs">
+            <strong>Keyboard shortcuts:</strong> ESC to deselect • Delete/Backspace to remove selected item
           </p>
         </div>
       </div>

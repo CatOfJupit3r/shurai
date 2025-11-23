@@ -1,15 +1,19 @@
 import { FiClock, FiGlobe, FiLock, FiTrash2 } from 'react-icons/fi';
 
+import { TEMPLATE_SCOPE } from '@shurai/shared';
+import type { TemplateScope } from '@shurai/shared';
+
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
+import { formatDateShort } from '@~/utils/date';
 
 interface iTemplateCardProps {
   template: {
     _id: string;
     name: string;
     description?: string;
-    scope: 'PERSONAL' | 'COMMUNITY';
+    scope: TemplateScope;
     rootItem: {
       name: string;
       children?: unknown[];
@@ -43,8 +47,8 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
               <CardDescription className="line-clamp-2">{template.description}</CardDescription>
             )}
           </div>
-          <Badge variant={template.scope === 'COMMUNITY' ? 'default' : 'secondary'} className="shrink-0">
-            {template.scope === 'COMMUNITY' ? (
+          <Badge variant={template.scope === TEMPLATE_SCOPE.COMMUNITY ? 'default' : 'secondary'} className="shrink-0">
+            {template.scope === TEMPLATE_SCOPE.COMMUNITY ? (
               <>
                 <FiGlobe className="mr-1 size-3" />
                 Community
@@ -62,7 +66,7 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <FiClock className="size-4" />
-          <span>Updated {new Date(template.updatedAt).toLocaleDateString()}</span>
+          <span>Updated {formatDateShort(template.updatedAt)}</span>
         </div>
 
         <div className="flex items-center justify-between gap-3 pt-2">

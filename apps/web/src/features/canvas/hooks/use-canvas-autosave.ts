@@ -1,4 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
+
+import { useDebounce } from '@~/hooks/use-debounce';
 
 interface iUseCanvasAutosaveOptions {
   isDirty: boolean;
@@ -25,31 +27,16 @@ export function useCanvasAutosave({
   enabled = true,
   debounceMs = 3000,
 }: iUseCanvasAutosaveOptions) {
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const autoSafeFn = useDebounce(() => {
+    save();
+  }, debounceMs);
 
   useEffect(() => {
-    // Clear existing timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
-
     // Only schedule autosave if:
     // 1. Autosave is enabled
     // 2. There are dirty changes
     // 3. Not currently saving
-    if (enabled && isDirty && !isSaving) {
-      timeoutRef.current = setTimeout(() => {
-        save();
-      }, debounceMs);
-    }
-
-    // Cleanup timeout on unmount or when dependencies change
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
-    };
-  }, [isDirty, save, isSaving, enabled, debounceMs]);
+    if (!enabled || !isDirty || isSaving) return;
+    autoSafeFn();
+  }, [isDirty, autoSafeFn, isSaving, enabled, debounceMs]);
 }

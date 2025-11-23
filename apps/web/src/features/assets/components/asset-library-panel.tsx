@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { FiEdit2, FiImage, FiPlus, FiSearch, FiTrash2 } from 'react-icons/fi';
 
+import type { AssetType } from '@shurai/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import {
@@ -20,8 +22,6 @@ import useAssetsList from '../hooks/use-assets-list';
 import useDeleteAsset from '../hooks/use-delete-asset';
 import useGlobalAssetsList from '../hooks/use-global-assets-list';
 import { AssetUploadModal } from './asset-upload-modal';
-
-type AssetType = 'ICON' | 'IMAGE' | 'COVER' | 'THEME_PRESET';
 
 interface iAsset {
   _id: string;

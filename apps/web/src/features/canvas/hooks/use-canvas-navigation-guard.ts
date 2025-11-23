@@ -20,10 +20,9 @@ export function useCanvasNavigationGuard({
   enabled = true,
   message = 'You have unsaved changes. Are you sure you want to leave?',
 }: iUseCanvasNavigationGuardOptions) {
-  // Use TanStack Router's useBlocker to prevent navigation
   useBlocker({
-    condition: enabled && isDirty,
-    blockerFn: () =>
+    disabled: !(enabled && isDirty),
+    shouldBlockFn: () =>
       // eslint-disable-next-line no-alert
       window.confirm(message),
   });

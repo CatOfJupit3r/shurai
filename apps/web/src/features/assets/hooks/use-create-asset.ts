@@ -43,7 +43,7 @@ export const createAssetMutationOptions = tanstackRPC.assets.createAsset.mutatio
 });
 
 export default function useCreateAsset() {
-  const { mutate: createAsset, isPending } = useMutation(createAssetMutationOptions);
+  const { mutateAsync: createAsset, isPending } = useMutation(createAssetMutationOptions);
 
   return {
     createAsset,

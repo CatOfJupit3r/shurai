@@ -2,6 +2,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { ASSET_TYPE } from '@shurai/shared/enums/workspace.enums';
 import type { AssetType } from '@shurai/shared/enums/workspace.enums';
 
 import { ObjectIdString } from '../helpers';
@@ -31,7 +32,7 @@ class WorkspaceAssetClass {
   @prop({ maxlength: 500 })
   public description?: string;
 
-  @prop({ required: true, index: true, enum: ['ICON', 'IMAGE', 'COVER', 'THEME_PRESET'] })
+  @prop({ required: true, index: true, enum: Object.values(ASSET_TYPE), type: String })
   public type!: AssetType;
 
   @prop()

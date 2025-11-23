@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { FiSearch } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
+import type { TemplateScope } from '@shurai/shared';
+
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Input } from '@~/components/ui/input';
 import { Skeleton } from '@~/components/ui/skeleton';
@@ -37,14 +39,14 @@ function TemplateListSkeleton() {
   );
 }
 
-function getEmptyTitle(searchQuery: string, activeTab: string) {
+function getEmptyTitle(searchQuery: string, activeTab: 'ALL' | TemplateScope) {
   if (searchQuery) return 'No templates found';
   if (activeTab === 'ALL') return 'No templates yet';
   return `No ${activeTab.toLowerCase()} templates`;
 }
 
 export function TemplateGallery({ currentUserId, onSelectTemplate }: iTemplateGalleryProps) {
-  const [activeTab, setActiveTab] = useState<'ALL' | 'PERSONAL' | 'COMMUNITY'>('ALL');
+  const [activeTab, setActiveTab] = useState<'ALL' | TemplateScope>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
 
   const scope = activeTab === 'ALL' ? undefined : activeTab;
@@ -87,7 +89,7 @@ export function TemplateGallery({ currentUserId, onSelectTemplate }: iTemplateGa
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'ALL' | 'PERSONAL' | 'COMMUNITY')}>
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'ALL' | TemplateScope)}>
           <TabsList className="grid w-full grid-cols-3 sm:w-96">
             <TabsTrigger value="ALL">All Templates</TabsTrigger>
             <TabsTrigger value="PERSONAL">Personal</TabsTrigger>

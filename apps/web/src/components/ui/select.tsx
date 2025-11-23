@@ -313,6 +313,7 @@ export interface iSingleSelectProps
   defaultValue?: string | null;
   onValueChange?: (value: string | null, option: iOptionType | null, action: ActionMeta<iOptionType>) => void;
   onOptionChange?: NonNullable<SingleSelectBaseProps['onChange']>;
+  isDOMTarget?: boolean;
 }
 
 export const SingleSelect = forwardRef<SelectInstance<iOptionType, false, GroupBase<iOptionType>>, iSingleSelectProps>(
