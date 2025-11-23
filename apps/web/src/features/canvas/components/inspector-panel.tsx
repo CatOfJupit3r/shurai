@@ -26,7 +26,9 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
   const [localOpacity, setLocalOpacity] = useState(node?.opacity ?? 1);
   const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
 
+  // Only fetch asset if assetId exists
   const { asset } = useAsset(node?.assetId ?? '');
+  const hasAsset = !!node?.assetId && !!asset;
 
   if (!node) return null;
 
@@ -202,7 +204,7 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
         {node.type === 'ASSET' && (
           <div className="space-y-2">
             <div className="text-sm font-semibold">Asset</div>
-            {node.assetId && asset ? (
+            {hasAsset ? (
               <div className="space-y-2">
                 {/* Asset Preview */}
                 <div className="flex items-center gap-3 rounded-lg border p-3">

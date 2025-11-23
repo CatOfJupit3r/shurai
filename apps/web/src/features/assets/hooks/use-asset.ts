@@ -10,11 +10,12 @@ export default function useAsset(assetId: string) {
     data: asset,
     isPending,
     error,
-  } = useQuery(
-    tanstackRPC.assets.getAsset.queryOptions({
+  } = useQuery({
+    ...tanstackRPC.assets.getAsset.queryOptions({
       input: { assetId },
     }),
-  );
+    enabled: !!assetId,
+  });
 
   return {
     asset,
