@@ -1,5 +1,8 @@
 import { FiClock, FiGlobe, FiLock, FiTrash2 } from 'react-icons/fi';
 
+import { TEMPLATE_SCOPE } from '@shurai/shared';
+import type { TemplateScope } from '@shurai/shared';
+
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -10,7 +13,7 @@ interface iTemplateCardProps {
     _id: string;
     name: string;
     description?: string;
-    scope: 'PERSONAL' | 'COMMUNITY';
+    scope: TemplateScope;
     rootItem: {
       name: string;
       children?: unknown[];
@@ -44,8 +47,8 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
               <CardDescription className="line-clamp-2">{template.description}</CardDescription>
             )}
           </div>
-          <Badge variant={template.scope === 'COMMUNITY' ? 'default' : 'secondary'} className="shrink-0">
-            {template.scope === 'COMMUNITY' ? (
+          <Badge variant={template.scope === TEMPLATE_SCOPE.COMMUNITY ? 'default' : 'secondary'} className="shrink-0">
+            {template.scope === TEMPLATE_SCOPE.COMMUNITY ? (
               <>
                 <FiGlobe className="mr-1 size-3" />
                 Community

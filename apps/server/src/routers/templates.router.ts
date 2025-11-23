@@ -1,4 +1,4 @@
-import { errorCodes } from '@shurai/shared';
+import { errorCodes, TEMPLATE_SCOPE } from '@shurai/shared';
 
 import { WorkspaceTemplateModel } from '@~/db/models/workspace-template.model';
 import { WorkspaceModel } from '@~/db/models/workspace.model';
@@ -13,14 +13,14 @@ export const templatesRouter = base.templates.router({
     const userId = context.session.user.id;
 
     const filter: Record<string, unknown> = {
-      $or: [{ userId }, { scope: 'COMMUNITY' }],
+      $or: [{ userId }, { scope: TEMPLATE_SCOPE.COMMUNITY }],
     };
 
     if (input.scope) {
-      if (input.scope === 'PERSONAL') {
-        filter.$or = [{ userId, scope: 'PERSONAL' }];
-      } else if (input.scope === 'COMMUNITY') {
-        filter.$or = [{ scope: 'COMMUNITY' }];
+      if (input.scope === TEMPLATE_SCOPE.PERSONAL) {
+        filter.$or = [{ userId, scope: TEMPLATE_SCOPE.PERSONAL }];
+      } else if (input.scope === TEMPLATE_SCOPE.COMMUNITY) {
+        filter.$or = [{ scope: TEMPLATE_SCOPE.COMMUNITY }];
       }
     }
 
@@ -51,7 +51,7 @@ export const templatesRouter = base.templates.router({
 
     const template = await WorkspaceTemplateModel.findById(templateId);
 
-    if (!template || (template.scope === 'PERSONAL' && template.userId !== userId)) {
+    if (!template || (template.scope === TEMPLATE_SCOPE.PERSONAL && template.userId !== userId)) {
       throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
     }
 
@@ -169,7 +169,7 @@ export const templatesRouter = base.templates.router({
 
     // Verify template exists and is accessible (owned or community)
     const template = await WorkspaceTemplateModel.findById(templateId);
-    if (!template || (template.scope === 'PERSONAL' && template.userId !== userId)) {
+    if (!template || (template.scope === TEMPLATE_SCOPE.PERSONAL && template.userId !== userId)) {
       throw ORPCNotFoundError(errorCodes.TEMPLATE_NOT_FOUND);
     }
 

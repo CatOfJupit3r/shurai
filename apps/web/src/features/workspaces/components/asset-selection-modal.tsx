@@ -1,3 +1,5 @@
+import { ASSET_TYPE } from '@shurai/shared';
+
 import { AssetPickerModal } from '@~/features/assets';
 
 interface iAssetSelectionModalProps {
@@ -14,7 +16,7 @@ export function AssetSelectionModal({ isOpen, onClose, onSelect, selectedAssetId
       onClose={onClose}
       onSelect={onSelect}
       selectedAssetId={selectedAssetId}
-      filterTypes={['ICON', 'IMAGE']}
+      filterTypes={[ASSET_TYPE.ICON, ASSET_TYPE.IMAGE]}
     />
   );
 }

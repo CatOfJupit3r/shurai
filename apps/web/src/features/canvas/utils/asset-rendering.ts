@@ -4,6 +4,7 @@
  * Utilities to map asset metadata to Konva node props, handling icons, images,
  * and default sizing with optimized image loading and caching.
  */
+import { ASSET_TYPE } from '@shurai/shared/enums/workspace.enums';
 import type { AssetType } from '@shurai/shared/enums/workspace.enums';
 
 // In-memory cache for loaded images
@@ -54,7 +55,7 @@ export function getAssetImageUrl(asset: iAssetMetadata | null | undefined): stri
   if (!asset) return null;
 
   // For ICON type, prefer iconUrl
-  if (asset.type === 'ICON') {
+  if (asset.type === ASSET_TYPE.ICON) {
     return asset.iconUrl ?? asset.imageUrl ?? null;
   }
 
@@ -197,7 +198,7 @@ export function getPlaceholderConfig(assetType?: AssetType): {
   strokeColor: string;
   dimensions: { width: number; height: number };
 } {
-  const type = assetType ?? 'IMAGE';
+  const type = assetType ?? ASSET_TYPE.IMAGE;
   return {
     fillColor: PLACEHOLDER_COLORS[type],
     strokeColor: '#94a3b8',

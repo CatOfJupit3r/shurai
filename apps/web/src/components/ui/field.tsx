@@ -258,7 +258,7 @@ function Form({
   return (
     <form
       onSubmit={handleSubmit}
-      className={cn('flex flex-col p-2 md:p-5 w-full mx-auto gap-2', className)}
+      className={cn('flex flex-col md:p-5 w-full mx-auto gap-2', className)}
       noValidate
       {...props}
     >

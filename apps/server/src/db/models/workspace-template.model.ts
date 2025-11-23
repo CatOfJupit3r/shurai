@@ -1,6 +1,7 @@
 import { getModelForClass, modelOptions, prop } from '@typegoose/typegoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
+import { TEMPLATE_SCOPE } from '@shurai/shared/enums/workspace.enums';
 import type { TemplateScope } from '@shurai/shared/enums/workspace.enums';
 
 import { ObjectIdString } from '../helpers';
@@ -19,7 +20,7 @@ class WorkspaceTemplateClass {
   @prop({ maxlength: 500 })
   public description?: string;
 
-  @prop({ required: true, index: true, enum: ['PERSONAL', 'COMMUNITY'] })
+  @prop({ required: true, index: true, enum: Object.values(TEMPLATE_SCOPE), type: String })
   public scope!: TemplateScope;
 
   @prop({ required: true, index: true })

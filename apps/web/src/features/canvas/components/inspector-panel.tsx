@@ -5,6 +5,8 @@
 import { useState } from 'react';
 import { FiImage, FiX } from 'react-icons/fi';
 
+import { ASSET_TYPE } from '@shurai/shared';
+
 import { Button } from '@~/components/ui/button';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
@@ -284,7 +286,7 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
         onClose={() => setIsAssetPickerOpen(false)}
         onSelect={handleAssetSelect}
         selectedAssetId={node.assetId}
-        filterTypes={['ICON', 'IMAGE']}
+        filterTypes={[ASSET_TYPE.ICON, ASSET_TYPE.IMAGE]}
         allowUpload={false}
       />
     </div>
