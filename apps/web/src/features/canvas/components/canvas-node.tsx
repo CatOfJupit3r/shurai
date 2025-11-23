@@ -9,6 +9,7 @@ import { Group, Image as KonvaImage, Rect, Transformer } from 'react-konva';
 import useAsset from '@~/features/assets/hooks/use-asset';
 
 import { selectedNodeIdAtom, hoveredNodeIdAtom } from '../store/canvas-atoms';
+import { loadAndCacheImage, getKonvaNodeProps, getPlaceholderConfig } from '../utils/asset-rendering';
 
 export interface iCanvasNodeData {
   id: string;
@@ -46,27 +47,31 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
   const isSelected = selectedNodeId === node.id;
   const isHovered = hoveredNodeId === node.id;
 
-  // Load image when asset changes
+  // Load image when asset changes using helper
   useEffect(() => {
     if (node.type === 'ASSET' && node.assetId && asset) {
-      const imageUrl = asset.iconUrl ?? asset.imageUrl;
-      if (imageUrl) {
-        const img = new window.Image();
-        img.crossOrigin = 'anonymous';
-        img.onload = () => {
-          setImage(img);
-        };
-        img.onerror = () => {
-          setImage(null);
-        };
-        img.src = imageUrl;
+      const konvaProps = getKonvaNodeProps(asset, {
+        position: node.position,
+        size: node.size,
+        rotation: node.rotation,
+        opacity: node.opacity,
+      });
+
+      if (konvaProps.imageUrl) {
+        loadAndCacheImage(konvaProps.imageUrl)
+          .then((img) => {
+            setImage(img);
+          })
+          .catch(() => {
+            setImage(null);
+          });
       } else {
         setImage(null);
       }
     } else {
       setImage(null);
     }
-  }, [node.type, node.assetId, asset]);
+  }, [node.type, node.assetId, node.position, node.size, node.rotation, node.opacity, asset]);
 
   useEffect(() => {
     if (isSelected && transformerRef.current && groupRef.current) {
@@ -122,9 +127,12 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
     strokeColor = '#60a5fa';
   }
 
+  // Get placeholder/fill colors based on asset type
+  const placeholder = getPlaceholderConfig(asset?.type);
   let fillColor = '#f3f4f6';
   if (node.type === 'ASSET') {
-    fillColor = '#dbeafe';
+    // Use theme primary color if available, otherwise use placeholder color
+    fillColor = asset?.themeConfig?.primaryColor ?? placeholder.fillColor;
   } else if (node.type === 'SUB_CANVAS') {
     fillColor = '#fef3c7';
   }

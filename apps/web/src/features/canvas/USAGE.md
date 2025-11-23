@@ -27,10 +27,10 @@ import {
 
 function CanvasEditor({ workspaceId }: { workspaceId: string }) {
   const { layout, isPending } = useCanvasLayout(workspaceId);
-  
+
   // Local state for editing
   const [nodes, setNodes] = useState<iCanvasNode[]>(layout?.nodes ?? []);
-  
+
   // Dirty state management
   const { isDirty, save, reset, isSaving, isResetting } = useCanvasDirtyState({
     workspaceId,
@@ -55,7 +55,7 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
         </button>
         {isDirty && <span className="unsaved-indicator">● Unsaved changes</span>}
       </div>
-      
+
       <CanvasStage
         nodes={nodes}
         onNodesChange={setNodes}
@@ -80,14 +80,14 @@ import {
 function AutosaveCanvasEditor({ workspaceId }: { workspaceId: string }) {
   const { layout, isPending } = useCanvasLayout(workspaceId);
   const [nodes, setNodes] = useState<iCanvasNode[]>([]);
-  
+
   // Update local state when layout loads
   useEffect(() => {
     if (layout?.nodes) {
       setNodes(layout.nodes);
     }
   }, [layout?.nodes]);
-  
+
   const dirtyState = useCanvasDirtyState({
     workspaceId,
     currentNodes: nodes,
@@ -118,7 +118,7 @@ function AutosaveCanvasEditor({ workspaceId }: { workspaceId: string }) {
         )}
         {!dirtyState.isDirty && !dirtyState.isSaving && <span>All changes saved</span>}
       </div>
-      
+
       <CanvasStage
         nodes={nodes}
         onNodesChange={setNodes}
@@ -142,7 +142,7 @@ import {
 function ProtectedCanvasEditor({ workspaceId }: { workspaceId: string }) {
   const { layout, isPending } = useCanvasLayout(workspaceId);
   const [nodes, setNodes] = useState<iCanvasNode[]>(layout?.nodes ?? []);
-  
+
   const dirtyState = useCanvasDirtyState({
     workspaceId,
     currentNodes: nodes,
@@ -171,7 +171,7 @@ function ProtectedCanvasEditor({ workspaceId }: { workspaceId: string }) {
           </div>
         )}
       </div>
-      
+
       <CanvasStage
         nodes={nodes}
         onNodesChange={setNodes}
@@ -209,15 +209,15 @@ function FullFeaturedCanvasEditor({
   autosaveDelay = 3000,
 }: CanvasEditorProps) {
   const { layout, isPending, error } = useCanvasLayout(workspaceId);
-  
+
   // Local canvas state
   const [nodes, setNodes] = useState<iCanvasNode[]>([]);
   const [contentCanvases, setContentCanvases] = useState<iContentCanvas[]>([]);
-  
+
   // Grid settings from global atoms
   const [gridEnabled, setGridEnabled] = useAtom(gridEnabledAtom);
   const [gridSize, setGridSize] = useAtom(gridSizeAtom);
-  
+
   // Initialize local state from loaded layout
   useEffect(() => {
     if (layout) {
@@ -225,7 +225,7 @@ function FullFeaturedCanvasEditor({
       setContentCanvases(layout.contentCanvases ?? []);
     }
   }, [layout]);
-  
+
   // Dirty state management
   const dirtyState = useCanvasDirtyState({
     workspaceId,
@@ -276,7 +276,7 @@ function FullFeaturedCanvasEditor({
             {dirtyState.isResetting ? 'Resetting...' : 'Reset to Default'}
           </button>
         </div>
-        
+
         <div className="toolbar-section">
           <label>
             <input
@@ -297,7 +297,7 @@ function FullFeaturedCanvasEditor({
             />
           </label>
         </div>
-        
+
         {/* Status indicator */}
         <div className="status-indicator">
           {dirtyState.isSaving && <span className="saving">● Saving...</span>}
@@ -347,13 +347,13 @@ interface iUseCanvasDirtyStateOptions {
 }
 
 interface iUseCanvasDirtyStateReturn {
-  isDirty: boolean;           // Whether there are unsaved changes
-  save: () => void;            // Save current state
-  reset: () => void;           // Reset to default state
-  markClean: () => void;       // Manually mark as clean
-  markDirty: () => void;       // Manually mark as dirty
-  isSaving: boolean;           // Whether save is in progress
-  isResetting: boolean;        // Whether reset is in progress
+  isDirty: boolean; // Whether there are unsaved changes
+  save: () => void; // Save current state
+  reset: () => void; // Reset to default state
+  markClean: () => void; // Manually mark as clean
+  markDirty: () => void; // Manually mark as dirty
+  isSaving: boolean; // Whether save is in progress
+  isResetting: boolean; // Whether reset is in progress
 }
 ```
 
@@ -366,8 +366,8 @@ interface iUseCanvasAutosaveOptions {
   isDirty: boolean;
   save: () => void;
   isSaving: boolean;
-  enabled?: boolean;      // Default: true
-  debounceMs?: number;    // Default: 3000
+  enabled?: boolean; // Default: true
+  debounceMs?: number; // Default: 3000
 }
 ```
 
@@ -378,8 +378,8 @@ Blocks navigation when there are unsaved changes.
 ```typescript
 interface iUseCanvasNavigationGuardOptions {
   isDirty: boolean;
-  enabled?: boolean;      // Default: true
-  message?: string;       // Default: 'You have unsaved changes. Are you sure you want to leave?'
+  enabled?: boolean; // Default: true
+  message?: string; // Default: 'You have unsaved changes. Are you sure you want to leave?'
 }
 ```
 
