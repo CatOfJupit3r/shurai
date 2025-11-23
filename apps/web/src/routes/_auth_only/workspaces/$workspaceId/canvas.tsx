@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useCallback, useEffect } from 'react';
-import { FiChevronLeft, FiGrid, FiSave, FiMaximize2 } from 'react-icons/fi';
+import { FiChevronLeft, FiGrid, FiSave, FiMaximize2, FiList, FiHelpCircle, FiRotateCcw } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 
@@ -17,6 +17,10 @@ import {
   GridOverlay,
   InspectorPanel,
   SubCanvasModal,
+  CanvasNodesList,
+  KeyboardShortcutsModal,
+  useCanvasKeyboard,
+  useCanvasHistory,
 } from '@~/features/canvas';
 import type { iCanvasNodeData } from '@~/features/canvas';
 import { useWorkspace } from '@~/features/workspaces';
@@ -86,12 +90,22 @@ function RouteComponent() {
   const [selectedSubCanvasId, setSelectedSubCanvasId] = useState<string | null>(null);
   const [selectedSubCanvasParentName, setSelectedSubCanvasParentName] = useState<string>('');
 
+  // Accessibility state
+  const [isNodesListOpen, setIsNodesListOpen] = useState(false);
+  const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+
+  // History management
+  const history = useCanvasHistory({ maxHistorySize: 50 });
+
   // Sync nodes from fetched layout
   useEffect(() => {
     if (layout?.nodes) {
       setNodes(layout.nodes as iCanvasNodeData[]);
       setIsGridEnabled(layout.gridEnabled ?? true);
+      // Initialize history with loaded state
+      history.reset(layout.nodes as iCanvasNodeData[]);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
 
   const handleBack = () => {
@@ -160,15 +174,23 @@ function RouteComponent() {
     [nodes, layout],
   );
 
-  const handleNodeDragEnd = useCallback((nodeId: string, newPosition: { x: number; y: number }) => {
-    setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, position: newPosition } : node)));
-    setHasUnsavedChanges(true);
-  }, []);
+  const handleNodeDragEnd = useCallback(
+    (nodeId: string, newPosition: { x: number; y: number }) => {
+      setNodes((prev) => {
+        const updated = prev.map((node) => (node.id === nodeId ? { ...node, position: newPosition } : node));
+        // Push to history
+        history.pushState(updated);
+        return updated;
+      });
+      setHasUnsavedChanges(true);
+    },
+    [history],
+  );
 
   const handleNodeTransform = useCallback(
     (nodeId: string, newProps: { x: number; y: number; width: number; height: number; rotation: number }) => {
-      setNodes((prev) =>
-        prev.map((node) =>
+      setNodes((prev) => {
+        const updated = prev.map((node) =>
           node.id === nodeId
             ? {
                 ...node,
@@ -177,17 +199,86 @@ function RouteComponent() {
                 rotation: newProps.rotation,
               }
             : node,
-        ),
-      );
+        );
+        // Push to history
+        history.pushState(updated);
+        return updated;
+      });
       setHasUnsavedChanges(true);
     },
-    [],
+    [history],
   );
 
-  const handleNodeUpdate = useCallback((nodeId: string, updates: Partial<iCanvasNodeData>) => {
-    setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node)));
-    setHasUnsavedChanges(true);
-  }, []);
+  const handleNodeUpdate = useCallback(
+    (nodeId: string, updates: Partial<iCanvasNodeData>) => {
+      setNodes((prev) => {
+        const updated = prev.map((node) => (node.id === nodeId ? { ...node, ...updates } : node));
+        // Push to history
+        history.pushState(updated);
+        return updated;
+      });
+      setHasUnsavedChanges(true);
+    },
+    [history],
+  );
+
+  const handleNodeDelete = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (!node) return;
+
+      setNodes((prev) => {
+        const updated = prev.filter((n) => n.id !== nodeId);
+        history.pushState(updated);
+        return updated;
+      });
+      setHasUnsavedChanges(true);
+      setSelectedNodeId(null);
+      setIsInspectorOpen(false);
+      toast.success(`${node.type} node removed from canvas`);
+    },
+    [nodes, history],
+  );
+
+  const handleUndo = useCallback(() => {
+    const previousState = history.undo();
+    if (previousState) {
+      setNodes(previousState);
+      setHasUnsavedChanges(true);
+      toast.success('Last change has been reverted');
+    } else {
+      toast.info('Nothing to undo');
+    }
+  }, [history]);
+
+  const handleResetSize = useCallback(
+    (nodeId: string) => {
+      const defaultSize = { width: 200, height: 200 };
+      handleNodeUpdate(nodeId, { size: defaultSize });
+      toast.success('Node size restored to default');
+    },
+    [handleNodeUpdate],
+  );
+
+  const handleResetToSaved = useCallback(() => {
+    if (!layout?.nodes) return;
+
+    setNodes(layout.nodes as iCanvasNodeData[]);
+    setHasUnsavedChanges(false);
+    history.reset(layout.nodes as iCanvasNodeData[]);
+    toast.success('All changes have been discarded');
+  }, [layout, history]);
+
+  // Keyboard shortcuts hook
+  useCanvasKeyboard({
+    selectedNodeId,
+    nodes,
+    onNodeUpdate: handleNodeUpdate,
+    onNodeDelete: handleNodeDelete,
+    onUndo: handleUndo,
+    onResetSize: handleResetSize,
+    isEnabled: !isShortcutsModalOpen && !isSubCanvasOpen,
+  });
 
   const handleStageClick = useCallback(() => {
     setSelectedNodeId(null);
@@ -246,6 +337,33 @@ function RouteComponent() {
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsNodesListOpen(!isNodesListOpen)}
+              title="Toggle nodes list"
+              aria-label="Toggle nodes list panel"
+            >
+              <FiList />
+              Nodes
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsShortcutsModalOpen(true)}
+              title="View keyboard shortcuts"
+              aria-label="View keyboard shortcuts"
+            >
+              <FiHelpCircle />
+              Shortcuts
+            </Button>
+            {hasUnsavedChanges ? (
+              <Button variant="ghost" size="sm" onClick={handleResetToSaved} title="Reset to last saved state">
+                <FiRotateCcw />
+                Reset
+              </Button>
+            ) : null}
+            <div className="mx-2 h-6 w-px bg-border" />
             <div className="mr-4 flex items-center gap-2">
               <Switch id="grid-toggle" checked={isGridEnabled} onCheckedChange={setIsGridEnabled} />
               <Label htmlFor="grid-toggle" className="cursor-pointer text-sm">
@@ -263,6 +381,28 @@ function RouteComponent() {
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-73px)]">
+        {/* Nodes List Sidebar */}
+        {isNodesListOpen ? (
+          <div className="w-80 border-r border-border bg-card">
+            <div className="border-b border-border p-4">
+              <h2 className="text-lg font-semibold">Canvas Nodes</h2>
+              <p className="text-xs text-muted-foreground">
+                {nodes.length} {nodes.length === 1 ? 'node' : 'nodes'} • Use arrow keys to navigate
+              </p>
+            </div>
+            <CanvasNodesList
+              nodes={nodes}
+              selectedNodeId={selectedNodeId}
+              onSelectNode={(nodeId) => {
+                setSelectedNodeId(nodeId);
+                setIsInspectorOpen(true);
+              }}
+              onDeleteNode={handleNodeDelete}
+              className="h-[calc(100%-73px)]"
+            />
+          </div>
+        ) : null}
+
         {/* Canvas Area */}
         <div className="flex-1 overflow-hidden bg-muted/20 p-6">
           {layoutError || !layout ? (
@@ -298,6 +438,9 @@ function RouteComponent() {
           />
         ) : null}
       </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal isOpen={isShortcutsModalOpen} onClose={() => setIsShortcutsModalOpen(false)} />
 
       {/* Sub-Canvas Modal */}
       <SubCanvasModal

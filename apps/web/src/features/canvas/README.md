@@ -64,12 +64,14 @@ Add the packages to `package.json` and run bun install when the environment issu
 - ✅ Grid overlay component
 - ✅ Inspector panel component
 - ✅ Sub-canvas modal component
+- ✅ **Keyboard shortcuts hook for accessibility**
+- ✅ **History management hook for undo/redo**
+- ✅ **Accessible nodes list with ARIA labels**
+- ✅ **Keyboard shortcuts help modal**
 
 ### In Progress 🔄
 
-- ⏳ Advanced selection, move, resize, rotate controls
-- ⏳ Keyboard shortcuts and accessibility
-- ⏳ Undo/redo functionality
+- ⏳ Advanced selection, move, resize, rotate controls (basic keyboard controls completed)
 - ⏳ Copy/paste functionality
 
 ## Usage
@@ -145,7 +147,55 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
 - `useCanvasAutosave(options)` - Auto-save with debouncing
 - `useCanvasNavigationGuard(options)` - Block navigation with unsaved changes
 
+#### Accessibility Hooks
+
+- `useCanvasKeyboard(options)` - Keyboard shortcuts for canvas navigation and editing
+  - Arrow keys: Move selected node (10px, 50px with Shift)
+  - Alt+Arrow keys: Resize selected node (10px, 50px with Shift)  
+  - Delete/Backspace: Delete selected node
+  - Ctrl+Z: Undo last change
+  - Ctrl+0: Reset node size to default
+- `useCanvasHistory(options)` - Undo/redo history management with configurable stack size
+
+### Components
+
+#### Canvas Components
+- `CanvasStage` - Main Konva stage with zoom and pan controls
+- `CanvasNode` - Individual node renderer with drag, transform support
+- `GridOverlay` - Visual grid overlay for alignment
+- `InspectorPanel` - Properties panel for selected node
+- `SubCanvasModal` - Modal for editing nested content canvases
+
+#### Accessibility Components
+- `CanvasNodesList` - Accessible list view of all canvas nodes with ARIA labels
+  - Keyboard navigation with arrow keys
+  - Visual indication of selected node
+  - Screen reader friendly
+- `KeyboardShortcutsModal` - Help modal documenting all keyboard shortcuts
+  - Organized by category
+  - Includes accessibility notes
+
 See [USAGE.md](./USAGE.md) for detailed API documentation and examples.
+
+## Accessibility Features
+
+The canvas is fully accessible via keyboard:
+
+### Keyboard Shortcuts
+- **Arrow Keys**: Move selected node (10px step, 50px with Shift)
+- **Alt + Arrow Keys**: Resize selected node (10px step, 50px with Shift)
+- **Delete / Backspace**: Delete selected node
+- **Ctrl/Cmd + Z**: Undo last change
+- **Ctrl/Cmd + 0**: Reset node size to default
+- **Tab**: Navigate between UI controls
+- **Scroll Wheel**: Zoom in/out on canvas
+
+### Accessibility Features
+- Focusable nodes list with ARIA labels
+- Screen reader announcements for all actions
+- Toast notifications for user feedback
+- Keyboard-only workflow support
+- SUB_CANVAS nodes protected from resize (with clear feedback)
 
 ## Next Steps
 
@@ -154,8 +204,8 @@ See [USAGE.md](./USAGE.md) for detailed API documentation and examples.
 3. ✅ Add dirty state tracking
 4. ✅ Add autosave functionality
 5. ✅ Add navigation guards
-6. 🔄 Create advanced canvas editing features
-7. 🔄 Add keyboard shortcuts
-8. 🔄 Implement undo/redo
-9. 🔄 Create main canvas route
+6. ✅ Create advanced canvas editing features
+7. ✅ Add keyboard shortcuts
+8. ✅ Implement undo/redo
+9. ✅ Create main canvas route
 10. 🔄 Test the implementation
