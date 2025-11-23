@@ -250,6 +250,15 @@ export function HeroCanvasPreview() {
 
   const handleNodeTransformEnd = useCallback((nodeId: string, e: Konva.KonvaEventObject<Event>) => {
     const node = e.target;
+    const newWidth = node.width() * node.scaleX();
+    const newHeight = node.height() * node.scaleY();
+
+    // Update width and height, then reset scale
+    node.width(newWidth);
+    node.height(newHeight);
+    node.scaleX(1);
+    node.scaleY(1);
+
     setCanvasNodes((prev) =>
       prev.map((n) =>
         n.id === nodeId
@@ -257,17 +266,14 @@ export function HeroCanvasPreview() {
               ...n,
               position: { x: node.x(), y: node.y() },
               size: {
-                width: node.width() * node.scaleX(),
-                height: node.height() * node.scaleY(),
+                width: newWidth,
+                height: newHeight,
               },
               rotation: node.rotation(),
             }
           : n,
       ),
     );
-    // Reset scale after applying
-    node.scaleX(1);
-    node.scaleY(1);
   }, []);
 
   const handleDeleteNode = useCallback(() => {
