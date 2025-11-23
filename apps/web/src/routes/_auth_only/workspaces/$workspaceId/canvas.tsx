@@ -1,7 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useAtom } from 'jotai';
-import { useState, useEffect } from 'react';
-import { FiChevronLeft, FiGrid, FiSave, FiList, FiHelpCircle, FiRotateCcw, FiInfo, FiX, FiPlus } from 'react-icons/fi';
+import { useState, useEffect, useCallback } from 'react';
+import {
+  FiChevronLeft,
+  FiGrid,
+  FiSave,
+  FiList,
+  FiHelpCircle,
+  FiRotateCcw,
+  FiInfo,
+  FiX,
+  FiPlus,
+  FiImage,
+  FiBox,
+} from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 
@@ -9,6 +21,12 @@ import { tryCatch } from '@shurai/shared/helpers/std-utils';
 
 import { Alert, AlertDescription, AlertTitle } from '@~/components/ui/alert';
 import { Button } from '@~/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@~/components/ui/dropdown-menu';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Label } from '@~/components/ui/label';
 import { Skeleton } from '@~/components/ui/skeleton';
@@ -291,14 +309,12 @@ function RouteComponent() {
     onResetSize: handleResetSize,
     onDeselect: () => {
       setSelectedNodeId(null);
-      setIsInspectorOpen(false);
     },
     isEnabled: !isShortcutsModalOpen && !isSubCanvasOpen,
   });
 
   const handleStageClick = useStableCallback(() => {
     setSelectedNodeId(null);
-    setIsInspectorOpen(false);
   });
 
   const handleCloseSubCanvas = useStableCallback(() => {
@@ -312,23 +328,28 @@ function RouteComponent() {
     localStorage.setItem(`canvas-info-banner-dismissed-${workspaceId}`, 'true');
   });
 
-  const handleAddNode = useStableCallback(() => {
-    const newNode: iCanvasNodeData = {
-      id: `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: 'ITEM',
-      position: { x: 100, y: 100 },
-      size: { width: 200, height: 200 },
-      zIndex: nodes.length,
-    };
+  const handleAddNode = useStableCallback(
+    useCallback(
+      (type: 'ITEM' | 'ASSET' | 'SUB_CANVAS') => {
+        const newNode: iCanvasNodeData = {
+          id: `node-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type,
+          position: { x: 100, y: 100 },
+          size: { width: 200, height: 200 },
+          zIndex: nodes.length,
+        };
 
-    setNodes((prev) => {
-      const updated = [...prev, newNode];
-      history.pushState(updated);
-      return updated;
-    });
-    setHasUnsavedChanges(true);
-    toast.success('New node created');
-  });
+        setNodes((prev) => {
+          const updated = [...prev, newNode];
+          history.pushState(updated);
+          return updated;
+        });
+        setHasUnsavedChanges(true);
+        toast.success(`New ${type} node created`);
+      },
+      [nodes.length, history],
+    ),
+  );
 
   if (isLoadingWorkspace || isLoadingLayout) {
     return (
@@ -358,7 +379,7 @@ function RouteComponent() {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) ?? null;
 
   return (
-    <div className="h-full bg-background">
+    <div className="h-full max-h-[calc(100vh-2rem)] max-w-screen overflow-hidden bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
         <div className="flex items-center justify-between px-6 py-4">
@@ -376,16 +397,40 @@ function RouteComponent() {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAddNode}
-              title="Add a new node to the canvas"
-              aria-label="Add new node"
-            >
-              <FiPlus />
-              Add Node
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" title="Add a new node to the canvas" aria-label="Add new node">
+                  <FiPlus />
+                  Add Node
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleAddNode('ITEM');
+                  }}
+                >
+                  <FiBox className="mr-2 size-4" />
+                  <span>Item Node</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleAddNode('ASSET');
+                  }}
+                >
+                  <FiImage className="mr-2 size-4" />
+                  <span>Asset Node</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => {
+                    handleAddNode('SUB_CANVAS');
+                  }}
+                >
+                  <HiOutlineCube className="mr-2 size-4" />
+                  <span>Sub Canvas Node</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               variant="ghost"
               size="sm"
@@ -521,7 +566,7 @@ function RouteComponent() {
         </div>
 
         {/* Inspector Panel */}
-        {isInspectorOpen && selectedNode ? (
+        {isInspectorOpen ? (
           <InspectorPanel
             node={selectedNode}
             onClose={() => {

@@ -25,6 +25,12 @@ interface iInspectorPanelProps {
   items?: Array<{ _id: string; name: string }>;
 }
 
+const PlaceholderInspectorPanel = () => (
+  <div className="flex h-full w-80 items-center justify-center overflow-y-auto border-l bg-card">
+    <p className="text-sm text-muted-foreground">No node selected</p>
+  </div>
+);
+
 export function InspectorPanel({ node, onClose, onUpdate, items }: iInspectorPanelProps) {
   const [localPosition, setLocalPosition] = useState(node?.position ?? { x: 0, y: 0 });
   const [localSize, setLocalSize] = useState(node?.size ?? { width: 100, height: 100 });
@@ -43,16 +49,17 @@ export function InspectorPanel({ node, onClose, onUpdate, items }: iInspectorPan
     }
   }, 150);
 
-  // Sync local state when node changes (e.g., when resizing on canvas)
+  const syncWithNode = useStableCallback(() => {
+    if (!node) return;
+    setLocalPosition(node.position ?? { x: 0, y: 0 });
+    setLocalSize(node.size ?? { width: 100, height: 100 });
+    setLocalRotation(node.rotation ?? 0);
+    setLocalOpacity(node.opacity ?? 1);
+  });
+
   useEffect(() => {
     if (!node) return;
-
-    debouncedUpdate({
-      position: node.position ?? { x: 0, y: 0 },
-      size: node.size ?? { width: 100, height: 100 },
-      rotation: node.rotation ?? 0,
-      opacity: node.opacity ?? 1,
-    });
+    syncWithNode();
   }, [
     node?.id,
     node?.position.x,
@@ -63,6 +70,7 @@ export function InspectorPanel({ node, onClose, onUpdate, items }: iInspectorPan
     node?.opacity,
     node,
     debouncedUpdate,
+    syncWithNode,
   ]);
 
   const handlePositionChange = useStableCallback((axis: 'x' | 'y', value: string) => {
@@ -102,7 +110,7 @@ export function InspectorPanel({ node, onClose, onUpdate, items }: iInspectorPan
     onUpdate(node.id, { assetId: undefined });
   });
 
-  if (!node) return null;
+  if (!node) return <PlaceholderInspectorPanel />;
 
   return (
     <div className="w-80 overflow-y-auto border-l bg-card">

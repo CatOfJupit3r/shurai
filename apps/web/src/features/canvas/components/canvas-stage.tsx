@@ -50,11 +50,14 @@ export function CanvasStage({ width, height, children, onStageClick }: iCanvasSt
   });
 
   const handleDragEnd = useStableCallback((e: Konva.KonvaEventObject<DragEvent>) => {
-    const CANVAS_WIDTH = 1440;
-    const CANVAS_HEIGHT = 810;
-
     const stage = e.target.getStage();
     if (!stage) return;
+
+    // Only handle drag end for the stage itself, not for children (nodes)
+    if (e.target !== stage) return;
+
+    const CANVAS_WIDTH = 1440;
+    const CANVAS_HEIGHT = 810;
 
     // Calculate the viewport size (window dimensions)
     const viewportWidth = width;
@@ -62,10 +65,12 @@ export function CanvasStage({ width, height, children, onStageClick }: iCanvasSt
 
     // Calculate the maximum pan distances based on current scale
     // We want to prevent panning so far that the entire canvas is off-screen
-    const maxX = (CANVAS_WIDTH * scale - viewportWidth) / scale;
-    const maxY = (CANVAS_HEIGHT * scale - viewportHeight) / scale;
-    const minX = 0;
-    const minY = 0;
+    // Allow panning until only a small margin of the canvas is visible
+    const margin = 50;
+    const minX = -CANVAS_WIDTH * scale + margin;
+    const maxX = viewportWidth - margin;
+    const minY = -CANVAS_HEIGHT * scale + margin;
+    const maxY = viewportHeight - margin;
 
     // Clamp the position to keep canvas visible
     const clampedX = Math.max(minX, Math.min(maxX, e.target.x()));
