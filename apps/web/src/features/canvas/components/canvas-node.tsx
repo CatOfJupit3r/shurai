@@ -33,23 +33,40 @@ interface iCanvasNodeProps {
     nodeId: string,
     newProps: { x: number; y: number; width: number; height: number; rotation: number },
   ) => void;
+  items?: Array<{ _id: string; assetId?: string }>;
 }
 
-export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd, onNodeTransform }: iCanvasNodeProps) {
+export function CanvasNode({
+  node,
+  onNodeClick,
+  onNodeDoubleClick,
+  onNodeDragEnd,
+  onNodeTransform,
+  items,
+}: iCanvasNodeProps) {
   const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom);
   const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeIdAtom);
   const groupRef = useRef<Konva.Group>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
   const [image, setImage] = useState<HTMLImageElement | null>(null);
 
-  const { asset } = useAsset(node.assetId ?? '');
+  // Get assetId from node directly or from linked item
+  let effectiveAssetId = node.assetId;
+  if (node.type === 'ITEM' && node.itemId && items) {
+    const linkedItem = items.find((i) => i._id === node.itemId);
+    if (linkedItem?.assetId) {
+      effectiveAssetId = linkedItem.assetId;
+    }
+  }
+
+  const { asset } = useAsset(effectiveAssetId ?? '');
 
   const isSelected = selectedNodeId === node.id;
   const isHovered = hoveredNodeId === node.id;
 
   // Load image when asset changes using helper
   useEffect(() => {
-    if (node.type === 'ASSET' && node.assetId && asset) {
+    if ((node.type === 'ASSET' || node.type === 'ITEM') && effectiveAssetId && asset) {
       const konvaProps = getKonvaNodeProps(asset, {
         position: node.position,
         size: node.size,
@@ -71,7 +88,7 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
     } else {
       setImage(null);
     }
-  }, [node.type, node.assetId, node.position, node.size, node.rotation, node.opacity, asset]);
+  }, [effectiveAssetId, asset, node.type, node.itemId, node.position, node.size, node.rotation, node.opacity]);
 
   useEffect(() => {
     if (isSelected && transformerRef.current && groupRef.current) {
@@ -106,14 +123,35 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
     const scaleX = groupNode.scaleX();
     const scaleY = groupNode.scaleY();
 
+    // Get current position BEFORE we reset scale
+    const currentX = groupNode.x();
+    const currentY = groupNode.y();
+
+    // Calculate new dimensions based on scale
+    const newWidth = Math.max(5, node.size.width * scaleX);
+    const newHeight = Math.max(5, node.size.height * scaleY);
+
+    // Reset scale to 1 to normalize the node
     groupNode.scaleX(1);
     groupNode.scaleY(1);
 
+    // After resetting scale, we need to adjust position to maintain visual position
+    // The key is: the visual top-left corner should stay in the same place
+    // Calculate the actual visual bounds before reset
+    const visualWidth = node.size.width * scaleX;
+    const visualHeight = node.size.height * scaleY;
+    const scaleDiffX = (node.size.width - visualWidth) / 2;
+    const scaleDiffY = (node.size.height - visualHeight) / 2;
+
+    // Adjust position to compensate for scale change
+    const newX = currentX + scaleDiffX;
+    const newY = currentY + scaleDiffY;
+
     const newProps = {
-      x: groupNode.x(),
-      y: groupNode.y(),
-      width: Math.max(5, node.size.width * scaleX),
-      height: Math.max(5, node.size.height * scaleY),
+      x: newX,
+      y: newY,
+      width: newWidth,
+      height: newHeight,
       rotation: groupNode.rotation(),
     };
 
@@ -121,23 +159,29 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
   };
 
   let strokeColor = 'transparent';
+  let strokeWidth = 2;
+
   if (isSelected) {
     strokeColor = '#3b82f6';
   } else if (isHovered) {
     strokeColor = '#60a5fa';
+  } else if (node.type === 'ITEM' && !node.itemId) {
+    // Unlinked ITEM node - dashed red border to indicate it needs linking
+    strokeColor = '#ef4444';
+    strokeWidth = 2;
   }
 
   // Get placeholder/fill colors based on asset type
   const placeholder = getPlaceholderConfig(asset?.type);
   let fillColor = '#f3f4f6';
-  if (node.type === 'ASSET') {
+  if (node.type === 'ASSET' || node.type === 'ITEM') {
     // Use theme primary color if available, otherwise use placeholder color
     fillColor = asset?.themeConfig?.primaryColor ?? placeholder.fillColor;
   } else if (node.type === 'SUB_CANVAS') {
     fillColor = '#fef3c7';
   }
 
-  const shouldShowImage = node.type === 'ASSET' && image;
+  const shouldShowImage = (node.type === 'ASSET' || node.type === 'ITEM') && image;
 
   return (
     <>
@@ -158,7 +202,13 @@ export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd
         opacity={node.opacity ?? 1}
       >
         {/* Background Rectangle */}
-        <Rect width={node.size.width} height={node.size.height} fill={fillColor} stroke={strokeColor} strokeWidth={2} />
+        <Rect
+          width={node.size.width}
+          height={node.size.height}
+          fill={fillColor}
+          stroke={strokeColor}
+          strokeWidth={strokeWidth}
+        />
         {/* Asset Image */}
         {shouldShowImage ? (
           <KonvaImage image={image} width={node.size.width} height={node.size.height} listening={false} />

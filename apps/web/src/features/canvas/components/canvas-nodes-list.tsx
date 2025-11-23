@@ -2,8 +2,10 @@
  * Canvas Nodes List Component
  * Accessible list view of canvas nodes with keyboard navigation
  */
-import { useCallback, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { FiImage, FiBox, FiLayout } from 'react-icons/fi';
+
+import useStableCallback from '@~/hooks/use-stable-callback';
 
 import type { iCanvasNodeData } from './canvas-node';
 
@@ -34,7 +36,7 @@ export function CanvasNodesList({
     }
   }, [selectedNodeId]);
 
-  const getNodeIcon = useCallback((type: iCanvasNodeData['type']) => {
+  const getNodeIcon = useStableCallback((type: iCanvasNodeData['type']) => {
     switch (type) {
       case 'ASSET':
         return <FiImage className="size-4" aria-hidden="true" />;
@@ -45,39 +47,36 @@ export function CanvasNodesList({
       default:
         return <FiBox className="size-4" aria-hidden="true" />;
     }
-  }, []);
+  });
 
-  const getNodeLabel = useCallback((node: iCanvasNodeData) => {
+  const getNodeLabel = useStableCallback((node: iCanvasNodeData) => {
     const position = `at (${Math.round(node.position.x)}, ${Math.round(node.position.y)})`;
     const size = `${Math.round(node.size.width)}×${Math.round(node.size.height)}`;
     return `${node.type} node ${position}, size ${size}`;
-  }, []);
+  });
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLButtonElement>, nodeId: string) => {
-      const currentIndex = nodes.findIndex((n) => n.id === nodeId);
+  const handleKeyDown = useStableCallback((e: React.KeyboardEvent<HTMLButtonElement>, nodeId: string) => {
+    const currentIndex = nodes.findIndex((n) => n.id === nodeId);
 
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        const nextIndex = Math.min(currentIndex + 1, nodes.length - 1);
-        if (nextIndex !== currentIndex) {
-          onSelectNode(nodes[nextIndex].id);
-        }
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        const prevIndex = Math.max(currentIndex - 1, 0);
-        if (prevIndex !== currentIndex) {
-          onSelectNode(nodes[prevIndex].id);
-        }
-      } else if (e.key === 'Delete' || e.key === 'Backspace') {
-        e.preventDefault();
-        if (onDeleteNode) {
-          onDeleteNode(nodeId);
-        }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      const nextIndex = Math.min(currentIndex + 1, nodes.length - 1);
+      if (nextIndex !== currentIndex) {
+        onSelectNode(nodes[nextIndex].id);
       }
-    },
-    [nodes, onSelectNode, onDeleteNode],
-  );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      const prevIndex = Math.max(currentIndex - 1, 0);
+      if (prevIndex !== currentIndex) {
+        onSelectNode(nodes[prevIndex].id);
+      }
+    } else if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault();
+      if (onDeleteNode) {
+        onDeleteNode(nodeId);
+      }
+    }
+  });
 
   if (nodes.length === 0) {
     return (

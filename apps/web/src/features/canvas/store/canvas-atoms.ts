@@ -48,7 +48,7 @@ export const isRotatingAtom = atom<boolean>(false);
 
 // Canvas view state
 export const scaleAtom = atomWithStorage<number>('canvas-scale', 1);
-export const stagePositionAtom = atomWithStorage<{ x: number; y: number }>('canvas-position', {
+export const stagePositionAtom = atomWithStorage<{ x: number; y: number }>('canvas-stage-position', {
   x: 0,
   y: 0,
 });

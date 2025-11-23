@@ -2,7 +2,7 @@
  * Inspector Panel Component
  * Displays and allows editing of selected canvas node properties
  */
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FiImage, FiX, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 
 import { ASSET_TYPE } from '@shurai/shared';
@@ -10,8 +10,11 @@ import { ASSET_TYPE } from '@shurai/shared';
 import { Button } from '@~/components/ui/button';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
+import { SingleSelect } from '@~/components/ui/select';
 import { AssetPickerModal } from '@~/features/assets';
 import useAsset from '@~/features/assets/hooks/use-asset';
+import { useDebounce } from '@~/hooks/use-debounce';
+import useStableCallback from '@~/hooks/use-stable-callback';
 
 import type { iCanvasNodeData } from './canvas-node';
 
@@ -19,9 +22,10 @@ interface iInspectorPanelProps {
   node: iCanvasNodeData | null;
   onClose: () => void;
   onUpdate: (nodeId: string, updates: Partial<iCanvasNodeData>) => void;
+  items?: Array<{ _id: string; name: string }>;
 }
 
-export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps) {
+export function InspectorPanel({ node, onClose, onUpdate, items }: iInspectorPanelProps) {
   const [localPosition, setLocalPosition] = useState(node?.position ?? { x: 0, y: 0 });
   const [localSize, setLocalSize] = useState(node?.size ?? { width: 100, height: 100 });
   const [localRotation, setLocalRotation] = useState(node?.rotation ?? 0);
@@ -32,42 +36,73 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
   const { asset } = useAsset(node?.assetId ?? '');
   const hasAsset = !!node?.assetId && !!asset;
 
-  if (!node) return null;
+  // Create a single debounced update function
+  const debouncedUpdate = useDebounce((updates: Partial<iCanvasNodeData>) => {
+    if (node) {
+      onUpdate(node.id, updates);
+    }
+  }, 150);
 
-  const handlePositionChange = (axis: 'x' | 'y', value: string) => {
+  // Sync local state when node changes (e.g., when resizing on canvas)
+  useEffect(() => {
+    if (!node) return;
+
+    debouncedUpdate({
+      position: node.position ?? { x: 0, y: 0 },
+      size: node.size ?? { width: 100, height: 100 },
+      rotation: node.rotation ?? 0,
+      opacity: node.opacity ?? 1,
+    });
+  }, [
+    node?.id,
+    node?.position.x,
+    node?.position.y,
+    node?.size.width,
+    node?.size.height,
+    node?.rotation,
+    node?.opacity,
+    node,
+    debouncedUpdate,
+  ]);
+
+  const handlePositionChange = useStableCallback((axis: 'x' | 'y', value: string) => {
     const numValue = parseFloat(value) || 0;
     const newPosition = { ...localPosition, [axis]: numValue };
     setLocalPosition(newPosition);
-    onUpdate(node.id, { position: newPosition });
-  };
+    debouncedUpdate({ position: newPosition });
+  });
 
-  const handleSizeChange = (dimension: 'width' | 'height', value: string) => {
+  const handleSizeChange = useStableCallback((dimension: 'width' | 'height', value: string) => {
     const numValue = Math.max(10, parseFloat(value) || 10);
     const newSize = { ...localSize, [dimension]: numValue };
     setLocalSize(newSize);
-    onUpdate(node.id, { size: newSize });
-  };
+    debouncedUpdate({ size: newSize });
+  });
 
-  const handleRotationChange = (value: string) => {
+  const handleRotationChange = useStableCallback((value: string) => {
     const numValue = parseFloat(value) || 0;
     setLocalRotation(numValue);
-    onUpdate(node.id, { rotation: numValue });
-  };
+    debouncedUpdate({ rotation: numValue });
+  });
 
-  const handleOpacityChange = (value: string) => {
+  const handleOpacityChange = useStableCallback((value: string) => {
     const numValue = Math.max(0, Math.min(1, parseFloat(value) || 0));
     setLocalOpacity(numValue);
-    onUpdate(node.id, { opacity: numValue });
-  };
+    debouncedUpdate({ opacity: numValue });
+  });
 
-  const handleAssetSelect = (assetId: string) => {
+  const handleAssetSelect = useStableCallback((assetId: string) => {
+    if (!node) return;
     onUpdate(node.id, { assetId });
     setIsAssetPickerOpen(false);
-  };
+  });
 
-  const handleClearAsset = () => {
+  const handleClearAsset = useStableCallback(() => {
+    if (!node) return;
     onUpdate(node.id, { assetId: undefined });
-  };
+  });
+
+  if (!node) return null;
 
   return (
     <div className="w-80 overflow-y-auto border-l bg-card">
@@ -89,6 +124,29 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
           <div className="text-xs text-muted-foreground">Type</div>
           <p className="mt-1 text-sm font-medium">{node.type}</p>
         </div>
+
+        {/* Item Linking */}
+        {items && items.length > 0 ? (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Link to Item</div>
+            <SingleSelect
+              options={items.map((item) => ({
+                label: item.name,
+                value: item._id,
+              }))}
+              value={node.itemId ?? null}
+              onValueChange={(value) => {
+                if (value) {
+                  onUpdate(node.id, { itemId: value });
+                } else {
+                  onUpdate(node.id, { itemId: undefined });
+                }
+              }}
+              isClearable
+              placeholder="Select an item..."
+            />
+          </div>
+        ) : null}
 
         {/* Position */}
         <div className="space-y-3">

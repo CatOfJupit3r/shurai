@@ -58,31 +58,30 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: iKeyboardShortcutsMo
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Keyboard Shortcuts</DialogTitle>
-          <DialogDescription>
-            Use these keyboard shortcuts to navigate and edit canvas nodes without a mouse. All shortcuts work when a
-            node is selected.
+      <DialogContent className="max-h-[80vh] w-full max-w-4xl overflow-y-auto lg:max-w-6xl">
+        <DialogHeader className="pb-2">
+          <DialogTitle className="text-lg">Keyboard Shortcuts</DialogTitle>
+          <DialogDescription className="text-xs">
+            Use these shortcuts to navigate and edit canvas nodes. All work when a node is selected.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mt-4 space-y-6">
+        <div className="space-y-3">
           {categories.map((category) => (
             <div key={category}>
-              <h3 className="mb-3 text-sm font-semibold">{category}</h3>
-              <div className="space-y-2">
+              <h3 className="mb-2 text-xs font-semibold">{category}</h3>
+              <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
                 {SHORTCUTS.filter((s) => s.category === category).map((shortcut) => (
                   <div
                     key={`${category}-${shortcut.description}`}
-                    className="flex items-center justify-between gap-4 text-sm"
+                    className="flex flex-col gap-1 rounded border border-border/40 bg-muted/10 p-2"
                   >
-                    <span className="text-muted-foreground">{shortcut.description}</span>
-                    <div className="flex shrink-0 gap-1">
+                    <span className="text-xs font-medium text-foreground">{shortcut.description}</span>
+                    <div className="flex flex-wrap gap-1">
                       {shortcut.keys.map((key) => (
                         <kbd
                           key={`${category}-${shortcut.description}-${key}`}
-                          className="rounded border border-border bg-muted px-2 py-1 font-mono text-xs shadow-sm"
+                          className="rounded border border-border/60 bg-muted px-1.5 py-0.5 font-mono text-[10px]"
                         >
                           {key}
                         </kbd>
@@ -95,29 +94,29 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: iKeyboardShortcutsMo
           ))}
         </div>
 
-        <div className="mt-6 rounded-lg border border-border bg-muted/50 p-4">
-          <h4 className="mb-2 text-sm font-semibold">Canvas Limitations</h4>
-          <ul className="space-y-1 text-xs text-muted-foreground">
-            <li>• Assets can only be selected from your existing library (uploads are not supported)</li>
-            <li>• Content canvases are limited to a single level of depth (no nested content canvases)</li>
-            <li>• Content canvas nodes (SUB_CANVAS type) cannot be resized, only repositioned</li>
-            <li>• Use the Asset Picker to choose from existing assets when editing nodes</li>
+        <div className="rounded border border-border/40 bg-muted/10 p-2">
+          <h4 className="mb-1 text-xs font-semibold">Canvas Limitations</h4>
+          <ul className="space-y-0.5 text-[10px] text-muted-foreground">
+            <li>• Assets can only be selected from your existing library (uploads not supported)</li>
+            <li>• Content canvases limited to single level of depth (no nesting)</li>
+            <li>• SUB_CANVAS nodes cannot be resized, only repositioned</li>
+            <li>• Use Asset Picker to choose from existing assets</li>
           </ul>
         </div>
 
-        <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4">
-          <h4 className="mb-2 text-sm font-semibold">Accessibility Notes</h4>
-          <ul className="space-y-1 text-xs text-muted-foreground">
-            <li>• Use Tab to navigate between canvas controls and the nodes list</li>
-            <li>• Arrow keys in the nodes list will move selection up/down</li>
-            <li>• Screen readers will announce node positions and sizes</li>
-            <li>• All actions provide toast notifications for feedback</li>
+        <div className="rounded border border-border/40 bg-muted/10 p-2">
+          <h4 className="mb-1 text-xs font-semibold">Accessibility</h4>
+          <ul className="space-y-0.5 text-[10px] text-muted-foreground">
+            <li>• Tab to navigate between canvas controls and nodes list</li>
+            <li>• Arrow keys in nodes list move selection up/down</li>
+            <li>• Screen readers announce node positions and sizes</li>
+            <li>• All actions provide toast notifications</li>
           </ul>
         </div>
 
         <DialogClose asChild>
-          <Button variant="outline" className="mt-4" onClick={onClose}>
-            <FiX className="mr-2" />
+          <Button variant="outline" size="sm" className="mt-2" onClick={onClose}>
+            <FiX className="mr-1.5 h-3 w-3" />
             Close
           </Button>
         </DialogClose>

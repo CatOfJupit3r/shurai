@@ -6,6 +6,8 @@ import type Konva from 'konva';
 import type React from 'react';
 import { Stage, Layer } from 'react-konva';
 
+import useStableCallback from '@~/hooks/use-stable-callback';
+
 import { scaleAtom, stagePositionAtom } from '../store/canvas-atoms';
 
 interface iCanvasStageProps {
@@ -19,7 +21,7 @@ export function CanvasStage({ width, height, children, onStageClick }: iCanvasSt
   const [scale, setScale] = useAtom(scaleAtom);
   const [stagePosition, setStagePosition] = useAtom(stagePositionAtom);
 
-  const handleWheel = (e: Konva.KonvaEventObject<WheelEvent>) => {
+  const handleWheel = useStableCallback((e: Konva.KonvaEventObject<WheelEvent>) => {
     e.evt.preventDefault();
 
     const scaleBy = 1.05;
@@ -45,14 +47,35 @@ export function CanvasStage({ width, height, children, onStageClick }: iCanvasSt
       y: pointer.y - mousePointTo.y * clampedScale,
     };
     setStagePosition(newPos);
-  };
+  });
 
-  const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
+  const handleDragEnd = useStableCallback((e: Konva.KonvaEventObject<DragEvent>) => {
+    const CANVAS_WIDTH = 1440;
+    const CANVAS_HEIGHT = 810;
+
+    const stage = e.target.getStage();
+    if (!stage) return;
+
+    // Calculate the viewport size (window dimensions)
+    const viewportWidth = width;
+    const viewportHeight = height;
+
+    // Calculate the maximum pan distances based on current scale
+    // We want to prevent panning so far that the entire canvas is off-screen
+    const maxX = (CANVAS_WIDTH * scale - viewportWidth) / scale;
+    const maxY = (CANVAS_HEIGHT * scale - viewportHeight) / scale;
+    const minX = 0;
+    const minY = 0;
+
+    // Clamp the position to keep canvas visible
+    const clampedX = Math.max(minX, Math.min(maxX, e.target.x()));
+    const clampedY = Math.max(minY, Math.min(maxY, e.target.y()));
+
     setStagePosition({
-      x: e.target.x(),
-      y: e.target.y(),
+      x: clampedX,
+      y: clampedY,
     });
-  };
+  });
 
   return (
     <Stage

@@ -3,7 +3,7 @@
  */
 import { useAtomValue } from 'jotai';
 import React from 'react';
-import { Layer, Line } from 'react-konva';
+import { Group, Line } from 'react-konva';
 
 import { gridEnabledAtom, gridSizeAtom, scaleAtom } from '../store/canvas-atoms';
 
@@ -48,5 +48,5 @@ export function GridOverlay({ width, height }: iGridOverlayProps) {
     );
   }
 
-  return <Layer listening={false}>{lines}</Layer>;
+  return <Group listening={false}>{lines}</Group>;
 }
