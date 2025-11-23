@@ -9,3 +9,4 @@ export { default as useGenerateUploadUrl } from './hooks/use-generate-upload-url
 export { AssetLibraryPanel } from './components/asset-library-panel';
 export { AssetPickerModal } from './components/asset-picker-modal';
 export { AssetUploadModal } from './components/asset-upload-modal';
+export { AssetUpdateModal } from './components/asset-update-modal';
