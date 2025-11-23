@@ -1,18 +1,20 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
+import { isExactMatch } from '@~/utils/query-helpers';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const deleteItemMutationOptions = tanstackRPC.items.deleteItem.mutationOptions({
   onError: (_error) => {
-    toastError('Failed to delete item');
+    toastORPCError('Failed to delete item', _error);
   },
   onSuccess: (_data, _variables, _context, ctx) => {
     // Invalidate all item hierarchy queries
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'items' && query.queryKey[1] === 'getItemHierarchy',
+      predicate: (query) =>
+        isExactMatch(query.queryKey, tanstackRPC.items.getItemHierarchy.key()) ||
+        isExactMatch(query.queryKey, tanstackRPC.items.listItems.key()),
     });
-    toastSuccess('Item deleted');
   },
 });
 

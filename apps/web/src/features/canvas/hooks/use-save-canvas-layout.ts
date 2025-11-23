@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { CanvasLayoutQueryReturnType } from './use-canvas-layout';
@@ -26,13 +26,12 @@ export const saveCanvasLayoutMutationOptions = tanstackRPC.canvas.saveLayout.mut
       void ctx.client.invalidateQueries({ queryKey: key });
     }
 
-    toastError('Save Failed', 'Failed to save canvas layout');
+    toastORPCError('Save Failed', _error);
   },
   onSuccess: (data, variables, _context, ctx) => {
     const key = tanstackRPC.canvas.getLayout.queryKey({ input: { workspaceId: variables.workspaceId } });
 
     ctx.client.setQueryData<CanvasLayoutQueryReturnType>(key, data);
-    toastSuccess('Layout Saved', 'Canvas layout saved successfully');
   },
 });
 

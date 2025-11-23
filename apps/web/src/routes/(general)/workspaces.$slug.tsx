@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { useState } from 'react';
-import { FiCopy, FiCheck, FiChevronDown, FiChevronRight } from 'react-icons/fi';
+import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
 import { tryCatch } from '@shurai/shared/helpers/std-utils';
 
-import { toastError, toastInfo } from '@~/components/toastifications/create-jsx-toasts';
+import { CopyButton } from '@~/components/copy-button';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
@@ -103,19 +103,6 @@ function RouteComponent() {
   const { slug } = Route.useParams();
   const { workspace, isPending: isLoadingWorkspace, error: workspaceError } = usePublicWorkspace(slug);
   const { items, isPending: isLoadingItems, error: itemsError } = usePublicItemHierarchy(slug);
-  const [isCopied, setIsCopied] = useState(false);
-
-  const handleCopyLink = async () => {
-    const url = window.location.href;
-    try {
-      await navigator.clipboard.writeText(url);
-      setIsCopied(true);
-      toastInfo('Link copied!', 'The workspace link has been copied to your clipboard');
-      setTimeout(() => setIsCopied(false), 2000);
-    } catch {
-      toastError('Copy failed', 'Failed to copy the link to your clipboard');
-    }
-  };
 
   if (isLoadingWorkspace || isLoadingItems) {
     return <PublicWorkspaceSkeleton />;
@@ -154,10 +141,9 @@ function RouteComponent() {
               <h1 className="mb-2 text-4xl font-bold tracking-tight">{workspace.title}</h1>
               {!!workspace.description && <p className="text-lg text-muted-foreground">{workspace.description}</p>}
             </div>
-            <Button onClick={handleCopyLink} variant="outline">
-              {isCopied ? <FiCheck className="text-green-500" /> : <FiCopy />}
-              {isCopied ? 'Copied!' : 'Copy Link'}
-            </Button>
+            <CopyButton variant="outline" value={window.location.href}>
+              Copy Link
+            </CopyButton>
           </div>
         </div>
       </div>

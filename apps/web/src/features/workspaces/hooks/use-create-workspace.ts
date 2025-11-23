@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const createWorkspaceMutationOptions = tanstackRPC.workspaces.createWorkspace.mutationOptions({
@@ -11,12 +11,11 @@ export const createWorkspaceMutationOptions = tanstackRPC.workspaces.createWorks
   onError: (_error, _variables, _context, ctx) => {
     const key = tanstackRPC.workspaces.listWorkspaces.queryKey();
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastError('Failed to create workspace');
+    toastORPCError('Failed to create workspace', _error);
   },
   onSuccess: (_data, _variables, _context, ctx) => {
     const key = tanstackRPC.workspaces.listWorkspaces.queryKey();
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastSuccess('Workspace created successfully');
   },
 });
 

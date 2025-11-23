@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { CanvasLayoutQueryReturnType } from './use-canvas-layout';
@@ -27,14 +27,13 @@ export const resetCanvasLayoutMutationOptions = tanstackRPC.canvas.resetLayout.m
       void ctx.client.invalidateQueries({ queryKey: key });
     }
 
-    toastError('Reset Failed', 'Failed to reset canvas layout');
+    toastORPCError('Reset Failed', _error);
   },
   onSuccess: (_data, variables, _context, ctx) => {
     const key = tanstackRPC.canvas.getLayout.queryKey({ input: { workspaceId: variables.workspaceId } });
 
     // Invalidate to fetch the fresh reset state
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastSuccess('Layout Reset', 'Canvas layout reset successfully');
   },
 });
 

@@ -251,6 +251,7 @@ function RouteComponent() {
               onMoveItem={handleMoveItem}
               onReorderItems={handleReorderItems}
               isLoading={isMoving || isReordering}
+              onDeleteItem={handleDeleteItem}
             />
           )}
         </div>

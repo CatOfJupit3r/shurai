@@ -1,11 +1,11 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const moveItemMutationOptions = tanstackRPC.items.moveItem.mutationOptions({
   onError: (_error) => {
-    toastError('Failed to move item');
+    toastORPCError('Failed to move item', _error);
   },
   onSuccess: (movedItem, _variables, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId: movedItem.workspaceId } });

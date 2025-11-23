@@ -3,15 +3,14 @@ import { useEffect, useState } from 'react';
 import { LuCheck, LuCopy } from 'react-icons/lu';
 
 import { Button } from '@~/components/ui/button';
+import type { iButtonProps } from '@~/components/ui/button';
 
 import { toastError, toastSuccess } from './toastifications';
 
-interface iCopyButtonProps {
+interface iCopyButtonProps extends Omit<iButtonProps, 'onClick' | 'value'> {
   value: string;
   successMessage?: string;
   errorMessage?: string;
-  disabled?: boolean;
-  'aria-label'?: string;
 }
 
 export function CopyButton({
@@ -19,7 +18,7 @@ export function CopyButton({
   successMessage = 'Copied to clipboard',
   errorMessage = 'Failed to copy',
   disabled = false,
-  'aria-label': ariaLabel = 'Copy to clipboard',
+  children,
 }: iCopyButtonProps) {
   const [copiedText, copyToClipboard] = useCopyToClipboard();
   const [isShowingFeedback, setIsShowingFeedback] = useState(false);
@@ -51,8 +50,8 @@ export function CopyButton({
   }, [isShowingFeedback]);
 
   return (
-    <Button variant="outline" size="icon" onClick={handleCopy} disabled={disabled} aria-label={ariaLabel}>
-      {isCopied ? <LuCheck className="h-4 w-4" /> : <LuCopy className="h-4 w-4" />}
+    <Button size="icon" onClick={handleCopy} {...(isCopied ? { disabled: true } : { disabled })}>
+      {isCopied ? <LuCheck className="h-4 w-4" /> : <LuCopy className="h-4 w-4" />} {children}
     </Button>
   );
 }

@@ -1,17 +1,17 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
+import { isSimilar } from '@~/utils/query-helpers';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const deleteTemplateMutationOptions = tanstackRPC.templates.deleteTemplate.mutationOptions({
   onError: (_error) => {
-    toastError('Failed to delete template');
+    toastORPCError('Failed to delete template', _error);
   },
   onSuccess: (_data, _variables, _context, ctx) => {
     void ctx.client.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === 'templates',
+      predicate: (query) => isSimilar(query.queryKey, tanstackRPC.templates.key()),
     });
-    toastSuccess('Template deleted successfully');
   },
 });
 

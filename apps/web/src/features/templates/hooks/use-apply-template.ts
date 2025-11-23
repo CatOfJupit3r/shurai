@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const applyTemplateMutationOptions = tanstackRPC.templates.applyTemplate.mutationOptions({
@@ -11,12 +11,11 @@ export const applyTemplateMutationOptions = tanstackRPC.templates.applyTemplate.
   onError: (_error, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastError('Failed to apply template');
+    toastORPCError('Failed to apply template', _error);
   },
   onSuccess: (_data, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastSuccess('Template applied successfully');
   },
 });
 

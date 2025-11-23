@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications/create-jsx-toasts';
+import { toastORPCError } from '@~/components/toastifications/create-jsx-toasts';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -42,14 +42,13 @@ export const updateAssetMutationOptions = tanstackRPC.assets.updateAsset.mutatio
     if (context?.previousAll) {
       ctx.client.setQueryData(context.allKey, context.previousAll);
     }
-    toastError('Failed to update asset', 'Please try again later');
+    toastORPCError('Failed to update asset', _error);
   },
   onSuccess: (updatedAsset, _variables, context, ctx) => {
     ctx.client.setQueryData<AssetQueryReturnType>(context.assetKey, updatedAsset);
     ctx.client.setQueryData<AssetsListQueryReturnType>(context.allKey, (old) =>
       old ? old.map((asset) => (asset._id === updatedAsset._id ? updatedAsset : asset)) : old,
     );
-    toastSuccess('Asset updated successfully');
   },
 });
 

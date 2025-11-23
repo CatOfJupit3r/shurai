@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications/create-jsx-toasts';
+import { toastORPCError } from '@~/components/toastifications/create-jsx-toasts';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -28,7 +28,7 @@ export const createAssetMutationOptions = tanstackRPC.assets.createAsset.mutatio
     if (context?.previous.typed && context.typeKey) {
       ctx.client.setQueryData(context.typeKey, context.previous.typed);
     }
-    toastError('Failed to create asset', 'Please try again later');
+    toastORPCError('Failed to create asset', _error);
   },
   onSuccess: (newAsset, _variables, context, ctx) => {
     ctx.client.setQueryData<AssetsListQueryReturnType>(context.allKey, (old) =>
@@ -39,7 +39,6 @@ export const createAssetMutationOptions = tanstackRPC.assets.createAsset.mutatio
         old ? [newAsset, ...old] : [newAsset],
       );
     }
-    toastSuccess('Asset created successfully');
   },
 });
 

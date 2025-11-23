@@ -1,5 +1,5 @@
 import { useSortable } from '@dnd-kit/sortable';
-import { FiChevronDown, FiChevronRight, FiMoreVertical, FiPlus } from 'react-icons/fi';
+import { FiChevronDown, FiChevronRight, FiMoreVertical, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
 import { Button } from '@~/components/ui/button';
@@ -20,6 +20,7 @@ interface iSortableItemNodeProps {
   onToggleExpand: () => void;
   onSelect: () => void;
   onAddChild: () => void;
+  onDelete: () => void;
 }
 
 export function SortableItemNode({
@@ -32,6 +33,7 @@ export function SortableItemNode({
   onToggleExpand,
   onSelect,
   onAddChild,
+  onDelete,
 }: iSortableItemNodeProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
 
@@ -78,6 +80,10 @@ export function SortableItemNode({
             <DropdownMenuItem onClick={onAddChild}>
               <FiPlus className="mr-2 size-4" />
               Add Child Item
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={onDelete}>
+              <FiTrash2 className="mr-2 size-4" />
+              Delete Item
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

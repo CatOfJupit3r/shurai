@@ -26,6 +26,7 @@ interface iItemTreeViewProps {
   onAddItem: (parentId?: string) => void;
   onMoveItem: (itemId: string, newParentId: string | null) => void;
   onReorderItems: (parentId: string | null, itemOrders: Array<{ itemId: string; order: number }>) => void;
+  onDeleteItem: (itemId: string) => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +38,7 @@ export function ItemTreeView({
   onMoveItem: _onMoveItem,
   onReorderItems: _onReorderItems,
   isLoading: _isLoading = false,
+  onDeleteItem,
 }: iItemTreeViewProps) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -107,6 +109,7 @@ export function ItemTreeView({
           onToggleExpand={() => toggleExpanded(item._id)}
           onSelect={() => onSelectItem(item._id)}
           onAddChild={() => onAddItem(item._id)}
+          onDelete={() => onDeleteItem(item._id)}
         />
         {!!(hasChildren && isExpanded) && (
           <div className="ml-4">{item.children.map((child: ItemWithChildren) => renderItem(child, depth + 1))}</div>

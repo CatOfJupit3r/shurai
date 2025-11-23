@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications/create-jsx-toasts';
+import { toastORPCError } from '@~/components/toastifications/create-jsx-toasts';
 import type { ORPCOutputs } from '@~/utils/orpc';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
@@ -24,10 +24,7 @@ export const deleteAssetMutationOptions = tanstackRPC.assets.deleteAsset.mutatio
     if (context?.previous) {
       ctx.client.setQueryData(context.allKey, context.previous);
     }
-    toastError('Failed to delete asset', 'The asset may be in use or another error occurred');
-  },
-  onSuccess: (_data, _variables, _context) => {
-    toastSuccess('Asset deleted successfully');
+    toastORPCError('Failed to delete asset', _error);
   },
   onSettled: (_data, _error, _variables, context, ctx) => {
     if (context) {

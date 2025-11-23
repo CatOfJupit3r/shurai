@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError, toastSuccess } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const createItemMutationOptions = tanstackRPC.items.createItem.mutationOptions({
@@ -11,12 +11,11 @@ export const createItemMutationOptions = tanstackRPC.items.createItem.mutationOp
   onError: (_error, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastError('Failed to create item');
+    toastORPCError('Failed to create item', _error);
   },
   onSuccess: (_data, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastSuccess('Item created');
   },
 });
 

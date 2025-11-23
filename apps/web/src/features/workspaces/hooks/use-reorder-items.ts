@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 
-import { toastError } from '@~/components/toastifications';
+import { toastORPCError } from '@~/components/toastifications';
 import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 export const reorderItemsMutationOptions = tanstackRPC.items.reorderItems.mutationOptions({
@@ -11,7 +11,7 @@ export const reorderItemsMutationOptions = tanstackRPC.items.reorderItems.mutati
   onError: (_error, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
     void ctx.client.invalidateQueries({ queryKey: key });
-    toastError('Failed to reorder items');
+    toastORPCError('Failed to reorder items', _error);
   },
   onSuccess: (_data, { workspaceId }, _context, ctx) => {
     const key = tanstackRPC.items.getItemHierarchy.queryKey({ input: { workspaceId } });
