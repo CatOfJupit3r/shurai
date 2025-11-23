@@ -21,6 +21,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs'
 import useAssetsList from '../hooks/use-assets-list';
 import useDeleteAsset from '../hooks/use-delete-asset';
 import useGlobalAssetsList from '../hooks/use-global-assets-list';
+import { AssetUpdateModal } from './asset-update-modal';
 import { AssetUploadModal } from './asset-upload-modal';
 
 interface iAsset {
@@ -39,6 +40,7 @@ export function AssetLibraryPanel() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<iAsset | null>(null);
+  const [assetToEdit, setAssetToEdit] = useState<string | null>(null);
 
   const { assets: myAssets, isPending: isLoadingMyAssets } = useAssetsList(
     filterType !== 'ALL' ? filterType : undefined,
@@ -65,6 +67,10 @@ export function AssetLibraryPanel() {
 
   const handleDeleteAsset = (asset: iAsset) => {
     setAssetToDelete(asset);
+  };
+
+  const handleEditAsset = (assetId: string) => {
+    setAssetToEdit(assetId);
   };
 
   const confirmDelete = () => {
@@ -128,6 +134,7 @@ export function AssetLibraryPanel() {
                   assets={assets}
                   isPending={isPending}
                   onDelete={handleDeleteAsset}
+                  onEdit={handleEditAsset}
                   showActions
                   emptyMessage="You haven't created any assets yet"
                 />
@@ -148,6 +155,9 @@ export function AssetLibraryPanel() {
 
       {/* Upload Modal */}
       <AssetUploadModal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)} />
+
+      {/* Update Modal */}
+      <AssetUpdateModal assetId={assetToEdit} isOpen={!!assetToEdit} onClose={() => setAssetToEdit(null)} />
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={!!assetToDelete} onOpenChange={() => setAssetToDelete(null)}>
@@ -177,11 +187,12 @@ interface iAssetGridProps {
   assets: iAsset[];
   isPending: boolean;
   onDelete?: (asset: iAsset) => void;
+  onEdit?: (assetId: string) => void;
   showActions: boolean;
   emptyMessage: string;
 }
 
-function AssetGrid({ assets, isPending, onDelete, showActions, emptyMessage }: iAssetGridProps) {
+function AssetGrid({ assets, isPending, onDelete, onEdit, showActions, emptyMessage }: iAssetGridProps) {
   if (isPending) {
     return (
       <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
@@ -206,7 +217,7 @@ function AssetGrid({ assets, isPending, onDelete, showActions, emptyMessage }: i
   return (
     <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
       {assets.map((asset) => (
-        <AssetCard key={asset._id} asset={asset} onDelete={onDelete} showActions={showActions} />
+        <AssetCard key={asset._id} asset={asset} onDelete={onDelete} onEdit={onEdit} showActions={showActions} />
       ))}
     </div>
   );
@@ -215,10 +226,11 @@ function AssetGrid({ assets, isPending, onDelete, showActions, emptyMessage }: i
 interface iAssetCardProps {
   asset: iAsset;
   onDelete?: (asset: iAsset) => void;
+  onEdit?: (assetId: string) => void;
   showActions: boolean;
 }
 
-function AssetCard({ asset, onDelete, showActions }: iAssetCardProps) {
+function AssetCard({ asset, onDelete, onEdit, showActions }: iAssetCardProps) {
   const [isMenuVisible, setIsMenuVisible] = useState(false);
 
   return (
@@ -249,7 +261,13 @@ function AssetCard({ asset, onDelete, showActions }: iAssetCardProps) {
       {/* Actions */}
       {showActions && isMenuVisible ? (
         <div className="absolute top-2 right-2 flex gap-1">
-          <Button type="button" size="sm" variant="secondary" className="size-8 p-0">
+          <Button
+            type="button"
+            size="sm"
+            variant="secondary"
+            className="size-8 p-0"
+            onClick={() => onEdit?.(asset._id)}
+          >
             <FiEdit2 className="size-4" />
           </Button>
           <Button

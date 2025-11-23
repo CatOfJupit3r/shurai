@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { FiUpload } from 'react-icons/fi';
 import z from 'zod';
 
@@ -15,14 +16,16 @@ import {
 } from '@~/components/ui/dialog';
 import { useAppForm } from '@~/components/ui/field';
 
-import useCreateAsset from '../hooks/use-create-asset';
+import useAsset from '../hooks/use-asset';
+import useUpdateAsset from '../hooks/use-update-asset';
 
-interface iAssetUploadModalProps {
+interface iAssetUpdateModalProps {
+  assetId: string | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
-const ASSET_UPLOAD_SCHEMA = z.object({
+const ASSET_UPDATE_SCHEMA = z.object({
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional(),
   type: z.enum([ASSET_TYPE.ICON, ASSET_TYPE.IMAGE, ASSET_TYPE.COVER, ASSET_TYPE.THEME_PRESET]),
@@ -33,10 +36,11 @@ const ASSET_UPLOAD_SCHEMA = z.object({
   accentColor: z.string().optional(),
 });
 
-type AssetUploadFormValues = z.infer<typeof ASSET_UPLOAD_SCHEMA>;
+type AssetUpdateFormValues = z.infer<typeof ASSET_UPDATE_SCHEMA>;
 
-export function AssetUploadModal({ isOpen, onClose }: iAssetUploadModalProps) {
-  const { createAsset, isPending } = useCreateAsset();
+export function AssetUpdateModal({ assetId, isOpen, onClose }: iAssetUpdateModalProps) {
+  const { asset, isPending: isLoadingAsset } = useAsset(assetId ?? '');
+  const { updateAsset, isPending: isUpdating } = useUpdateAsset();
 
   const form = useAppForm({
     defaultValues: {
@@ -48,11 +52,13 @@ export function AssetUploadModal({ isOpen, onClose }: iAssetUploadModalProps) {
       primaryColor: '',
       secondaryColor: '',
       accentColor: '',
-    } satisfies AssetUploadFormValues as AssetUploadFormValues,
+    } satisfies AssetUpdateFormValues as AssetUpdateFormValues,
     validators: {
-      onSubmit: ASSET_UPLOAD_SCHEMA,
+      onSubmit: ASSET_UPDATE_SCHEMA,
     },
     onSubmit: async ({ value, formApi }) => {
+      if (!assetId) return;
+
       const themeConfig =
         value.primaryColor || value.secondaryColor || value.accentColor
           ? {
@@ -62,7 +68,8 @@ export function AssetUploadModal({ isOpen, onClose }: iAssetUploadModalProps) {
             }
           : undefined;
 
-      await createAsset({
+      updateAsset({
+        assetId,
         name: value.name,
         description: value.description ?? undefined,
         type: value.type,
@@ -75,14 +82,29 @@ export function AssetUploadModal({ isOpen, onClose }: iAssetUploadModalProps) {
     },
   });
 
+  // Populate form with existing asset data
+  useEffect(() => {
+    if (asset && isOpen) {
+      form.setFieldValue('name', asset.name);
+      form.setFieldValue('description', asset.description ?? '');
+      form.setFieldValue('type', asset.type);
+      form.setFieldValue('iconUrl', asset.iconUrl ?? '');
+      form.setFieldValue('imageUrl', asset.imageUrl ?? '');
+      form.setFieldValue('primaryColor', asset.themeConfig?.primaryColor ?? '');
+      form.setFieldValue('secondaryColor', asset.themeConfig?.secondaryColor ?? '');
+      form.setFieldValue('accentColor', asset.themeConfig?.accentColor ?? '');
+    }
+  }, [asset, isOpen, form]);
+
+  const isPending = isLoadingAsset || isUpdating;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Asset</DialogTitle>
+          <DialogTitle>Update Asset</DialogTitle>
           <DialogDescription>
-            Add a new asset to your library. Assets can be icons, images, covers, or theme presets used throughout your
-            workspaces.
+            Edit the details of your asset. Changes will be reflected across all workspaces that use this asset.
           </DialogDescription>
         </DialogHeader>
 
@@ -177,7 +199,7 @@ export function AssetUploadModal({ isOpen, onClose }: iAssetUploadModalProps) {
               await form.handleSubmit();
             }}
           >
-            {isPending ? 'Creating...' : 'Create Asset'}
+            {isPending ? 'Updating...' : 'Update Asset'}
           </Button>
         </DialogFooter>
       </DialogContent>
