@@ -10,8 +10,11 @@ import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 
 import env from '@~/constants/env';
+import { createLogger } from '@~/lib/logger';
 import { appRouter } from '@~/routers';
 import nonContractRouter from '@~/routers/non-contract.router';
+
+const honoLogger = createLogger('hono');
 
 interface iCreateContextOptions {
   context: HonoContext;
@@ -58,7 +61,9 @@ export default async function honoLoader(auth: ReturnType<typeof betterAuth>) {
     ],
     interceptors: [
       onError((error) => {
-        console.error(error);
+        honoLogger.error('API handler error', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }),
     ],
   });
@@ -66,7 +71,9 @@ export default async function honoLoader(auth: ReturnType<typeof betterAuth>) {
   const rpcHandler = new RPCHandler(appRouter, {
     interceptors: [
       onError((error) => {
-        console.error(error);
+        honoLogger.error('RPC handler error', {
+          error: error instanceof Error ? error.message : String(error),
+        });
       }),
     ],
   });

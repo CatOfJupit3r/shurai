@@ -960,4 +960,406 @@ describe('Canvas API Contract Tests', () => {
       ).rejects.toThrow('Canvas layout not found');
     });
   });
+
+  describe('Payload Size Validation and Monitoring', () => {
+    it('should reject canvas layout with payload exceeding size limit', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Create a very large payload that exceeds 5MB
+      // Each node is approximately 200-300 bytes, so we need around 20,000+ nodes
+      const largeNodes = Array.from({ length: 25000 }, (_, i) => ({
+        id: `node-${i}`,
+        type: 'ITEM' as const,
+        position: { x: i * 10, y: i * 10 },
+        size: { width: 100, height: 100 },
+        itemId: `item-${i}`,
+        zIndex: i,
+        rotation: 45,
+        opacity: 0.8,
+        assetHints: {
+          aspectRatio: 1.5,
+          dominantColor: '#FF5733',
+        },
+      }));
+
+      const layoutInput = {
+        workspaceId: workspace._id,
+        nodes: largeNodes,
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      try {
+        await call(appRouter.canvas.saveLayout, layoutInput, ctx());
+        expect(true).toBe(false); // Should not reach here
+      } catch (error: any) {
+        expect(error).toBeDefined();
+        expect(error.message).toContain('Canvas layout payload exceeds maximum size limit');
+      }
+    });
+
+    it('should accept canvas layout within size limit', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Create a reasonable payload (around 100 nodes)
+      const nodes = Array.from({ length: 100 }, (_, i) => ({
+        id: `node-${i}`,
+        type: 'ITEM' as const,
+        position: { x: i * 10, y: i * 10 },
+        size: { width: 100, height: 100 },
+        itemId: `item-${i}`,
+      }));
+
+      const layoutInput = {
+        workspaceId: workspace._id,
+        nodes,
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      const savedLayout = await call(appRouter.canvas.saveLayout, layoutInput, ctx());
+
+      expect(savedLayout).toBeDefined();
+      expect(savedLayout.nodes.length).toBe(100);
+      expect(savedLayout.revision).toBe(1);
+    });
+
+    it('should handle moderately large payloads with content canvases', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Create a payload with multiple content canvases
+      const contentCanvases = Array.from({ length: 10 }, (_, i) => ({
+        _id: `canvas-${i}`,
+        name: `Content Canvas ${i}`,
+        description: `Description for canvas ${i}`,
+        nodes: Array.from({ length: 50 }, (_, j) => ({
+          id: `node-${i}-${j}`,
+          type: 'ITEM' as const,
+          position: { x: j * 10, y: j * 10 },
+          size: { width: 100, height: 100 },
+          itemId: `item-${i}-${j}`,
+        })),
+        backgroundColor: '#FFFFFF',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }));
+
+      const layoutInput = {
+        workspaceId: workspace._id,
+        nodes: Array.from({ length: 100 }, (_, i) => ({
+          id: `main-node-${i}`,
+          type: i < 10 ? ('SUB_CANVAS' as const) : ('ITEM' as const),
+          position: { x: i * 100, y: i * 100 },
+          size: { width: 200, height: 200 },
+          subCanvasId: i < 10 ? `canvas-${i}` : undefined,
+          itemId: i >= 10 ? `main-item-${i}` : undefined,
+        })),
+        contentCanvases,
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      const savedLayout = await call(appRouter.canvas.saveLayout, layoutInput, ctx());
+
+      expect(savedLayout).toBeDefined();
+      expect(savedLayout.nodes.length).toBe(100);
+      expect(savedLayout.contentCanvases?.length).toBe(10);
+      expect(savedLayout.revision).toBe(1);
+    });
+
+    it('should track revision correctly across multiple saves', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      const baseInput = {
+        workspaceId: workspace._id,
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      // Save 1
+      const save1 = await call(
+        appRouter.canvas.saveLayout,
+        {
+          ...baseInput,
+          nodes: [
+            {
+              id: 'node-1',
+              type: 'ITEM' as const,
+              position: { x: 0, y: 0 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-1',
+            },
+          ],
+        },
+        ctx(),
+      );
+      expect(save1.revision).toBe(1);
+
+      // Save 2
+      const save2 = await call(
+        appRouter.canvas.saveLayout,
+        {
+          ...baseInput,
+          nodes: [
+            {
+              id: 'node-1',
+              type: 'ITEM' as const,
+              position: { x: 100, y: 100 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-1',
+            },
+            {
+              id: 'node-2',
+              type: 'ITEM' as const,
+              position: { x: 200, y: 200 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-2',
+            },
+          ],
+        },
+        ctx(),
+      );
+      expect(save2.revision).toBe(2);
+
+      // Save 3
+      const save3 = await call(appRouter.canvas.saveLayout, { ...baseInput, nodes: [] }, ctx());
+      expect(save3.revision).toBe(3);
+    });
+
+    it('should maintain correct revision after reset and new save', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Save initial layout
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [
+            {
+              id: 'node-1',
+              type: 'ITEM' as const,
+              position: { x: 0, y: 0 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-1',
+            },
+          ],
+          canvasSize: { width: 1920, height: 1080 },
+        },
+        ctx(),
+      );
+
+      // Reset
+      await call(
+        appRouter.canvas.resetLayout,
+        {
+          workspaceId: workspace._id,
+        },
+        ctx(),
+      );
+
+      // Save new layout - should start at revision 1 again
+      const newSave = await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [
+            {
+              id: 'node-new',
+              type: 'ITEM' as const,
+              position: { x: 50, y: 50 },
+              size: { width: 150, height: 150 },
+              itemId: 'item-new',
+            },
+          ],
+          canvasSize: { width: 1920, height: 1080 },
+        },
+        ctx(),
+      );
+
+      expect(newSave.revision).toBe(1);
+    });
+  });
+
+  describe('Error Handling and Edge Cases', () => {
+    it('should handle empty nodes array', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      const layoutInput = {
+        workspaceId: workspace._id,
+        nodes: [],
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      const savedLayout = await call(appRouter.canvas.saveLayout, layoutInput, ctx());
+
+      expect(savedLayout).toBeDefined();
+      expect(savedLayout.nodes.length).toBe(0);
+      expect(savedLayout.revision).toBe(1);
+    });
+
+    it('should handle layout with all optional fields', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      const layoutInput = {
+        workspaceId: workspace._id,
+        nodes: [
+          {
+            id: 'node-1',
+            type: 'ITEM' as const,
+            position: { x: 0, y: 0 },
+            size: { width: 100, height: 100 },
+            itemId: 'item-1',
+            zIndex: 5,
+            rotation: 90,
+            opacity: 0.5,
+            assetHints: {
+              aspectRatio: 16 / 9,
+              dominantColor: '#3498db',
+            },
+          },
+        ],
+        canvasSize: { width: 2560, height: 1440 },
+        backgroundColor: '#f0f0f0',
+        gridEnabled: true,
+        gridSize: 25,
+      };
+
+      const savedLayout = await call(appRouter.canvas.saveLayout, layoutInput, ctx());
+
+      expect(savedLayout).toBeDefined();
+      expect(savedLayout.nodes[0].zIndex).toBe(5);
+      expect(savedLayout.nodes[0].rotation).toBe(90);
+      expect(savedLayout.nodes[0].opacity).toBe(0.5);
+      expect(savedLayout.backgroundColor).toBe('#f0f0f0');
+      expect(savedLayout.gridEnabled).toBe(true);
+      expect(savedLayout.gridSize).toBe(25);
+    });
+
+    it('should handle multiple sequential operations', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      const baseInput = {
+        workspaceId: workspace._id,
+        canvasSize: { width: 1920, height: 1080 },
+      };
+
+      // Save -> Get -> Save -> Reset -> Get (should fail)
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          ...baseInput,
+          nodes: [
+            {
+              id: 'node-1',
+              type: 'ITEM' as const,
+              position: { x: 0, y: 0 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-1',
+            },
+          ],
+        },
+        ctx(),
+      );
+
+      const layout1 = await call(appRouter.canvas.getLayout, { workspaceId: workspace._id }, ctx());
+      expect(layout1.revision).toBe(1);
+
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          ...baseInput,
+          nodes: [
+            {
+              id: 'node-2',
+              type: 'ITEM' as const,
+              position: { x: 100, y: 100 },
+              size: { width: 100, height: 100 },
+              itemId: 'item-2',
+            },
+          ],
+        },
+        ctx(),
+      );
+
+      const layout2 = await call(appRouter.canvas.getLayout, { workspaceId: workspace._id }, ctx());
+      expect(layout2.revision).toBe(2);
+
+      await call(appRouter.canvas.resetLayout, { workspaceId: workspace._id }, ctx());
+
+      try {
+        await call(appRouter.canvas.getLayout, { workspaceId: workspace._id }, ctx());
+        expect(true).toBe(false); // Should not reach here
+      } catch (error: any) {
+        expect(error).toBeDefined();
+      }
+    });
+  });
 });

@@ -1,23 +1,25 @@
 import { config } from 'dotenv';
 import { z } from 'zod';
 
+import { globalLogger } from '@~/lib/logger';
+
 switch (process.env.NODE_ENV) {
   case 'test': {
     config({ path: '.env.test' });
-    console.log('Loaded .env.test file');
+    globalLogger.info('Loaded .env.test file');
     break;
   }
   case 'production': {
     // we assume they are passed to by container
     // e.g. Heroku, Docker, etc.
-    console.log('Current environment expects variables to by passed by container');
+    globalLogger.info('Current environment expects variables to by passed by container');
     break;
   }
   case undefined:
   case 'development':
-    console.log('Using .development.env file');
+    globalLogger.info('Using .development.env file');
     config();
-    console.log('Loaded .development.env file');
+    globalLogger.info('Loaded .development.env file');
     break;
   default:
     throw new Error(`Invalid NODE_ENV: ${process.env.NODE_ENV}.`);
@@ -42,7 +44,9 @@ const envSchema = z.object({
 
 const env = envSchema.safeParse(process.env);
 if (!env.success) {
-  console.error('Environment variables validation failure:', z.treeifyError(env.error));
+  globalLogger.error('Environment variables validation failure', {
+    errors: z.treeifyError(env.error),
+  });
   throw new Error('Invalid environment variables');
 }
 
