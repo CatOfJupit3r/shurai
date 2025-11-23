@@ -3,11 +3,13 @@
  * Displays and allows editing of selected canvas node properties
  */
 import { useState } from 'react';
-import { FiX } from 'react-icons/fi';
+import { FiImage, FiX } from 'react-icons/fi';
 
 import { Button } from '@~/components/ui/button';
 import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
+import { AssetPickerModal } from '@~/features/assets';
+import useAsset from '@~/features/assets/hooks/use-asset';
 
 import type { iCanvasNodeData } from './canvas-node';
 
@@ -22,6 +24,9 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
   const [localSize, setLocalSize] = useState(node?.size ?? { width: 100, height: 100 });
   const [localRotation, setLocalRotation] = useState(node?.rotation ?? 0);
   const [localOpacity, setLocalOpacity] = useState(node?.opacity ?? 1);
+  const [isAssetPickerOpen, setIsAssetPickerOpen] = useState(false);
+
+  const { asset } = useAsset(node?.assetId ?? '');
 
   if (!node) return null;
 
@@ -49,6 +54,15 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
     const numValue = Math.max(0, Math.min(1, parseFloat(value) || 0));
     setLocalOpacity(numValue);
     onUpdate(node.id, { opacity: numValue });
+  };
+
+  const handleAssetSelect = (assetId: string) => {
+    onUpdate(node.id, { assetId });
+    setIsAssetPickerOpen(false);
+  };
+
+  const handleClearAsset = () => {
+    onUpdate(node.id, { assetId: undefined });
   };
 
   return (
@@ -184,6 +198,60 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
           </div>
         )}
 
+        {/* Asset Selection - Only show for ASSET type nodes */}
+        {node.type === 'ASSET' && (
+          <div className="space-y-2">
+            <div className="text-sm font-semibold">Asset</div>
+            {node.assetId && asset ? (
+              <div className="space-y-2">
+                {/* Asset Preview */}
+                <div className="flex items-center gap-3 rounded-lg border p-3">
+                  <div className="flex size-16 shrink-0 items-center justify-center rounded bg-muted">
+                    {(asset.iconUrl ?? asset.imageUrl) ? (
+                      <img
+                        src={asset.iconUrl ?? asset.imageUrl}
+                        alt={asset.name}
+                        className="max-h-full max-w-full object-contain"
+                      />
+                    ) : (
+                      <FiImage className="size-8 text-muted-foreground" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{asset.name}</p>
+                    <p className="text-xs text-muted-foreground">{asset.type}</p>
+                  </div>
+                </div>
+                {/* Action Buttons */}
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => setIsAssetPickerOpen(true)}
+                  >
+                    Change Asset
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" onClick={handleClearAsset}>
+                    Clear
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full justify-start"
+                onClick={() => setIsAssetPickerOpen(true)}
+              >
+                <FiImage className="mr-2" />
+                Select Asset
+              </Button>
+            )}
+          </div>
+        )}
+
         {/* References */}
         {node.itemId ? (
           <div>
@@ -204,6 +272,16 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
           </div>
         ) : null}
       </div>
+
+      {/* Asset Picker Modal */}
+      <AssetPickerModal
+        isOpen={isAssetPickerOpen}
+        onClose={() => setIsAssetPickerOpen(false)}
+        onSelect={handleAssetSelect}
+        selectedAssetId={node.assetId}
+        filterTypes={['ICON', 'IMAGE']}
+        allowUpload={false}
+      />
     </div>
   );
 }
