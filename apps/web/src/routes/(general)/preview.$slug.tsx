@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
@@ -6,13 +6,13 @@ import { HiOutlineCube } from 'react-icons/hi';
 import { tryCatch } from '@shurai/shared/helpers/std-utils';
 
 import { CopyButton } from '@~/components/copy-button';
-import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { WorkspaceNotFound } from '@~/components/workspace-not-found';
 import { usePublicItemHierarchy, usePublicWorkspace } from '@~/features/workspaces';
 
-export const Route = createFileRoute('/(general)/workspaces/$slug')({
+export const Route = createFileRoute('/(general)/preview/$slug')({
   component: RouteComponent,
   beforeLoad: async ({ context, params }) => {
     await tryCatch(async () =>
@@ -104,32 +104,8 @@ function RouteComponent() {
   const { workspace, isPending: isLoadingWorkspace, error: workspaceError } = usePublicWorkspace(slug);
   const { items, isPending: isLoadingItems, error: itemsError } = usePublicItemHierarchy(slug);
 
-  if (isLoadingWorkspace || isLoadingItems) {
-    return <PublicWorkspaceSkeleton />;
-  }
-
-  if (workspaceError || itemsError || !workspace) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Empty>
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <HiOutlineCube className="size-10" />
-            </EmptyMedia>
-            <EmptyTitle>Workspace not found</EmptyTitle>
-            <EmptyDescription>
-              This workspace doesn&apos;t exist or is private.
-              <br />
-              Please check the link and try again.
-            </EmptyDescription>
-          </EmptyHeader>
-          <Link to="/">
-            <Button>Go to Home</Button>
-          </Link>
-        </Empty>
-      </div>
-    );
-  }
+  if (isLoadingWorkspace || isLoadingItems) return <PublicWorkspaceSkeleton />;
+  if (!workspace || workspaceError || itemsError) return <WorkspaceNotFound />;
 
   return (
     <div className="min-h-screen bg-background">

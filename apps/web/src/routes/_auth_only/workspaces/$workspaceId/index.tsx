@@ -2,6 +2,8 @@ import { createFileRoute, Link } from '@tanstack/react-router';
 import { FiEdit, FiExternalLink, FiEye, FiEyeOff, FiMaximize2 } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
+import { tryCatch } from '@shurai/shared/helpers/std-utils';
+
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -11,22 +13,40 @@ import { useItemHierarchy, useWorkspace } from '@~/features/workspaces';
 
 export const Route = createFileRoute('/_auth_only/workspaces/$workspaceId/')({
   component: RouteComponent,
+  notFoundComponent: EmptyWorkspace,
   beforeLoad: async ({ context, params }) => {
-    await Promise.all([
-      context.queryClient.ensureQueryData(
-        context.tanstackRPC.workspaces.getWorkspace.queryOptions({
-          input: { workspaceId: params.workspaceId },
-        }),
-      ),
-      context.queryClient.ensureQueryData(
-        context.tanstackRPC.items.getItemHierarchy.queryOptions({
-          input: { workspaceId: params.workspaceId },
-        }),
-      ),
-    ]);
+    await tryCatch(async () =>
+      Promise.all([
+        context.queryClient.ensureQueryData(
+          context.tanstackRPC.workspaces.getWorkspace.queryOptions({
+            input: { workspaceId: params.workspaceId },
+          }),
+        ),
+        context.queryClient.ensureQueryData(
+          context.tanstackRPC.items.getItemHierarchy.queryOptions({
+            input: { workspaceId: params.workspaceId },
+          }),
+        ),
+      ]),
+    );
   },
 });
 
+function EmptyWorkspace() {
+  return (
+    <div className="flex h-full items-center justify-center bg-background">
+      <Empty>
+        <EmptyHeader>
+          <EmptyTitle>Workspace not found</EmptyTitle>
+          <EmptyDescription>This workspace doesn&apos;t exist or you don&apos;t have access to it.</EmptyDescription>
+        </EmptyHeader>
+        <Link to="/dashboard">
+          <Button>Back to Dashboard</Button>
+        </Link>
+      </Empty>
+    </div>
+  );
+}
 function WorkspaceDetailSkeleton() {
   return (
     <div className="min-h-screen bg-background">
@@ -44,28 +64,14 @@ function WorkspaceDetailSkeleton() {
 
 function RouteComponent() {
   const { workspaceId } = Route.useParams();
-  const { workspace, isPending: isLoadingWorkspace, error: workspaceError } = useWorkspace(workspaceId);
+  const { workspace, isPending: isLoadingWorkspace } = useWorkspace(workspaceId);
   const { items, isPending: isLoadingItems } = useItemHierarchy(workspaceId);
 
   if (isLoadingWorkspace || isLoadingItems) {
     return <WorkspaceDetailSkeleton />;
   }
 
-  if (workspaceError || !workspace) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Empty>
-          <EmptyHeader>
-            <EmptyTitle>Workspace not found</EmptyTitle>
-            <EmptyDescription>This workspace doesn&apos;t exist or you don&apos;t have access to it.</EmptyDescription>
-          </EmptyHeader>
-          <Link to="/dashboard">
-            <Button>Back to Dashboard</Button>
-          </Link>
-        </Empty>
-      </div>
-    );
-  }
+  if (!workspace) return <EmptyWorkspace />;
 
   const isPublic = workspace.visibility === 'PUBLIC';
 

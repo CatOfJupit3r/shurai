@@ -6,7 +6,11 @@ import { QuickSignIn } from '@~/features/dev-tools';
 
 import useLogin from '../hooks/use-login';
 
-export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () => unknown }) {
+interface iSignInFormProps {
+  onSwitchToSignUp: () => unknown;
+}
+
+export default function SignInForm({ onSwitchToSignUp }: iSignInFormProps) {
   const { mutate } = useLogin();
 
   const form = useAppForm({
@@ -19,6 +23,7 @@ export default function SignInForm({ onSwitchToSignUp }: { onSwitchToSignUp: () 
         username: value.username,
         password: value.password,
       });
+      // Redirect will happen automatically via beforeLoad hook in _to_dashboard route
     },
     validators: {
       onSubmit: z.object({
