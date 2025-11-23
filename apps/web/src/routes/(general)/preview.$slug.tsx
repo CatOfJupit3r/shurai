@@ -12,9 +12,8 @@ import { Skeleton } from '@~/components/ui/skeleton';
 import { WorkspaceNotFound } from '@~/components/workspace-not-found';
 import { usePublicItemHierarchy, usePublicWorkspace } from '@~/features/workspaces';
 
-export const Route = createFileRoute('/(general)/workspaces/$slug')({
+export const Route = createFileRoute('/(general)/preview/$slug')({
   component: RouteComponent,
-  notFoundComponent: WorkspaceNotFound,
   beforeLoad: async ({ context, params }) => {
     await tryCatch(async () =>
       Promise.all([
@@ -105,17 +104,8 @@ function RouteComponent() {
   const { workspace, isPending: isLoadingWorkspace, error: workspaceError } = usePublicWorkspace(slug);
   const { items, isPending: isLoadingItems, error: itemsError } = usePublicItemHierarchy(slug);
 
-  if (isLoadingWorkspace || isLoadingItems) {
-    return <PublicWorkspaceSkeleton />;
-  }
-
-  if (workspaceError ?? itemsError) {
-    throw workspaceError ?? itemsError;
-  }
-
-  if (!workspace) {
-    throw new Error('Workspace not found');
-  }
+  if (isLoadingWorkspace || isLoadingItems) return <PublicWorkspaceSkeleton />;
+  if (!workspace || workspaceError || itemsError) return <WorkspaceNotFound />;
 
   return (
     <div className="min-h-screen bg-background">

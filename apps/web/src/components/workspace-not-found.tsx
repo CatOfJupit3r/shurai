@@ -6,7 +6,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from './
 
 export function WorkspaceNotFound() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
+    <div className="flex h-full items-center justify-center bg-background">
       <Empty>
         <EmptyHeader>
           <EmptyMedia variant="icon">

@@ -1,21 +1,12 @@
-import { createORPCClient, onError } from '@orpc/client';
+import { createORPCClient } from '@orpc/client';
 import { RPCLink } from '@orpc/client/fetch';
 import type { ContractRouterClient, InferContractRouterOutputs } from '@orpc/contract';
 import { createIsomorphicFn } from '@tanstack/react-start';
 import { getRequestHeaders } from '@tanstack/react-start/server';
-import { isError } from 'lodash-es';
 
 import type { CONTRACT } from '@shurai/shared';
 
-import { getBackendURL, isOnClient } from './ssr-helpers';
-
-const INTERCEPTORS = [
-  onError((error) => {
-    if (!isOnClient) return;
-    if (isError(error) && error.message.includes('The operation was aborted')) return;
-    console.error(error);
-  }),
-] as ConstructorParameters<typeof RPCLink>[0]['interceptors'];
+import { getBackendURL } from './ssr-helpers';
 
 const getORPCClient = createIsomorphicFn()
   .client((): ContractRouterClient<typeof CONTRACT> => {
@@ -28,7 +19,6 @@ const getORPCClient = createIsomorphicFn()
           credentials: 'include',
         });
       },
-      interceptors: INTERCEPTORS,
     });
 
     return createORPCClient(link);
@@ -38,7 +28,6 @@ const getORPCClient = createIsomorphicFn()
     const link = new RPCLink({
       url: URL,
       headers: () => getRequestHeaders(),
-      interceptors: INTERCEPTORS,
     });
     return createORPCClient(link);
   });

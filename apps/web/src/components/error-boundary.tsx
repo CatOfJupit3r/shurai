@@ -48,7 +48,7 @@ export function ErrorBoundary({ error, reset }: iErrorBoundaryProps) {
             {error.stack ? (
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold">Stack Trace:</h3>
-                <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-xs">
+                <pre className="max-h-64 overflow-x-auto rounded-lg bg-muted p-4 text-xs">
                   <code>{error.stack}</code>
                 </pre>
               </div>
