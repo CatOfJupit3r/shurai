@@ -17,6 +17,8 @@ import { Input } from '@~/components/ui/input';
 import { Label } from '@~/components/ui/label';
 import type { iCanvasNode } from '@~/features/canvas';
 
+import { SingleSelect } from './ui/select';
+
 // Predefined global assets for the preview
 const PREVIEW_ASSETS = [
   {
@@ -323,19 +325,15 @@ export function HeroCanvasPreview() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="item-asset">Select Asset</Label>
-                  <select
+                  <SingleSelect
                     id="item-asset"
                     value={newItemAsset}
-                    onChange={(e) => setNewItemAsset(e.target.value)}
-                    className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Choose an asset</option>
-                    {PREVIEW_ASSETS.map((asset) => (
-                      <option key={asset.id} value={asset.id}>
-                        {asset.iconUrl} {asset.name}
-                      </option>
-                    ))}
-                  </select>
+                    onValueChange={(value) => (value ? setNewItemAsset(value) : undefined)}
+                    options={PREVIEW_ASSETS.map((asset) => ({
+                      value: asset.id,
+                      label: `${asset.iconUrl} ${asset.name}`,
+                    }))}
+                  />
                 </div>
                 <Button onClick={handleAddItem} disabled={!newItemName || !newItemAsset} className="w-full">
                   <FiPlus className="mr-2 h-4 w-4" />
@@ -346,7 +344,7 @@ export function HeroCanvasPreview() {
               {/* Items List */}
               <div className="space-y-2">
                 <Label htmlFor="items-list">Your Items</Label>
-                <div id="items-list" className="max-h-[300px] space-y-2 overflow-y-auto">
+                <div id="items-list" className="h-[300px] max-h-[300px] space-y-2 overflow-y-auto">
                   {items.length === 0 ? (
                     <div className="rounded-lg border border-dashed border-border p-6 text-center text-sm text-muted-foreground">
                       No items yet. Add some to get started!
