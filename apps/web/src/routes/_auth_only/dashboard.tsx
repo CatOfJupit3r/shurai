@@ -10,6 +10,9 @@ import { WorkspaceCard } from '@~/features/workspaces/components/workspace-card'
 
 export const Route = createFileRoute('/_auth_only/dashboard')({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.ensureQueryData(context.tanstackRPC.workspaces.listWorkspaces.queryOptions());
+  },
 });
 
 function WorkspaceListSkeleton() {

@@ -2,6 +2,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 import { FiChevronLeft } from 'react-icons/fi';
 
+import { tryCatch } from '@shurai/shared/helpers/std-utils';
+
 import { Button } from '@~/components/ui/button';
 import { TemplateGallery } from '@~/features/templates/components/template-gallery';
 import { TemplatePreviewModal } from '@~/features/templates/components/template-preview-modal';
@@ -9,6 +11,17 @@ import { useMe } from '@~/features/user';
 
 export const Route = createFileRoute('/_auth_only/templates')({
   component: RouteComponent,
+  beforeLoad: async ({ context }) => {
+    await tryCatch(async () =>
+      Promise.all([
+        context.queryClient.ensureQueryData(
+          context.tanstackRPC.templates.listTemplates.queryOptions({
+            input: {},
+          }),
+        ),
+      ]),
+    );
+  },
 });
 
 function RouteComponent() {

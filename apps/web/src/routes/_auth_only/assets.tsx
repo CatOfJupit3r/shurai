@@ -4,6 +4,9 @@ import { AssetLibraryPanel } from '@~/features/assets';
 
 export const Route = createFileRoute('/_auth_only/assets')({
   component: AssetsPage,
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.ensureQueryData(context.tanstackRPC.assets.listAssets.queryOptions({ input: {} }));
+  },
 });
 
 function AssetsPage() {

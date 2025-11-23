@@ -21,8 +21,17 @@ import {
 import type { iCanvasNodeData } from '@~/features/canvas';
 import { useWorkspace } from '@~/features/workspaces';
 
-export const Route = createFileRoute('/_auth_only/workspace/$workspaceId/canvas')({
+export const Route = createFileRoute('/_auth_only/workspaces/$workspaceId/canvas')({
   component: RouteComponent,
+  beforeLoad: async ({ context, params }) => {
+    await Promise.all([
+      context.queryClient.ensureQueryData(
+        context.tanstackRPC.canvas.getLayout.queryOptions({
+          input: { workspaceId: params.workspaceId },
+        }),
+      ),
+    ]);
+  },
 });
 
 function CanvasSkeleton() {
@@ -91,7 +100,7 @@ function RouteComponent() {
       const hasConfirmed = window.confirm('You have unsaved changes. Are you sure you want to leave?');
       if (!hasConfirmed) return;
     }
-    void navigate({ to: '/workspace/$workspaceId/builder', params: { workspaceId } });
+    void navigate({ to: '/workspaces/$workspaceId/builder', params: { workspaceId } });
   };
 
   const handleCreateLayout = () => {

@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { FiCopy, FiCheck, FiChevronDown, FiChevronRight } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
+import { tryCatch } from '@shurai/shared/helpers/std-utils';
+
 import { toastError, toastInfo } from '@~/components/toastifications/create-jsx-toasts';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
@@ -10,8 +12,24 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~
 import { Skeleton } from '@~/components/ui/skeleton';
 import { usePublicItemHierarchy, usePublicWorkspace } from '@~/features/workspaces';
 
-export const Route = createFileRoute('/(general)/workspace/$slug')({
+export const Route = createFileRoute('/(general)/workspaces/$slug')({
   component: RouteComponent,
+  beforeLoad: async ({ context, params }) => {
+    await tryCatch(async () =>
+      Promise.all([
+        context.queryClient.ensureQueryData(
+          context.tanstackRPC.workspaces.getWorkspaceBySlug.queryOptions({
+            input: { slug: params.slug },
+          }),
+        ),
+        context.queryClient.ensureQueryData(
+          context.tanstackRPC.items.getPublicItemHierarchy.queryOptions({
+            input: { slug: params.slug },
+          }),
+        ),
+      ]),
+    );
+  },
 });
 
 interface iItemNodeProps {
