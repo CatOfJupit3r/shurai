@@ -31,6 +31,7 @@ const SHORTCUTS: iShortcut[] = [
   { keys: ['Shift', '←', '↑', '→', '↓'], description: 'Move selected node (50px)', category: 'Navigation' },
   { keys: ['Tab'], description: 'Navigate through nodes list', category: 'Navigation' },
   { keys: ['Enter'], description: 'Select focused node', category: 'Navigation' },
+  { keys: ['Escape'], description: 'Deselect current node', category: 'Navigation' },
 
   // Editing
   { keys: ['Alt', '←', '↑', '→', '↓'], description: 'Resize selected node (10px)', category: 'Editing' },

@@ -3,7 +3,7 @@
  * Displays and allows editing of selected canvas node properties
  */
 import { useState } from 'react';
-import { FiImage, FiX } from 'react-icons/fi';
+import { FiImage, FiX, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 
 import { ASSET_TYPE } from '@shurai/shared';
 
@@ -195,12 +195,37 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
         </div>
 
         {/* Z-Index */}
-        {node.zIndex !== undefined && (
-          <div>
-            <div className="text-xs text-muted-foreground">Z-Index</div>
-            <p className="mt-1 text-sm font-medium">{node.zIndex}</p>
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-semibold">Layers</p>
+            <span className="text-xs text-muted-foreground">Z: {node.zIndex ?? 0}</span>
           </div>
-        )}
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onUpdate(node.id, { zIndex: Math.max(0, (node.zIndex ?? 0) - 1) })}
+              disabled={(node.zIndex ?? 0) === 0}
+              title="Send backward"
+              className="flex-1"
+            >
+              <FiArrowDown className="mr-2 h-4 w-4" />
+              Send Back
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => onUpdate(node.id, { zIndex: (node.zIndex ?? 0) + 1 })}
+              title="Bring forward"
+              className="flex-1"
+            >
+              <FiArrowUp className="mr-2 h-4 w-4" />
+              Bring Forward
+            </Button>
+          </div>
+        </div>
 
         {/* Asset Selection - Only show for ASSET type nodes */}
         {node.type === 'ASSET' && (

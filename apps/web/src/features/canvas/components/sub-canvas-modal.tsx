@@ -171,15 +171,17 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
             <div className="flex h-full items-center justify-center">
               <CanvasStage width={canvasSize.width} height={canvasSize.height} onStageClick={handleStageClick}>
                 <GridOverlay width={canvasSize.width} height={canvasSize.height} />
-                {nodes.map((node) => (
-                  <CanvasNode
-                    key={node.id}
-                    node={node}
-                    onNodeClick={handleNodeClick}
-                    onNodeDragEnd={handleNodeDragEnd}
-                    onNodeTransform={handleNodeTransform}
-                  />
-                ))}
+                {[...nodes]
+                  .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+                  .map((node) => (
+                    <CanvasNode
+                      key={node.id}
+                      node={node}
+                      onNodeClick={handleNodeClick}
+                      onNodeDragEnd={handleNodeDragEnd}
+                      onNodeTransform={handleNodeTransform}
+                    />
+                  ))}
               </CanvasStage>
             </div>
           )}

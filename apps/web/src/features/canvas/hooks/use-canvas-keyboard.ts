@@ -14,6 +14,7 @@ interface iUseCanvasKeyboardOptions {
   onNodeDelete?: (nodeId: string) => void;
   onUndo?: () => void;
   onResetSize?: (nodeId: string) => void;
+  onDeselect?: () => void;
   isEnabled?: boolean;
 }
 
@@ -29,6 +30,7 @@ export function useCanvasKeyboard({
   onNodeDelete,
   onUndo,
   onResetSize,
+  onDeselect,
   isEnabled = true,
 }: iUseCanvasKeyboardOptions) {
   const selectedNode = nodes.find((n) => n.id === selectedNodeId);
@@ -45,6 +47,13 @@ export function useCanvasKeyboard({
 
       const { key, ctrlKey: isCtrlPressed, metaKey: isMetaPressed, shiftKey: isShiftPressed, altKey: isAltPressed } = e;
       const isCmdPressed = isCtrlPressed || isMetaPressed;
+
+      // Escape to deselect
+      if (key === 'Escape' && onDeselect) {
+        e.preventDefault();
+        onDeselect();
+        return;
+      }
 
       // Undo (Ctrl/Cmd + Z)
       if (isCmdPressed && key === 'z' && !isShiftPressed && onUndo) {
@@ -140,7 +149,7 @@ export function useCanvasKeyboard({
         position: { x: newX, y: newY },
       });
     },
-    [isEnabled, selectedNode, onNodeUpdate, onNodeDelete, onUndo, onResetSize],
+    [isEnabled, selectedNode, onNodeUpdate, onNodeDelete, onUndo, onResetSize, onDeselect],
   );
 
   useEffect(() => {

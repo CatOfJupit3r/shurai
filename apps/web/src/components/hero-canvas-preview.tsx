@@ -7,7 +7,7 @@
 import type Konva from 'konva';
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import type { Ref } from 'react';
-import { FiPlus, FiTrash2, FiMove, FiMaximize2 } from 'react-icons/fi';
+import { FiPlus, FiTrash2, FiMove, FiMaximize2, FiArrowUp, FiArrowDown } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 import { Stage, Layer, Rect, Image as KonvaImage, Transformer, Text } from 'react-konva';
 
@@ -279,6 +279,25 @@ export function HeroCanvasPreview() {
     );
   }, []);
 
+  const handleNodeZIndexChange = useCallback((nodeId: string, direction: 'up' | 'down') => {
+    setCanvasNodes((prev) => {
+      const currentIndex = prev.findIndex((n) => n.id === nodeId);
+      if (currentIndex === -1) return prev;
+
+      const newNodes = [...prev];
+      if (direction === 'up' && currentIndex < prev.length - 1) {
+        // Move up in visual layer (increase zIndex)
+        [newNodes[currentIndex], newNodes[currentIndex + 1]] = [newNodes[currentIndex + 1], newNodes[currentIndex]];
+      } else if (direction === 'down' && currentIndex > 0) {
+        // Move down in visual layer (decrease zIndex)
+        [newNodes[currentIndex], newNodes[currentIndex - 1]] = [newNodes[currentIndex - 1], newNodes[currentIndex]];
+      }
+
+      // Update zIndex values based on new order
+      return newNodes.map((n, idx) => ({ ...n, zIndex: idx }));
+    });
+  }, []);
+
   const handleDeleteNode = useCallback(() => {
     if (!selectedNodeId) return;
     const node = canvasNodes.find((n) => n.id === selectedNodeId);
@@ -291,6 +310,32 @@ export function HeroCanvasPreview() {
 
   const selectedNode = useMemo(() => canvasNodes.find((n) => n.id === selectedNodeId), [canvasNodes, selectedNodeId]);
 
+  // Keyboard interactions
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!selectedNodeId) return;
+
+      // ESC to deselect
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        setSelectedNodeId(null);
+      }
+
+      // Delete or Backspace to remove node
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        const node = canvasNodes.find((n) => n.id === selectedNodeId);
+        if (node?.itemId) {
+          setItems((prev) => prev.map((i) => (i.id === node.itemId ? { ...i, addedToCanvas: false } : i)));
+        }
+        setCanvasNodes((prev) => prev.filter((n) => n.id !== selectedNodeId));
+        setSelectedNodeId(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedNodeId, canvasNodes]);
   return (
     <section className="border-b border-border py-16 sm:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
@@ -424,16 +469,18 @@ export function HeroCanvasPreview() {
                     ))}
 
                     {/* Canvas Nodes */}
-                    {canvasNodes.map((node) => (
-                      <CanvasNodeImage
-                        key={node.id}
-                        node={node}
-                        isSelected={selectedNodeId === node.id}
-                        onSelect={() => setSelectedNodeId(node.id)}
-                        onDragEnd={(e) => handleNodeDragEnd(node.id, e)}
-                        onTransformEnd={(e) => handleNodeTransformEnd(node.id, e)}
-                      />
-                    ))}
+                    {[...canvasNodes]
+                      .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+                      .map((node) => (
+                        <CanvasNodeImage
+                          key={node.id}
+                          node={node}
+                          isSelected={selectedNodeId === node.id}
+                          onSelect={() => setSelectedNodeId(node.id)}
+                          onDragEnd={(e) => handleNodeDragEnd(node.id, e)}
+                          onTransformEnd={(e) => handleNodeTransformEnd(node.id, e)}
+                        />
+                      ))}
                   </Layer>
                 </Stage>
 
@@ -448,7 +495,7 @@ export function HeroCanvasPreview() {
               </div>
 
               {/* Inspector Panel */}
-              {selectedNode ? (
+              {selectedNode && selectedNodeId ? (
                 <div className="mt-4 space-y-3 rounded-lg border border-border bg-muted/30 p-4">
                   <div className="flex items-center justify-between">
                     <Label htmlFor="inspector-details" className="text-sm font-semibold">
@@ -475,6 +522,33 @@ export function HeroCanvasPreview() {
                     <div>
                       <span className="text-muted-foreground">Rotation:</span> {Math.round(selectedNode.rotation ?? 0)}°
                     </div>
+                    <div>
+                      <span className="text-muted-foreground">Z-Index:</span> {selectedNode.zIndex ?? 0}
+                    </div>
+                  </div>
+
+                  {/* Z-Index Controls */}
+                  <div className="flex gap-2 border-t border-border pt-3">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNodeZIndexChange(selectedNodeId, 'down')}
+                      disabled={selectedNode.zIndex === 0}
+                      title="Send backward"
+                    >
+                      <FiArrowDown className="mr-1 h-3 w-3" />
+                      Send Back
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleNodeZIndexChange(selectedNodeId, 'up')}
+                      disabled={selectedNode.zIndex === canvasNodes.length - 1}
+                      title="Bring forward"
+                    >
+                      <FiArrowUp className="mr-1 h-3 w-3" />
+                      Bring Forward
+                    </Button>
                   </div>
                 </div>
               ) : null}
@@ -485,6 +559,9 @@ export function HeroCanvasPreview() {
         <div className="mt-8 text-center text-sm text-muted-foreground">
           <p>
             💡 <strong>Tip:</strong> This is a live preview. Changes are not saved. Sign up to create real workspaces!
+          </p>
+          <p className="mt-2 text-xs">
+            <strong>Keyboard shortcuts:</strong> ESC to deselect • Delete/Backspace to remove selected item
           </p>
         </div>
       </div>

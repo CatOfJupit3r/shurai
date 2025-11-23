@@ -301,6 +301,10 @@ function RouteComponent() {
     onNodeDelete: handleNodeDelete,
     onUndo: handleUndo,
     onResetSize: handleResetSize,
+    onDeselect: () => {
+      setSelectedNodeId(null);
+      setIsInspectorOpen(false);
+    },
     isEnabled: !isShortcutsModalOpen && !isSubCanvasOpen,
   });
 
@@ -472,16 +476,18 @@ function RouteComponent() {
             <div className="flex h-full items-center justify-center">
               <CanvasStage width={canvasSize.width} height={canvasSize.height} onStageClick={handleStageClick}>
                 <GridOverlay width={canvasSize.width} height={canvasSize.height} />
-                {nodes.map((node) => (
-                  <CanvasNode
-                    key={node.id}
-                    node={node}
-                    onNodeClick={handleNodeClick}
-                    onNodeDoubleClick={handleNodeDoubleClick}
-                    onNodeDragEnd={handleNodeDragEnd}
-                    onNodeTransform={handleNodeTransform}
-                  />
-                ))}
+                {[...nodes]
+                  .sort((a, b) => (a.zIndex ?? 0) - (b.zIndex ?? 0))
+                  .map((node) => (
+                    <CanvasNode
+                      key={node.id}
+                      node={node}
+                      onNodeClick={handleNodeClick}
+                      onNodeDoubleClick={handleNodeDoubleClick}
+                      onNodeDragEnd={handleNodeDragEnd}
+                      onNodeTransform={handleNodeTransform}
+                    />
+                  ))}
               </CanvasStage>
             </div>
           )}
