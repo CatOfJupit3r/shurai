@@ -1,6 +1,7 @@
 # Canvas Feature Implementation
 
 ## Overview
+
 This feature implements a React-Konva based canvas view for workspace items with Jotai state management, TanStack Query for data fetching, and comprehensive dirty state tracking.
 
 ## Required Dependencies
@@ -22,11 +23,13 @@ The following packages need to be installed in `apps/web/package.json`:
 Due to a current issue with Bun 1.3.3, packages cannot be installed automatically. Please use one of these methods:
 
 ### Method 1: Docker with Bun 1.2.21
+
 ```bash
 docker run --rm -v "$(pwd):/app" -w /app oven/bun:1.1.29 bun install
 ```
 
 ### Method 2: Use NPM (with corepack)
+
 ```bash
 corepack enable
 corepack prepare yarn@bun@1.2.21 --activate
@@ -34,6 +37,7 @@ yarn install
 ```
 
 ### Method 3: Manual Installation
+
 Add the packages to `package.json` and run bun install when the environment issue is resolved.
 
 ## Structure
@@ -87,11 +91,11 @@ import {
 function CanvasEditor({ workspaceId }: { workspaceId: string }) {
   const { layout, isPending } = useCanvasLayout(workspaceId);
   const [nodes, setNodes] = useState<iCanvasNode[]>([]);
-  
+
   useEffect(() => {
     if (layout?.nodes) setNodes(layout.nodes);
   }, [layout?.nodes]);
-  
+
   const dirtyState = useCanvasDirtyState({
     workspaceId,
     currentNodes: nodes,
@@ -126,14 +130,17 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
 ### Hooks
 
 #### Query Hooks
+
 - `useCanvasLayout(workspaceId: string)` - Fetch canvas layout
 - `useContentCanvas(contentCanvasId: string | null)` - Fetch content canvas
 
 #### Mutation Hooks
+
 - `useSaveCanvasLayout()` - Save canvas layout with optimistic updates
 - `useResetCanvasLayout()` - Reset canvas to default state
 
 #### State Management Hooks
+
 - `useCanvasDirtyState(options)` - Manage dirty state and provide save/reset actions
 - `useCanvasAutosave(options)` - Auto-save with debouncing
 - `useCanvasNavigationGuard(options)` - Block navigation with unsaved changes

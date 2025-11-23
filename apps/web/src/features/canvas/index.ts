@@ -22,3 +22,6 @@ export { SubCanvasModal } from './components/sub-canvas-modal';
 
 // Store exports
 export * from './store/canvas-atoms';
+
+// Utilities
+export * from './utils';
