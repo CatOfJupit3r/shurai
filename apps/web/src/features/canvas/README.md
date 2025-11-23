@@ -151,7 +151,7 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
 
 - `useCanvasKeyboard(options)` - Keyboard shortcuts for canvas navigation and editing
   - Arrow keys: Move selected node (10px, 50px with Shift)
-  - Alt+Arrow keys: Resize selected node (10px, 50px with Shift)  
+  - Alt+Arrow keys: Resize selected node (10px, 50px with Shift)
   - Delete/Backspace: Delete selected node
   - Ctrl+Z: Undo last change
   - Ctrl+0: Reset node size to default
@@ -160,6 +160,7 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
 ### Components
 
 #### Canvas Components
+
 - `CanvasStage` - Main Konva stage with zoom and pan controls
 - `CanvasNode` - Individual node renderer with drag, transform support
 - `GridOverlay` - Visual grid overlay for alignment
@@ -167,6 +168,7 @@ function CanvasEditor({ workspaceId }: { workspaceId: string }) {
 - `SubCanvasModal` - Modal for editing nested content canvases
 
 #### Accessibility Components
+
 - `CanvasNodesList` - Accessible list view of all canvas nodes with ARIA labels
   - Keyboard navigation with arrow keys
   - Visual indication of selected node
@@ -182,6 +184,7 @@ See [USAGE.md](./USAGE.md) for detailed API documentation and examples.
 The canvas is fully accessible via keyboard:
 
 ### Keyboard Shortcuts
+
 - **Arrow Keys**: Move selected node (10px step, 50px with Shift)
 - **Alt + Arrow Keys**: Resize selected node (10px step, 50px with Shift)
 - **Delete / Backspace**: Delete selected node
@@ -191,6 +194,7 @@ The canvas is fully accessible via keyboard:
 - **Scroll Wheel**: Zoom in/out on canvas
 
 ### Accessibility Features
+
 - Focusable nodes list with ARIA labels
 - Screen reader announcements for all actions
 - Toast notifications for user feedback

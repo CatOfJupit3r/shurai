@@ -36,6 +36,7 @@ const workspaceErrorCodes = {
   CANVAS_LAYOUT_NOT_FOUND: 'CANVAS_LAYOUT_NOT_FOUND',
   CANVAS_DEPTH_LIMIT_EXCEEDED: 'CANVAS_DEPTH_LIMIT_EXCEEDED',
   CANVAS_INVALID_NODE_REFERENCE: 'CANVAS_INVALID_NODE_REFERENCE',
+  CANVAS_PAYLOAD_TOO_LARGE: 'CANVAS_PAYLOAD_TOO_LARGE',
 } as const;
 
 const workspaceErrorMessages = {
@@ -58,6 +59,7 @@ const workspaceErrorMessages = {
   [workspaceErrorCodes.CANVAS_LAYOUT_NOT_FOUND]: 'Canvas layout not found',
   [workspaceErrorCodes.CANVAS_DEPTH_LIMIT_EXCEEDED]: 'Canvas depth limit exceeded (max depth: 1)',
   [workspaceErrorCodes.CANVAS_INVALID_NODE_REFERENCE]: 'Canvas node contains invalid item, asset, or sub-canvas reference',
+  [workspaceErrorCodes.CANVAS_PAYLOAD_TOO_LARGE]: 'Canvas layout payload exceeds maximum size limit',
 };
 
 export const errorCodes = {
