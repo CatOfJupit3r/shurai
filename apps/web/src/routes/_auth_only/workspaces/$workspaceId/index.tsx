@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { FiEdit, FiExternalLink, FiEye, FiEyeOff, FiMaximize2 } from 'react-icons/fi';
+import { FiEdit, FiExternalLink, FiEye, FiEyeOff, FiMaximize2, FiSettings } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
 import { tryCatch } from '@shurai/shared/helpers/std-utils';
@@ -125,6 +125,13 @@ function RouteComponent() {
                   <FiMaximize2 className="mr-2" />
                   Open Canvas
                   <span className="ml-auto text-xs text-muted-foreground">Visual layout editor</span>
+                </Link>
+              </Button>
+              <Button variant="outline" className="w-full justify-start" size="lg" asChild>
+                <Link to="/workspaces/$workspaceId/edit" params={{ workspaceId }}>
+                  <FiSettings className="mr-2" />
+                  Workspace Settings
+                  <span className="ml-auto text-xs text-muted-foreground">Edit title, visibility, etc.</span>
                 </Link>
               </Button>
               {isPublic && workspace.shareableSlug ? (
