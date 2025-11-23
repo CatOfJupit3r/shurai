@@ -4,6 +4,7 @@ import { HiOutlineSparkles } from 'react-icons/hi';
 import { LuRocket, LuServerCog } from 'react-icons/lu';
 import { TbLayoutDashboard } from 'react-icons/tb';
 
+import { HeroCanvasPreview } from '@~/components/hero-canvas-preview';
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
@@ -121,6 +122,9 @@ function HomeComponent() {
           </div>
         </div>
       </section>
+
+      {/* Canvas and Item Management Preview */}
+      <HeroCanvasPreview />
 
       {/* Features Section */}
       <section className="border-b border-border py-16 sm:py-24">
