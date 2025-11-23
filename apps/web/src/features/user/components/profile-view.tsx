@@ -6,6 +6,7 @@ import { Button } from '@~/components/ui/button';
 import { Card, CardContent } from '@~/components/ui/card';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@~/components/ui/tabs';
+import { formatDateYearMonth } from '@~/utils/date';
 
 import { useMe } from '../hooks/use-me';
 import { useUserProfile } from '../hooks/use-user-profile';
@@ -47,12 +48,7 @@ export function ProfileView() {
                   <div className="mt-3 flex flex-wrap gap-2 text-xs text-muted-foreground">
                     {user?.createdAt ? (
                       <div className="flex items-center gap-1">
-                        <LuCalendar className="h-3 w-3" />
-                        Joined{' '}
-                        {new Date(user.createdAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'short',
-                        })}
+                        <LuCalendar className="h-3 w-3" /> Joined {formatDateYearMonth(user.createdAt)}
                       </div>
                     ) : null}
                   </div>

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/co
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
 import { useItemHierarchy, useWorkspace } from '@~/features/workspaces';
+import { formatDateLong } from '@~/utils/date';
 
 export const Route = createFileRoute('/_auth_only/workspaces/$workspaceId/')({
   component: RouteComponent,
@@ -164,23 +165,11 @@ function RouteComponent() {
               </div>
               <div className="border-t pt-4">
                 <h3 className="mb-2 font-semibold">Last Updated</h3>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(workspace.updatedAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
+                <p className="text-sm text-muted-foreground">{formatDateLong(workspace.updatedAt)}</p>
               </div>
               <div className="border-t pt-4">
                 <h3 className="mb-2 font-semibold">Created</h3>
-                <p className="text-sm text-muted-foreground">
-                  {new Date(workspace.createdAt).toLocaleDateString(undefined, {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric',
-                  })}
-                </p>
+                <p className="text-sm text-muted-foreground">{formatDateLong(workspace.createdAt)}</p>
               </div>
             </CardContent>
           </Card>

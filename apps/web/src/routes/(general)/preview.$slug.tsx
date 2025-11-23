@@ -11,6 +11,7 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~
 import { Skeleton } from '@~/components/ui/skeleton';
 import { WorkspaceNotFound } from '@~/components/workspace-not-found';
 import { usePublicItemHierarchy, usePublicWorkspace } from '@~/features/workspaces';
+import { formatDateShort, formatDateLong } from '@~/utils/date';
 
 export const Route = createFileRoute('/(general)/preview/$slug')({
   component: RouteComponent,
@@ -69,7 +70,7 @@ function ItemNode({ item, level }: iItemNodeProps) {
           <p className="text-sm font-medium">{item.name}</p>
           {!!item.description && <p className="text-xs text-muted-foreground">{item.description}</p>}
           {!!item.acquireDate && (
-            <p className="text-xs text-muted-foreground">Acquired: {new Date(item.acquireDate).toLocaleDateString()}</p>
+            <p className="text-xs text-muted-foreground">Acquired: {formatDateShort(item.acquireDate)}</p>
           )}
         </div>
       </div>
@@ -167,23 +168,11 @@ function RouteComponent() {
                 </div>
                 <div>
                   <h3 className="mb-2 font-semibold">Last Updated</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(workspace.updatedAt).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formatDateLong(workspace.updatedAt)}</p>
                 </div>
                 <div>
                   <h3 className="mb-2 font-semibold">Created</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(workspace.createdAt).toLocaleDateString(undefined, {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                    })}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{formatDateLong(workspace.createdAt)}</p>
                 </div>
               </CardContent>
             </Card>

@@ -3,6 +3,7 @@ import { FiClock, FiGlobe, FiLock, FiTrash2 } from 'react-icons/fi';
 import { Badge } from '@~/components/ui/badge';
 import { Button } from '@~/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
+import { formatDateShort } from '@~/utils/date';
 
 interface iTemplateCardProps {
   template: {
@@ -62,7 +63,7 @@ export function TemplateCard({ template, currentUserId, onSelect, onDelete, isDe
       <CardContent className="space-y-4">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <FiClock className="size-4" />
-          <span>Updated {new Date(template.updatedAt).toLocaleDateString()}</span>
+          <span>Updated {formatDateShort(template.updatedAt)}</span>
         </div>
 
         <div className="flex items-center justify-between gap-3 pt-2">

@@ -4,6 +4,7 @@ import { Alert, AlertDescription, AlertTitle } from '@~/components/ui/alert';
 import { Badge } from '@~/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@~/components/ui/card';
 import { Skeleton } from '@~/components/ui/skeleton';
+import { formatDateShort } from '@~/utils/date';
 
 import { useAllAchievements } from '../hooks/use-all-achievements';
 import { useMyAchievements } from '../hooks/use-my-achievements';
@@ -108,7 +109,7 @@ export function AchievementsPanel() {
                     <p className="text-sm text-muted-foreground">{achievement.description}</p>
                     {isUnlocked && userAchievement ? (
                       <p className="mt-2 text-xs text-muted-foreground">
-                        Unlocked on {new Date(userAchievement.unlockedAt).toLocaleDateString()}
+                        Unlocked on {formatDateShort(userAchievement.unlockedAt)}
                       </p>
                     ) : null}
                   </div>
