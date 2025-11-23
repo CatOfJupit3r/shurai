@@ -16,6 +16,7 @@ import {
   CanvasNode,
   GridOverlay,
   InspectorPanel,
+  SubCanvasModal,
 } from '@~/features/canvas';
 import type { iCanvasNodeData } from '@~/features/canvas';
 import { useWorkspace } from '@~/features/workspaces';
@@ -70,6 +71,11 @@ function RouteComponent() {
   const [isGridEnabled, setIsGridEnabled] = useState(true);
   const canvasSize = { width: 1920, height: 1080 };
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Sub-canvas modal state
+  const [isSubCanvasOpen, setIsSubCanvasOpen] = useState(false);
+  const [selectedSubCanvasId, setSelectedSubCanvasId] = useState<string | null>(null);
+  const [selectedSubCanvasParentName, setSelectedSubCanvasParentName] = useState<string>('');
 
   // Sync nodes from fetched layout
   useEffect(() => {
@@ -131,6 +137,20 @@ function RouteComponent() {
     setIsInspectorOpen(true);
   }, []);
 
+  const handleNodeDoubleClick = useCallback(
+    (nodeId: string) => {
+      const node = nodes.find((n) => n.id === nodeId);
+      if (node?.type === 'SUB_CANVAS' && node.subCanvasId) {
+        // Find the content canvas name from layout
+        const contentCanvas = layout?.contentCanvases?.find((c) => c._id === node.subCanvasId);
+        setSelectedSubCanvasId(node.subCanvasId);
+        setSelectedSubCanvasParentName(contentCanvas?.name ?? 'Content Canvas');
+        setIsSubCanvasOpen(true);
+      }
+    },
+    [nodes, layout],
+  );
+
   const handleNodeDragEnd = useCallback((nodeId: string, newPosition: { x: number; y: number }) => {
     setNodes((prev) => prev.map((node) => (node.id === nodeId ? { ...node, position: newPosition } : node)));
     setHasUnsavedChanges(true);
@@ -163,6 +183,12 @@ function RouteComponent() {
   const handleStageClick = useCallback(() => {
     setSelectedNodeId(null);
     setIsInspectorOpen(false);
+  }, []);
+
+  const handleCloseSubCanvas = useCallback(() => {
+    setIsSubCanvasOpen(false);
+    setSelectedSubCanvasId(null);
+    setSelectedSubCanvasParentName('');
   }, []);
 
   if (isLoadingWorkspace || isLoadingLayout) {
@@ -241,6 +267,7 @@ function RouteComponent() {
                     key={node.id}
                     node={node}
                     onNodeClick={handleNodeClick}
+                    onNodeDoubleClick={handleNodeDoubleClick}
                     onNodeDragEnd={handleNodeDragEnd}
                     onNodeTransform={handleNodeTransform}
                   />
@@ -262,6 +289,14 @@ function RouteComponent() {
           />
         ) : null}
       </div>
+
+      {/* Sub-Canvas Modal */}
+      <SubCanvasModal
+        isOpen={isSubCanvasOpen}
+        onClose={handleCloseSubCanvas}
+        contentCanvasId={selectedSubCanvasId}
+        parentItemName={selectedSubCanvasParentName}
+      />
     </div>
   );
 }

@@ -24,6 +24,7 @@ export interface iCanvasNodeData {
 interface iCanvasNodeProps {
   node: iCanvasNodeData;
   onNodeClick?: (nodeId: string) => void;
+  onNodeDoubleClick?: (nodeId: string) => void;
   onNodeDragEnd?: (nodeId: string, newPosition: { x: number; y: number }) => void;
   onNodeTransform?: (
     nodeId: string,
@@ -31,7 +32,7 @@ interface iCanvasNodeProps {
   ) => void;
 }
 
-export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }: iCanvasNodeProps) {
+export function CanvasNode({ node, onNodeClick, onNodeDoubleClick, onNodeDragEnd, onNodeTransform }: iCanvasNodeProps) {
   const [selectedNodeId, setSelectedNodeId] = useAtom(selectedNodeIdAtom);
   const [hoveredNodeId, setHoveredNodeId] = useAtom(hoveredNodeIdAtom);
   const shapeRef = useRef<Konva.Rect>(null);
@@ -51,6 +52,11 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
     e.cancelBubble = true;
     setSelectedNodeId(node.id);
     onNodeClick?.(node.id);
+  };
+
+  const handleDoubleClick = (e: Konva.KonvaEventObject<MouseEvent>) => {
+    e.cancelBubble = true;
+    onNodeDoubleClick?.(node.id);
   };
 
   const handleDragEnd = (e: Konva.KonvaEventObject<DragEvent>) => {
@@ -109,6 +115,7 @@ export function CanvasNode({ node, onNodeClick, onNodeDragEnd, onNodeTransform }
         strokeWidth={2}
         draggable
         onClick={handleClick}
+        onDblClick={handleDoubleClick}
         onMouseEnter={() => setHoveredNodeId(node.id)}
         onMouseLeave={() => setHoveredNodeId(null)}
         onDragEnd={handleDragEnd}

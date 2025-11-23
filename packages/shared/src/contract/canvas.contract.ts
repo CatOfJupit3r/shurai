@@ -149,11 +149,27 @@ const getPublicLayout = oc
   )
   .output(CANVAS_LAYOUT_SCHEMA);
 
+const getContentCanvas = authProcedure
+  .route({
+    path: '/content-canvas/:contentCanvasId',
+    method: 'GET',
+    summary: 'Get content canvas by ID',
+    description:
+      'Retrieves a specific content canvas (sub-canvas) by its ID. Only accessible if the user owns the parent workspace or the workspace is public. Content canvases are limited to a maximum depth of 1 and represent nested layouts within workspace items. Returns CANVAS_LAYOUT_NOT_FOUND if the content canvas does not exist or user lacks access.',
+  })
+  .input(
+    z.object({
+      contentCanvasId: z.string(),
+    }),
+  )
+  .output(CONTENT_CANVAS_SCHEMA);
+
 const canvasContract = oc.prefix('/canvas').router({
   getLayout,
   saveLayout,
   resetLayout,
   getPublicLayout,
+  getContentCanvas,
 });
 
 export default canvasContract;

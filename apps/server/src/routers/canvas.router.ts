@@ -32,4 +32,11 @@ export const canvasRouter = base.canvas.router({
 
     return canvasService.getPublicLayout(slug);
   }),
+
+  getContentCanvas: protectedProcedure.canvas.getContentCanvas.handler(async ({ context, input }) => {
+    const userId = context.session.user.id;
+    const { contentCanvasId } = input;
+
+    return canvasService.getContentCanvas(contentCanvasId, userId);
+  }),
 });
