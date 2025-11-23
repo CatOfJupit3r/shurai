@@ -287,6 +287,37 @@ class CanvasService {
 
     return { success: true };
   }
+
+  /**
+   * Gets a specific content canvas by ID
+   */
+  async getContentCanvas(contentCanvasId: string, userId: string) {
+    const contentCanvas = await WorkspaceContentCanvasModel.findById(contentCanvasId);
+
+    if (!contentCanvas) {
+      throw ORPCNotFoundError(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
+    }
+
+    // Check access: user must own the workspace or it must be public
+    const workspace = await WorkspaceModel.findById(contentCanvas.workspaceId);
+    if (!workspace) {
+      throw ORPCNotFoundError(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
+    }
+
+    if (workspace.userId !== userId && workspace.visibility !== 'PUBLIC') {
+      throw ORPCNotFoundError(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
+    }
+
+    return {
+      _id: contentCanvas._id,
+      name: contentCanvas.name,
+      description: contentCanvas.description,
+      nodes: contentCanvas.nodes,
+      backgroundColor: contentCanvas.backgroundColor,
+      createdAt: contentCanvas.createdAt,
+      updatedAt: contentCanvas.updatedAt,
+    };
+  }
 }
 
 export const canvasService = new CanvasService();
