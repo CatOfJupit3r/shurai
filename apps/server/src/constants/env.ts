@@ -40,6 +40,9 @@ const envSchema = z.object({
   SERVER_PORT: z.coerce.number().int().min(1).max(65535).optional().default(5050),
   SERVER_HOST: z.string().optional().default('localhost'),
   CORS_ORIGIN: z.url().optional().default(''),
+
+  // POPULATION CONFIG
+  POPULATE_ON_EMPTY: z.enum(['ASSETS', 'FULL', 'NONE']).optional().default('NONE'),
 });
 
 const env = envSchema.safeParse(process.env);
