@@ -30,9 +30,17 @@ interface iAssetPickerModalProps {
   onSelect: (assetId: string) => void;
   selectedAssetId?: string;
   filterTypes?: AssetType[];
+  allowUpload?: boolean;
 }
 
-export function AssetPickerModal({ isOpen, onClose, onSelect, selectedAssetId, filterTypes }: iAssetPickerModalProps) {
+export function AssetPickerModal({
+  isOpen,
+  onClose,
+  onSelect,
+  selectedAssetId,
+  filterTypes,
+  allowUpload = true,
+}: iAssetPickerModalProps) {
   const [activeTab, setActiveTab] = useState<'MY_ASSETS' | 'GLOBAL'>('MY_ASSETS');
   const [filterType, setFilterType] = useState<AssetType | 'ALL'>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -80,7 +88,9 @@ export function AssetPickerModal({ isOpen, onClose, onSelect, selectedAssetId, f
           <DialogHeader>
             <DialogTitle>Select Asset</DialogTitle>
             <DialogDescription>
-              Choose an asset from your library or the global collection. You can also create a new asset.
+              {allowUpload
+                ? 'Choose an asset from your library or the global collection. You can also create a new asset.'
+                : 'Choose an asset from your library or the global collection.'}
             </DialogDescription>
           </DialogHeader>
 
@@ -91,12 +101,12 @@ export function AssetPickerModal({ isOpen, onClose, onSelect, selectedAssetId, f
                 <TabsTrigger value="GLOBAL">Global</TabsTrigger>
               </TabsList>
 
-              {activeTab === 'MY_ASSETS' && (
+              {activeTab === 'MY_ASSETS' && allowUpload ? (
                 <Button size="sm" onClick={() => setIsUploadModalOpen(true)}>
                   <FiPlus className="mr-2 size-4" />
                   New Asset
                 </Button>
-              )}
+              ) : null}
             </div>
 
             {/* Search and Filter */}
