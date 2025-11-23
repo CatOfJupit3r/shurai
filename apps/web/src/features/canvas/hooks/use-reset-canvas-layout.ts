@@ -5,7 +5,7 @@ import { tanstackRPC } from '@~/utils/tanstack-orpc';
 
 import type { CanvasLayoutQueryReturnType } from './use-canvas-layout';
 
-export const saveCanvasLayoutMutationOptions = tanstackRPC.canvas.saveLayout.mutationOptions({
+export const resetCanvasLayoutMutationOptions = tanstackRPC.canvas.resetLayout.mutationOptions({
   async onMutate(variables, ctx) {
     const key = tanstackRPC.canvas.getLayout.queryKey({ input: { workspaceId: variables.workspaceId } });
 
@@ -13,8 +13,9 @@ export const saveCanvasLayoutMutationOptions = tanstackRPC.canvas.saveLayout.mut
 
     const previous = ctx.client.getQueryData<CanvasLayoutQueryReturnType>(key);
 
-    // Note: We don't do optimistic updates for complex nested structures
-    // Just cancel queries and let onSuccess handle the update
+    // Optimistically clear the layout (remove from cache)
+    ctx.client.removeQueries({ queryKey: key });
+
     return { previous };
   },
   onError: (_error, variables, context, ctx) => {
@@ -26,21 +27,22 @@ export const saveCanvasLayoutMutationOptions = tanstackRPC.canvas.saveLayout.mut
       void ctx.client.invalidateQueries({ queryKey: key });
     }
 
-    toastError('Save Failed', 'Failed to save canvas layout');
+    toastError('Reset Failed', 'Failed to reset canvas layout');
   },
-  onSuccess: (data, variables, _context, ctx) => {
+  onSuccess: (_data, variables, _context, ctx) => {
     const key = tanstackRPC.canvas.getLayout.queryKey({ input: { workspaceId: variables.workspaceId } });
 
-    ctx.client.setQueryData<CanvasLayoutQueryReturnType>(key, data);
-    toastSuccess('Layout Saved', 'Canvas layout saved successfully');
+    // Invalidate to fetch the fresh reset state
+    void ctx.client.invalidateQueries({ queryKey: key });
+    toastSuccess('Layout Reset', 'Canvas layout reset successfully');
   },
 });
 
-export function useSaveCanvasLayout() {
-  const { mutate: saveLayout, isPending } = useMutation(saveCanvasLayoutMutationOptions);
+export function useResetCanvasLayout() {
+  const { mutate: resetLayout, isPending } = useMutation(resetCanvasLayoutMutationOptions);
 
   return {
-    saveLayout,
+    resetLayout,
     isPending,
   };
 }

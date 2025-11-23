@@ -74,3 +74,23 @@ export const canvasStateAtom = atom<iCanvasState>((get) => ({
   gridSize: get(gridSizeAtom),
   showGuides: get(showGuidesAtom),
 }));
+
+// Dirty state tracking for unsaved changes
+export const isDirtyAtom = atom<boolean>(false);
+
+// Snapshot of last saved state for comparison
+export const lastSavedNodesAtom = atom<iCanvasNode[]>([]);
+
+// Content canvas interface
+export interface iContentCanvas {
+  _id: string;
+  name: string;
+  description?: string;
+  nodes: iCanvasNode[];
+  backgroundColor?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Snapshot of last saved content canvases
+export const lastSavedContentCanvasesAtom = atom<iContentCanvas[]>([]);
