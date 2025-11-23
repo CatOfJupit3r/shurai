@@ -66,6 +66,12 @@ export function WorkspaceCard({ workspace }: iWorkspaceCardProps) {
 
       <CardFooter className="flex gap-2">
         <Button variant="default" size="sm" className="flex-1" asChild>
+          <Link to="/workspaces/$workspaceId" params={{ workspaceId: workspace._id }}>
+            <FiEye />
+            View
+          </Link>
+        </Button>
+        <Button variant="outline" size="sm" asChild>
           <Link to="/workspaces/$workspaceId/builder" params={{ workspaceId: workspace._id }}>
             <FiEdit />
             Edit
@@ -76,10 +82,9 @@ export function WorkspaceCard({ workspace }: iWorkspaceCardProps) {
             variant="outline"
             size="sm"
             tooltip="View public page"
-            onClick={() => window.open(`/public/${workspace.shareableSlug}`, '_blank')}
+            onClick={() => window.open(`/workspaces/${workspace.shareableSlug}`, '_blank')}
           >
             <FiExternalLink />
-            Share
           </Button>
         ) : null}
       </CardFooter>

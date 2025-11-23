@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
 import { FiPlus } from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 
@@ -6,6 +7,7 @@ import { Button } from '@~/components/ui/button';
 import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Skeleton } from '@~/components/ui/skeleton';
 import { useWorkspacesList } from '@~/features/workspaces';
+import { CreateWorkspaceModal } from '@~/features/workspaces/components/create-workspace-modal';
 import { WorkspaceCard } from '@~/features/workspaces/components/workspace-card';
 
 export const Route = createFileRoute('/_auth_only/dashboard')({
@@ -40,7 +42,7 @@ function WorkspaceListSkeleton() {
   );
 }
 
-function EmptyWorkspaces() {
+function EmptyWorkspaces({ onCreateWorkspace }: { onCreateWorkspace: () => unknown }) {
   return (
     <Empty>
       <EmptyHeader>
@@ -55,7 +57,7 @@ function EmptyWorkspaces() {
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
-        <Button size="lg" onClick={() => console.log('Create workspace')}>
+        <Button size="lg" onClick={onCreateWorkspace}>
           <FiPlus />
           Create Workspace
         </Button>
@@ -64,7 +66,7 @@ function EmptyWorkspaces() {
   );
 }
 
-function WorkspacesContent() {
+function WorkspacesContent({ onCreateWorkspace }: { onCreateWorkspace: () => unknown }) {
   const { workspaces, isPending, error } = useWorkspacesList();
 
   if (isPending) {
@@ -83,7 +85,7 @@ function WorkspacesContent() {
   }
 
   if (workspaces.length === 0) {
-    return <EmptyWorkspaces />;
+    return <EmptyWorkspaces onCreateWorkspace={onCreateWorkspace} />;
   }
 
   return (
@@ -97,6 +99,7 @@ function WorkspacesContent() {
 
 function RouteComponent() {
   const { workspaces, isPending } = useWorkspacesList();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -112,7 +115,7 @@ function RouteComponent() {
                   : 'Create and manage your PC workspaces'}
               </p>
             </div>
-            <Button onClick={() => console.log('Create workspace')}>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
               <FiPlus />
               New Workspace
             </Button>
@@ -122,8 +125,11 @@ function RouteComponent() {
 
       {/* Main Content */}
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        <WorkspacesContent />
+        <WorkspacesContent onCreateWorkspace={() => setIsCreateModalOpen(true)} />
       </div>
+
+      {/* Create Workspace Modal */}
+      <CreateWorkspaceModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} />
     </div>
   );
 }
