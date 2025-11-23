@@ -722,4 +722,242 @@ describe('Canvas API Contract Tests', () => {
       expect(layout.updatedAt.getTime()).toBeGreaterThan(layout.createdAt.getTime());
     });
   });
+
+  describe('getContentCanvas', () => {
+    it('should retrieve a content canvas by ID when user owns the workspace', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Test Workspace with Content Canvas',
+          description: 'Testing content canvas retrieval',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Create a layout with a content canvas
+      const contentCanvas = {
+        _id: 'content-canvas-1',
+        name: 'Component Details',
+        description: 'Detailed component layout',
+        nodes: [
+          {
+            id: 'node-1',
+            type: 'ITEM' as const,
+            position: { x: 100, y: 100 },
+            size: { width: 200, height: 200 },
+            itemId: 'item-1',
+          },
+        ],
+        backgroundColor: '#f5f5f5',
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [
+            {
+              id: 'main-node-1',
+              type: 'SUB_CANVAS' as const,
+              position: { x: 0, y: 0 },
+              size: { width: 400, height: 400 },
+              subCanvasId: 'content-canvas-1',
+            },
+          ],
+          contentCanvases: [contentCanvas],
+          canvasSize: { width: 1920, height: 1080 },
+          gridEnabled: true,
+          gridSize: 20,
+        },
+        ctx(),
+      );
+
+      // Retrieve the content canvas
+      const retrievedCanvas = await call(
+        appRouter.canvas.getContentCanvas,
+        {
+          contentCanvasId: 'content-canvas-1',
+        },
+        ctx(),
+      );
+
+      expect(retrievedCanvas._id).toBe('content-canvas-1');
+      expect(retrievedCanvas.name).toBe('Component Details');
+      expect(retrievedCanvas.nodes).toHaveLength(1);
+      expect(retrievedCanvas.nodes[0].type).toBe('ITEM');
+    });
+
+    it('should return NOT_FOUND when content canvas does not exist', async () => {
+      const { ctx } = await createUser();
+
+      await expect(
+        call(
+          appRouter.canvas.getContentCanvas,
+          {
+            contentCanvasId: 'non-existent-canvas',
+          },
+          ctx(),
+        ),
+      ).rejects.toThrow('Canvas layout not found');
+    });
+
+    it('should return NOT_FOUND when user does not own the workspace and it is private', async () => {
+      const { ctx: ownerCtx } = await createUser();
+      const { ctx: otherCtx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Private Workspace',
+          visibility: 'PRIVATE',
+        },
+        ownerCtx(),
+      );
+
+      // Create a layout with a content canvas
+      const contentCanvas = {
+        _id: 'private-canvas-1',
+        name: 'Private Content',
+        nodes: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [],
+          contentCanvases: [contentCanvas],
+          canvasSize: { width: 1920, height: 1080 },
+        },
+        ownerCtx(),
+      );
+
+      // Try to access as another user
+      await expect(
+        call(
+          appRouter.canvas.getContentCanvas,
+          {
+            contentCanvasId: 'private-canvas-1',
+          },
+          otherCtx(),
+        ),
+      ).rejects.toThrow('Canvas layout not found');
+    });
+
+    it('should allow access to content canvas when workspace is public', async () => {
+      const { ctx: ownerCtx } = await createUser();
+      const { ctx: publicCtx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Public Workspace',
+          visibility: 'PUBLIC',
+        },
+        ownerCtx(),
+      );
+
+      // Create a layout with a content canvas
+      const contentCanvas = {
+        _id: 'public-canvas-1',
+        name: 'Public Content',
+        description: 'Publicly accessible content',
+        nodes: [
+          {
+            id: 'node-1',
+            type: 'ASSET' as const,
+            position: { x: 50, y: 50 },
+            size: { width: 150, height: 150 },
+            assetId: 'asset-1',
+          },
+        ],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [],
+          contentCanvases: [contentCanvas],
+          canvasSize: { width: 1920, height: 1080 },
+        },
+        ownerCtx(),
+      );
+
+      // Access as another user
+      const retrievedCanvas = await call(
+        appRouter.canvas.getContentCanvas,
+        {
+          contentCanvasId: 'public-canvas-1',
+        },
+        publicCtx(),
+      );
+
+      expect(retrievedCanvas._id).toBe('public-canvas-1');
+      expect(retrievedCanvas.name).toBe('Public Content');
+      expect(retrievedCanvas.description).toBe('Publicly accessible content');
+    });
+
+    it('should return NOT_FOUND when workspace is deleted but content canvas exists', async () => {
+      const { ctx } = await createUser();
+
+      const workspace = await call(
+        appRouter.workspaces.createWorkspace,
+        {
+          title: 'Workspace to Delete',
+          visibility: 'PRIVATE',
+        },
+        ctx(),
+      );
+
+      // Create a layout with a content canvas
+      const contentCanvas = {
+        _id: 'orphaned-canvas-1',
+        name: 'Orphaned Content',
+        nodes: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      await call(
+        appRouter.canvas.saveLayout,
+        {
+          workspaceId: workspace._id,
+          nodes: [],
+          contentCanvases: [contentCanvas],
+          canvasSize: { width: 1920, height: 1080 },
+        },
+        ctx(),
+      );
+
+      // Delete the workspace
+      await call(
+        appRouter.workspaces.deleteWorkspace,
+        {
+          workspaceId: workspace._id,
+        },
+        ctx(),
+      );
+
+      // Try to access the content canvas
+      await expect(
+        call(
+          appRouter.canvas.getContentCanvas,
+          {
+            contentCanvasId: 'orphaned-canvas-1',
+          },
+          ctx(),
+        ),
+      ).rejects.toThrow('Canvas layout not found');
+    });
+  });
 });
