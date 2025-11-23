@@ -90,7 +90,7 @@ export function AssetPickerModal({
             <DialogDescription>
               {allowUpload
                 ? 'Choose an asset from your library or the global collection. You can also create a new asset.'
-                : 'Choose an asset from your library or the global collection.'}
+                : 'Choose an asset from your library or the global collection. Asset uploads are disabled in canvas mode.'}
             </DialogDescription>
           </DialogHeader>
 

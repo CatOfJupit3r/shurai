@@ -187,9 +187,17 @@ export function SubCanvasModal({ isOpen, onClose, contentCanvasId, parentItemNam
 
         {/* Info footer - show depth limitation */}
         <div className="border-t border-border bg-muted/30 px-6 py-3">
-          <p className="text-xs text-muted-foreground">
-            ℹ️ This is a content canvas (depth 1). Nested content canvases are not allowed.
-          </p>
+          <div className="flex items-start gap-2">
+            <span className="text-xs">ℹ️</span>
+            <div className="flex-1 text-xs text-muted-foreground">
+              <p className="font-medium">Content Canvas Limitations:</p>
+              <ul className="mt-1 space-y-0.5">
+                <li>• This is a single-level content canvas (depth 1)</li>
+                <li>• Nested content canvases are not allowed</li>
+                <li>• Only existing assets can be selected (no uploads)</li>
+              </ul>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

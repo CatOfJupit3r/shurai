@@ -204,6 +204,9 @@ export function InspectorPanel({ node, onClose, onUpdate }: iInspectorPanelProps
         {node.type === 'ASSET' && (
           <div className="space-y-2">
             <div className="text-sm font-semibold">Asset</div>
+            <p className="text-xs text-muted-foreground">
+              Select from your existing asset library. Asset uploads are not available in canvas mode.
+            </p>
             {hasAsset ? (
               <div className="space-y-2">
                 {/* Asset Preview */}

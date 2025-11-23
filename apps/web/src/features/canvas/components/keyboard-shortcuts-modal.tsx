@@ -95,11 +95,20 @@ export function KeyboardShortcutsModal({ isOpen, onClose }: iKeyboardShortcutsMo
         </div>
 
         <div className="mt-6 rounded-lg border border-border bg-muted/50 p-4">
+          <h4 className="mb-2 text-sm font-semibold">Canvas Limitations</h4>
+          <ul className="space-y-1 text-xs text-muted-foreground">
+            <li>• Assets can only be selected from your existing library (uploads are not supported)</li>
+            <li>• Content canvases are limited to a single level of depth (no nested content canvases)</li>
+            <li>• Content canvas nodes (SUB_CANVAS type) cannot be resized, only repositioned</li>
+            <li>• Use the Asset Picker to choose from existing assets when editing nodes</li>
+          </ul>
+        </div>
+
+        <div className="mt-4 rounded-lg border border-border bg-muted/50 p-4">
           <h4 className="mb-2 text-sm font-semibold">Accessibility Notes</h4>
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li>• Use Tab to navigate between canvas controls and the nodes list</li>
             <li>• Arrow keys in the nodes list will move selection up/down</li>
-            <li>• Content canvas nodes (nested layouts) cannot be resized via keyboard</li>
             <li>• Screen readers will announce node positions and sizes</li>
             <li>• All actions provide toast notifications for feedback</li>
           </ul>
