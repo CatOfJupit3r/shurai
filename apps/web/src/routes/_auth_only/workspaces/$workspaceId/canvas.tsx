@@ -1,9 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState, useCallback, useEffect } from 'react';
-import { FiChevronLeft, FiGrid, FiSave, FiMaximize2, FiList, FiHelpCircle, FiRotateCcw } from 'react-icons/fi';
+import {
+  FiChevronLeft,
+  FiGrid,
+  FiSave,
+  FiMaximize2,
+  FiList,
+  FiHelpCircle,
+  FiRotateCcw,
+  FiInfo,
+  FiX,
+} from 'react-icons/fi';
 import { HiOutlineCube } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 
+import { Alert, AlertDescription, AlertTitle } from '@~/components/ui/alert';
 import { Button } from '@~/components/ui/button';
 import { Empty, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from '@~/components/ui/empty';
 import { Label } from '@~/components/ui/label';
@@ -60,6 +71,12 @@ function EmptyCanvas({ onCreateLayout }: { onCreateLayout: () => unknown }) {
           Create a canvas layout to visually arrange and present your workspace items.
           <br />
           You can position, resize, and rotate items on the canvas.
+          <br />
+          <br />
+          <span className="text-xs">
+            <strong>Note:</strong> Canvas supports selecting existing assets only. Content canvases have single-level
+            depth.
+          </span>
         </EmptyDescription>
       </EmptyHeader>
       <Button size="lg" onClick={onCreateLayout}>
@@ -93,6 +110,13 @@ function RouteComponent() {
   // Accessibility state
   const [isNodesListOpen, setIsNodesListOpen] = useState(false);
   const [isShortcutsModalOpen, setIsShortcutsModalOpen] = useState(false);
+
+  // Info banner state
+  const [isInfoBannerDismissed, setIsInfoBannerDismissed] = useState(() => {
+    // Check localStorage for dismissed state
+    const dismissed = localStorage.getItem(`canvas-info-banner-dismissed-${workspaceId}`);
+    return dismissed === 'true';
+  });
 
   // History management
   const history = useCanvasHistory({ maxHistorySize: 50 });
@@ -291,6 +315,11 @@ function RouteComponent() {
     setSelectedSubCanvasParentName('');
   }, []);
 
+  const handleDismissInfoBanner = useCallback(() => {
+    setIsInfoBannerDismissed(true);
+    localStorage.setItem(`canvas-info-banner-dismissed-${workspaceId}`, 'true');
+  }, [workspaceId]);
+
   if (isLoadingWorkspace || isLoadingLayout) {
     return (
       <div className="min-h-screen bg-background">
@@ -378,6 +407,38 @@ function RouteComponent() {
           </div>
         </div>
       </div>
+
+      {/* Canvas Limitations Info Banner */}
+      {!isInfoBannerDismissed && layout && !layoutError ? (
+        <div className="border-b border-border bg-card px-6 py-3">
+          <Alert>
+            <FiInfo className="text-blue-500" />
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1">
+                <AlertTitle>Canvas Limitations</AlertTitle>
+                <AlertDescription>
+                  <ul className="mt-1 space-y-1 text-xs">
+                    <li>
+                      • Assets can only be selected from your existing library (uploads are not supported in canvas)
+                    </li>
+                    <li>• Content canvases are limited to a single level of depth (no nested content canvases)</li>
+                    <li>• Content canvas nodes (SUB_CANVAS) cannot be resized, only repositioned</li>
+                  </ul>
+                </AlertDescription>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0"
+                onClick={handleDismissInfoBanner}
+                aria-label="Dismiss canvas limitations banner"
+              >
+                <FiX />
+              </Button>
+            </div>
+          </Alert>
+        </div>
+      ) : null}
 
       {/* Main Content */}
       <div className="flex h-[calc(100vh-73px)]">
