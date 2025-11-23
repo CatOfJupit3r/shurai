@@ -66,7 +66,7 @@ export function WorkspaceCard({ workspace }: iWorkspaceCardProps) {
 
       <CardFooter className="flex gap-2">
         <Button variant="default" size="sm" className="flex-1" asChild>
-          <Link to="/workspace/$workspaceId/builder" params={{ workspaceId: workspace._id }}>
+          <Link to="/workspaces/$workspaceId/builder" params={{ workspaceId: workspace._id }}>
             <FiEdit />
             Edit
           </Link>

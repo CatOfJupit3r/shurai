@@ -17,10 +17,11 @@ import { Route as Auth_onlyProfileRouteImport } from './routes/_auth_only/profil
 import { Route as Auth_onlyDashboardRouteImport } from './routes/_auth_only/dashboard';
 import { Route as Auth_onlyAssetsRouteImport } from './routes/_auth_only/assets';
 import { Route as generalTo_dashboardRouteImport } from './routes/(general)/_to_dashboard';
-import { Route as generalWorkspaceSlugRouteImport } from './routes/(general)/workspace.$slug';
+import { Route as generalWorkspacesSlugRouteImport } from './routes/(general)/workspaces.$slug';
 import { Route as generalTo_dashboardAuthRouteImport } from './routes/(general)/_to_dashboard.auth';
-import { Route as Auth_onlyWorkspaceWorkspaceIdCanvasRouteImport } from './routes/_auth_only/workspace.$workspaceId.canvas';
-import { Route as Auth_onlyWorkspaceWorkspaceIdBuilderRouteImport } from './routes/_auth_only/workspace.$workspaceId.builder';
+import { Route as Auth_onlyWorkspacesWorkspaceIdIndexRouteImport } from './routes/_auth_only/workspaces/$workspaceId/index';
+import { Route as Auth_onlyWorkspacesWorkspaceIdCanvasRouteImport } from './routes/_auth_only/workspaces/$workspaceId/canvas';
+import { Route as Auth_onlyWorkspacesWorkspaceIdBuilderRouteImport } from './routes/_auth_only/workspaces/$workspaceId/builder';
 
 const Auth_onlyRoute = Auth_onlyRouteImport.update({
   id: '/_auth_only',
@@ -60,9 +61,9 @@ const generalTo_dashboardRoute = generalTo_dashboardRouteImport.update({
   id: '/(general)/_to_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any);
-const generalWorkspaceSlugRoute = generalWorkspaceSlugRouteImport.update({
-  id: '/(general)/workspace/$slug',
-  path: '/workspace/$slug',
+const generalWorkspacesSlugRoute = generalWorkspacesSlugRouteImport.update({
+  id: '/(general)/workspaces/$slug',
+  path: '/workspaces/$slug',
   getParentRoute: () => rootRouteImport,
 } as any);
 const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
@@ -70,16 +71,22 @@ const generalTo_dashboardAuthRoute = generalTo_dashboardAuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => generalTo_dashboardRoute,
 } as any);
-const Auth_onlyWorkspaceWorkspaceIdCanvasRoute =
-  Auth_onlyWorkspaceWorkspaceIdCanvasRouteImport.update({
-    id: '/workspace/$workspaceId/canvas',
-    path: '/workspace/$workspaceId/canvas',
+const Auth_onlyWorkspacesWorkspaceIdIndexRoute =
+  Auth_onlyWorkspacesWorkspaceIdIndexRouteImport.update({
+    id: '/workspaces/$workspaceId/',
+    path: '/workspaces/$workspaceId/',
     getParentRoute: () => Auth_onlyRoute,
   } as any);
-const Auth_onlyWorkspaceWorkspaceIdBuilderRoute =
-  Auth_onlyWorkspaceWorkspaceIdBuilderRouteImport.update({
-    id: '/workspace/$workspaceId/builder',
-    path: '/workspace/$workspaceId/builder',
+const Auth_onlyWorkspacesWorkspaceIdCanvasRoute =
+  Auth_onlyWorkspacesWorkspaceIdCanvasRouteImport.update({
+    id: '/workspaces/$workspaceId/canvas',
+    path: '/workspaces/$workspaceId/canvas',
+    getParentRoute: () => Auth_onlyRoute,
+  } as any);
+const Auth_onlyWorkspacesWorkspaceIdBuilderRoute =
+  Auth_onlyWorkspacesWorkspaceIdBuilderRouteImport.update({
+    id: '/workspaces/$workspaceId/builder',
+    path: '/workspaces/$workspaceId/builder',
     getParentRoute: () => Auth_onlyRoute,
   } as any);
 
@@ -91,9 +98,10 @@ export interface FileRoutesByFullPath {
   '/settings': typeof Auth_onlySettingsRoute;
   '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
-  '/workspace/$slug': typeof generalWorkspaceSlugRoute;
-  '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
-  '/workspace/$workspaceId/canvas': typeof Auth_onlyWorkspaceWorkspaceIdCanvasRoute;
+  '/workspaces/$slug': typeof generalWorkspacesSlugRoute;
+  '/workspaces/$workspaceId/builder': typeof Auth_onlyWorkspacesWorkspaceIdBuilderRoute;
+  '/workspaces/$workspaceId/canvas': typeof Auth_onlyWorkspacesWorkspaceIdCanvasRoute;
+  '/workspaces/$workspaceId': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute;
@@ -103,9 +111,10 @@ export interface FileRoutesByTo {
   '/settings': typeof Auth_onlySettingsRoute;
   '/templates': typeof Auth_onlyTemplatesRoute;
   '/auth': typeof generalTo_dashboardAuthRoute;
-  '/workspace/$slug': typeof generalWorkspaceSlugRoute;
-  '/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
-  '/workspace/$workspaceId/canvas': typeof Auth_onlyWorkspaceWorkspaceIdCanvasRoute;
+  '/workspaces/$slug': typeof generalWorkspacesSlugRoute;
+  '/workspaces/$workspaceId/builder': typeof Auth_onlyWorkspacesWorkspaceIdBuilderRoute;
+  '/workspaces/$workspaceId/canvas': typeof Auth_onlyWorkspacesWorkspaceIdCanvasRoute;
+  '/workspaces/$workspaceId': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport;
@@ -118,9 +127,10 @@ export interface FileRoutesById {
   '/_auth_only/settings': typeof Auth_onlySettingsRoute;
   '/_auth_only/templates': typeof Auth_onlyTemplatesRoute;
   '/(general)/_to_dashboard/auth': typeof generalTo_dashboardAuthRoute;
-  '/(general)/workspace/$slug': typeof generalWorkspaceSlugRoute;
-  '/_auth_only/workspace/$workspaceId/builder': typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
-  '/_auth_only/workspace/$workspaceId/canvas': typeof Auth_onlyWorkspaceWorkspaceIdCanvasRoute;
+  '/(general)/workspaces/$slug': typeof generalWorkspacesSlugRoute;
+  '/_auth_only/workspaces/$workspaceId/builder': typeof Auth_onlyWorkspacesWorkspaceIdBuilderRoute;
+  '/_auth_only/workspaces/$workspaceId/canvas': typeof Auth_onlyWorkspacesWorkspaceIdCanvasRoute;
+  '/_auth_only/workspaces/$workspaceId/': typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath;
@@ -132,9 +142,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/auth'
-    | '/workspace/$slug'
-    | '/workspace/$workspaceId/builder'
-    | '/workspace/$workspaceId/canvas';
+    | '/workspaces/$slug'
+    | '/workspaces/$workspaceId/builder'
+    | '/workspaces/$workspaceId/canvas'
+    | '/workspaces/$workspaceId';
   fileRoutesByTo: FileRoutesByTo;
   to:
     | '/'
@@ -144,9 +155,10 @@ export interface FileRouteTypes {
     | '/settings'
     | '/templates'
     | '/auth'
-    | '/workspace/$slug'
-    | '/workspace/$workspaceId/builder'
-    | '/workspace/$workspaceId/canvas';
+    | '/workspaces/$slug'
+    | '/workspaces/$workspaceId/builder'
+    | '/workspaces/$workspaceId/canvas'
+    | '/workspaces/$workspaceId';
   id:
     | '__root__'
     | '/'
@@ -158,16 +170,17 @@ export interface FileRouteTypes {
     | '/_auth_only/settings'
     | '/_auth_only/templates'
     | '/(general)/_to_dashboard/auth'
-    | '/(general)/workspace/$slug'
-    | '/_auth_only/workspace/$workspaceId/builder'
-    | '/_auth_only/workspace/$workspaceId/canvas';
+    | '/(general)/workspaces/$slug'
+    | '/_auth_only/workspaces/$workspaceId/builder'
+    | '/_auth_only/workspaces/$workspaceId/canvas'
+    | '/_auth_only/workspaces/$workspaceId/';
   fileRoutesById: FileRoutesById;
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute;
   Auth_onlyRoute: typeof Auth_onlyRouteWithChildren;
   generalTo_dashboardRoute: typeof generalTo_dashboardRouteWithChildren;
-  generalWorkspaceSlugRoute: typeof generalWorkspaceSlugRoute;
+  generalWorkspacesSlugRoute: typeof generalWorkspacesSlugRoute;
 }
 
 declare module '@tanstack/react-router' {
@@ -228,11 +241,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardRouteImport;
       parentRoute: typeof rootRouteImport;
     };
-    '/(general)/workspace/$slug': {
-      id: '/(general)/workspace/$slug';
-      path: '/workspace/$slug';
-      fullPath: '/workspace/$slug';
-      preLoaderRoute: typeof generalWorkspaceSlugRouteImport;
+    '/(general)/workspaces/$slug': {
+      id: '/(general)/workspaces/$slug';
+      path: '/workspaces/$slug';
+      fullPath: '/workspaces/$slug';
+      preLoaderRoute: typeof generalWorkspacesSlugRouteImport;
       parentRoute: typeof rootRouteImport;
     };
     '/(general)/_to_dashboard/auth': {
@@ -242,18 +255,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof generalTo_dashboardAuthRouteImport;
       parentRoute: typeof generalTo_dashboardRoute;
     };
-    '/_auth_only/workspace/$workspaceId/canvas': {
-      id: '/_auth_only/workspace/$workspaceId/canvas';
-      path: '/workspace/$workspaceId/canvas';
-      fullPath: '/workspace/$workspaceId/canvas';
-      preLoaderRoute: typeof Auth_onlyWorkspaceWorkspaceIdCanvasRouteImport;
+    '/_auth_only/workspaces/$workspaceId/': {
+      id: '/_auth_only/workspaces/$workspaceId/';
+      path: '/workspaces/$workspaceId';
+      fullPath: '/workspaces/$workspaceId';
+      preLoaderRoute: typeof Auth_onlyWorkspacesWorkspaceIdIndexRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
-    '/_auth_only/workspace/$workspaceId/builder': {
-      id: '/_auth_only/workspace/$workspaceId/builder';
-      path: '/workspace/$workspaceId/builder';
-      fullPath: '/workspace/$workspaceId/builder';
-      preLoaderRoute: typeof Auth_onlyWorkspaceWorkspaceIdBuilderRouteImport;
+    '/_auth_only/workspaces/$workspaceId/canvas': {
+      id: '/_auth_only/workspaces/$workspaceId/canvas';
+      path: '/workspaces/$workspaceId/canvas';
+      fullPath: '/workspaces/$workspaceId/canvas';
+      preLoaderRoute: typeof Auth_onlyWorkspacesWorkspaceIdCanvasRouteImport;
+      parentRoute: typeof Auth_onlyRoute;
+    };
+    '/_auth_only/workspaces/$workspaceId/builder': {
+      id: '/_auth_only/workspaces/$workspaceId/builder';
+      path: '/workspaces/$workspaceId/builder';
+      fullPath: '/workspaces/$workspaceId/builder';
+      preLoaderRoute: typeof Auth_onlyWorkspacesWorkspaceIdBuilderRouteImport;
       parentRoute: typeof Auth_onlyRoute;
     };
   }
@@ -265,8 +285,9 @@ interface Auth_onlyRouteChildren {
   Auth_onlyProfileRoute: typeof Auth_onlyProfileRoute;
   Auth_onlySettingsRoute: typeof Auth_onlySettingsRoute;
   Auth_onlyTemplatesRoute: typeof Auth_onlyTemplatesRoute;
-  Auth_onlyWorkspaceWorkspaceIdBuilderRoute: typeof Auth_onlyWorkspaceWorkspaceIdBuilderRoute;
-  Auth_onlyWorkspaceWorkspaceIdCanvasRoute: typeof Auth_onlyWorkspaceWorkspaceIdCanvasRoute;
+  Auth_onlyWorkspacesWorkspaceIdBuilderRoute: typeof Auth_onlyWorkspacesWorkspaceIdBuilderRoute;
+  Auth_onlyWorkspacesWorkspaceIdCanvasRoute: typeof Auth_onlyWorkspacesWorkspaceIdCanvasRoute;
+  Auth_onlyWorkspacesWorkspaceIdIndexRoute: typeof Auth_onlyWorkspacesWorkspaceIdIndexRoute;
 }
 
 const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
@@ -275,10 +296,12 @@ const Auth_onlyRouteChildren: Auth_onlyRouteChildren = {
   Auth_onlyProfileRoute: Auth_onlyProfileRoute,
   Auth_onlySettingsRoute: Auth_onlySettingsRoute,
   Auth_onlyTemplatesRoute: Auth_onlyTemplatesRoute,
-  Auth_onlyWorkspaceWorkspaceIdBuilderRoute:
-    Auth_onlyWorkspaceWorkspaceIdBuilderRoute,
-  Auth_onlyWorkspaceWorkspaceIdCanvasRoute:
-    Auth_onlyWorkspaceWorkspaceIdCanvasRoute,
+  Auth_onlyWorkspacesWorkspaceIdBuilderRoute:
+    Auth_onlyWorkspacesWorkspaceIdBuilderRoute,
+  Auth_onlyWorkspacesWorkspaceIdCanvasRoute:
+    Auth_onlyWorkspacesWorkspaceIdCanvasRoute,
+  Auth_onlyWorkspacesWorkspaceIdIndexRoute:
+    Auth_onlyWorkspacesWorkspaceIdIndexRoute,
 };
 
 const Auth_onlyRouteWithChildren = Auth_onlyRoute._addFileChildren(
@@ -300,7 +323,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   Auth_onlyRoute: Auth_onlyRouteWithChildren,
   generalTo_dashboardRoute: generalTo_dashboardRouteWithChildren,
-  generalWorkspaceSlugRoute: generalWorkspaceSlugRoute,
+  generalWorkspacesSlugRoute: generalWorkspacesSlugRoute,
 };
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

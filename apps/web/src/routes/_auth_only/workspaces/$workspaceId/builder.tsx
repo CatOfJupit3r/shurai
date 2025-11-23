@@ -21,8 +21,15 @@ import {
 import { ItemDetailsPanel } from '@~/features/workspaces/components/item-details-panel';
 import { ItemTreeView } from '@~/features/workspaces/components/item-tree-view';
 
-export const Route = createFileRoute('/_auth_only/workspace/$workspaceId/builder')({
+export const Route = createFileRoute('/_auth_only/workspaces/$workspaceId/builder')({
   component: RouteComponent,
+  beforeLoad: async ({ context, params }) => {
+    await context.queryClient.ensureQueryData(
+      context.tanstackRPC.items.getItemHierarchy.queryOptions({
+        input: { workspaceId: params.workspaceId },
+      }),
+    );
+  },
 });
 
 function BuilderSkeleton() {
@@ -205,7 +212,7 @@ function RouteComponent() {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={async () => navigate({ to: '/workspace/$workspaceId/canvas', params: { workspaceId } })}
+              onClick={async () => navigate({ to: '/workspaces/$workspaceId/canvas', params: { workspaceId } })}
             >
               <FiMaximize2 />
               Canvas View
