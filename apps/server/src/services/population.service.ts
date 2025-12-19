@@ -41,8 +41,8 @@ class PopulationService {
   async populateDummyData() {
     logger.info('Starting full database population...');
 
-    // Check if database is already populated
-    const userCount = await User.countDocuments();
+    // Check if database is already populated (excluding system user)
+    const userCount = await User.countDocuments({ _id: { $ne: 'system' } });
     if (userCount > 0) {
       logger.info(`Found ${userCount} existing users, skipping full population`);
       return;
@@ -50,75 +50,103 @@ class PopulationService {
 
     logger.info('Creating dummy users...');
 
-    // Create system user for global assets
-    const systemUser = await User.create({
-      _id: 'system',
-      name: 'System',
-      email: 'system@shurai.local',
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    // Import auth service to use Better Auth API
+    const authService = (await import('./auth.service')).default;
+    const auth = authService.getInstance();
 
-    await UserProfileModel.create({
-      userId: systemUser._id,
-      bio: 'System user for global assets',
-    });
+    // Create or get system user for global assets
+    let systemUser = await User.findById('system');
+    if (!systemUser) {
+      logger.info('Creating system user...');
+      systemUser = await User.create({
+        _id: 'system',
+        name: 'System',
+        email: 'system@shurai.local',
+        emailVerified: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      await UserProfileModel.create({
+        userId: systemUser._id,
+        bio: 'System user for global assets',
+      });
+    } else {
+      logger.info('System user already exists, skipping creation');
+    }
 
     // Populate global assets first
     await this.populateGlobalAssets(systemUser._id);
 
-    // Create dummy users
-    const demoUser = await User.create({
-      _id: 'demo-user-1',
-      name: 'Demo User',
-      email: 'demo@example.com',
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+    // Create demo users using Better Auth's signUpEmail
+    logger.info('Creating demo user account...');
+    const demoUserResponse = await auth.api.signUpEmail({
+      body: {
+        email: 'demo@example.com',
+        name: 'Demo User',
+        username: 'demo',
+        password: 'Demo123!@#',
+      },
     });
 
-    await UserProfileModel.create({
-      userId: demoUser._id,
-      bio: 'This is a demo user account showcasing the Shurai platform!',
+    if (!demoUserResponse) {
+      throw new Error('Failed to create demo user');
+    }
+
+    const demoUser = demoUserResponse.user;
+
+    // Update the profile bio for demo user
+    await UserProfileModel.findOneAndUpdate(
+      { userId: demoUser.id },
+      { bio: 'This is a demo user account showcasing the Shurai platform!' },
+      { new: true },
+    );
+
+    logger.info('Creating Alice Johnson account...');
+    const aliceResponse = await auth.api.signUpEmail({
+      body: {
+        email: 'alice@example.com',
+        name: 'Alice Johnson',
+        username: 'alice',
+        password: 'Alice123!@#',
+      },
     });
 
-    const secondUser = await User.create({
-      _id: 'demo-user-2',
-      name: 'Alice Johnson',
-      email: 'alice@example.com',
-      emailVerified: true,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    });
+    if (!aliceResponse) {
+      throw new Error('Failed to create Alice user');
+    }
 
-    await UserProfileModel.create({
-      userId: secondUser._id,
-      bio: 'PC enthusiast and gaming setup collector',
-    });
+    const secondUser = aliceResponse.user;
+
+    // Update the profile bio for Alice
+    await UserProfileModel.findOneAndUpdate(
+      { userId: secondUser.id },
+      { bio: 'PC enthusiast and gaming setup collector' },
+      { new: true },
+    );
 
     logger.info('Creating dummy assets for users...');
 
     // Create some user-specific assets for demo user
-    const demoUserAssets = await WorkspaceAssetModel.insertMany([
+    await WorkspaceAssetModel.insertMany([
       {
-        userId: demoUser._id,
+        userId: demoUser.id,
         name: 'My Custom GPU Icon',
         description: 'Custom RTX 4090 icon',
         type: 'ICON',
-        iconUrl: 'https://api.dicebear.com/7.x/shapes/svg?seed=custom-gpu',
+        iconUrl: 'http://localhost:3030/user-assets/items/custom-gpu-icon.png',
         isGlobal: false,
       },
       {
-        userId: demoUser._id,
+        userId: demoUser.id,
         name: 'My Setup Photo',
         description: 'Photo of my actual setup',
         type: 'IMAGE',
-        imageUrl: 'https://images.unsplash.com/photo-1593640408182-31c70c8268f5?w=800&h=600&fit=crop',
+        imageUrl: 'http://localhost:3030/user-assets/items/demo-setup-photo.jpg',
         isGlobal: false,
       },
       {
-        userId: demoUser._id,
+        userId: demoUser.id,
         name: 'Personal Dark Theme',
         description: 'My customized dark theme',
         type: 'THEME_PRESET',
@@ -133,15 +161,15 @@ class PopulationService {
 
     const aliceAssets = await WorkspaceAssetModel.insertMany([
       {
-        userId: secondUser._id,
-        name: 'Gaming Setup Cover',
-        description: 'Cover image for gaming workspace',
+        userId: secondUser.id,
+        name: 'Minimalist Setup Cover',
+        description: 'Cover image for minimalist workspace',
         type: 'COVER',
-        imageUrl: 'https://images.unsplash.com/photo-1616588589676-62b3bd4ff6d2?w=1200&h=400&fit=crop',
+        imageUrl: 'http://localhost:3030/user-assets/covers/alice-minimal-setup.jpg',
         isGlobal: false,
       },
       {
-        userId: secondUser._id,
+        userId: secondUser.id,
         name: 'Purple Theme',
         description: 'Custom purple accent theme',
         type: 'THEME_PRESET',
@@ -156,20 +184,29 @@ class PopulationService {
 
     logger.info('Creating dummy workspaces...');
 
-    // Create public workspace for demo user
+    // Create public workspace for demo user with cover image
+    const demoWorkspaceCoverAsset = await WorkspaceAssetModel.create({
+      userId: demoUser.id,
+      name: 'Gaming Battlestation Cover',
+      description: 'Cover image for my gaming setup',
+      type: 'COVER',
+      imageUrl: 'http://localhost:3030/user-assets/covers/demo-gaming-setup.jpg',
+      isGlobal: false,
+    });
+
     const publicWorkspace = await WorkspaceModel.create({
-      userId: demoUser._id,
+      userId: demoUser.id,
       title: 'My Gaming Battlestation 2024',
       description:
         'My pride and joy - a high-end gaming setup featuring RTX 4090, AMD Ryzen 9, and custom RGB lighting throughout.',
       visibility: 'PUBLIC',
       shareableSlug: 'demo-gaming-setup-2024',
-      coverAssetId: demoUserAssets[1]._id,
+      coverAssetId: demoWorkspaceCoverAsset._id,
     });
 
     // Create private workspace for demo user
     const privateWorkspace = await WorkspaceModel.create({
-      userId: demoUser._id,
+      userId: demoUser.id,
       title: 'Work From Home Setup',
       description: 'My professional work setup - private configuration',
       visibility: 'PRIVATE',
@@ -177,7 +214,7 @@ class PopulationService {
 
     // Create public workspace for Alice
     const aliceWorkspace = await WorkspaceModel.create({
-      userId: secondUser._id,
+      userId: secondUser.id,
       title: 'Minimalist Productivity Setup',
       description:
         'Clean and minimal setup focused on productivity. Features an ultrawide monitor and ergonomic peripherals.',

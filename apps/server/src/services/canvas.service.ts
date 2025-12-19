@@ -180,13 +180,33 @@ class CanvasService {
         throw ORPCNotFoundError(errorCodes.WORKSPACE_NOT_FOUND);
       }
 
+      // Auto-create canvas layout if it doesn't exist
       if (!workspace.canvasLayout) {
-        this.logger.warn('Canvas layout retrieval failed - layout not found', {
+        this.logger.info('Canvas layout not found, creating default layout', {
           workspaceId,
           userId,
-          duration: Date.now() - startTime,
         });
-        throw ORPCNotFoundError(errorCodes.CANVAS_LAYOUT_NOT_FOUND);
+
+        workspace.canvasLayout = {
+          _id: ObjectIdString(),
+          nodes: [],
+          canvasSize: { width: 1440, height: 810 },
+          backgroundColor: undefined,
+          gridEnabled: true,
+          gridSize: 20,
+          revision: 0,
+          lastModifiedBy: userId,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        await workspace.save();
+
+        this.logger.info('Default canvas layout created successfully', {
+          workspaceId,
+          userId,
+          canvasLayoutId: workspace.canvasLayout._id,
+        });
       }
 
       // Fetch associated content canvases

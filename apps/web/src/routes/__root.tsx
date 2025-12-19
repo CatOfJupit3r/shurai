@@ -24,6 +24,9 @@ export interface iRouterAppContext {
 }
 
 export const Route = createRootRouteWithContext<iRouterAppContext>()({
+  beforeLoad: async ({ context }) => {
+    await context.queryClient.ensureQueryData(meQueryOptions);
+  },
   component: RootComponent,
   head: () => ({
     meta: [

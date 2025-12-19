@@ -135,15 +135,12 @@ function RouteComponent() {
                 </Link>
               </Button>
               {isPublic && workspace.shareableSlug ? (
-                <Button
-                  variant="secondary"
-                  className="w-full justify-start"
-                  size="lg"
-                  onClick={() => window.open(`/workspaces/${workspace.shareableSlug}`, '_blank')}
-                >
-                  <FiExternalLink className="mr-2" />
-                  View Public Page
-                  <span className="ml-auto text-xs text-muted-foreground">See what others see</span>
+                <Button variant="ghost" size="lg" asChild>
+                  <Link className="w-full justify-start" to="/preview/$slug" params={{ slug: workspace.shareableSlug }}>
+                    <FiExternalLink className="mr-2" />
+                    View Public Page
+                    <span className="ml-auto text-xs text-muted-foreground">See what others see</span>
+                  </Link>
                 </Button>
               ) : null}
             </CardContent>

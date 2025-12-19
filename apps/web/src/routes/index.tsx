@@ -1,7 +1,7 @@
 import { Link, createFileRoute } from '@tanstack/react-router';
 import { FaUserCircle } from 'react-icons/fa';
-import { HiOutlineSparkles } from 'react-icons/hi';
-import { LuRocket, LuServerCog } from 'react-icons/lu';
+import { HiOutlineCube } from 'react-icons/hi';
+import { LuImage, LuLayoutTemplate, LuShare2 } from 'react-icons/lu';
 import { TbLayoutDashboard } from 'react-icons/tb';
 
 import { HeroCanvasPreview } from '@~/components/hero-canvas-preview';
@@ -23,13 +23,13 @@ function Metrics() {
 
   return (
     <div className="mt-10 border-t border-border pt-10">
-      <p className="mb-4 text-sm text-muted-foreground">Join thousands of challenge creators and competitors</p>
+      <p className="mb-4 text-sm text-muted-foreground">Join the community of PC enthusiasts showcasing their builds</p>
       <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
         <div className="flex flex-col items-center">
           <div className="text-lg font-bold text-foreground">
             {isPending || error ? <CountSkeleton /> : metrics?.totalUsers}
           </div>
-          <p className="text-xs">Total Users</p>
+          <p className="text-xs">Workspace Creators</p>
         </div>
         <div className="h-8 w-px bg-border" />
         <div className="flex flex-col items-center">
@@ -54,26 +54,29 @@ function StatusBadge() {
   if (error || data?.status !== 'OK')
     return <Badge className="bg-red-100 text-red-700 hover:bg-red-100">⚠️ Service Unhealthy</Badge>;
 
-  return (
-    <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100">🎯 The Challenge Platform is Live</Badge>
-  );
+  return <Badge className="mb-6 bg-purple-100 text-purple-700 hover:bg-purple-100">✨ Shurai is Live</Badge>;
 }
 
 const FEATURES = [
   {
-    title: 'Contract-first approach',
-    description: 'Start building with clear API contracts using oRPC',
-    icon: <LuServerCog className="h-8 w-8" />,
+    title: 'Visual Canvas Editor',
+    description: 'Arrange your PC components on an interactive canvas with drag-and-drop positioning.',
+    icon: <HiOutlineCube className="h-8 w-8" />,
   },
   {
-    title: 'Shiny new tech',
-    description: 'Built with Bun, React, TanStack Router, and more modern technologies.',
-    icon: <HiOutlineSparkles className="h-8 w-8" />,
+    title: 'Asset Library',
+    description: 'Customize your build with a rich library of icons, images, and theme configurations.',
+    icon: <LuImage className="h-8 w-8" />,
   },
   {
-    title: 'Ready-to-use template',
-    description: 'Jumpstart your project with a full-stack starter template.',
-    icon: <LuRocket className="h-8 w-8" />,
+    title: 'Template System',
+    description: 'Save and reuse common build configurations with one-click template application.',
+    icon: <LuLayoutTemplate className="h-8 w-8" />,
+  },
+  {
+    title: 'Share Your Build',
+    description: 'Generate shareable links to showcase your workspace with the community.',
+    icon: <LuShare2 className="h-8 w-8" />,
   },
 ];
 
@@ -89,31 +92,31 @@ function HomeComponent() {
 
             {/* Main Headline */}
             <h1 className="text-5xl font-bold tracking-tight text-foreground sm:text-6xl">
-              Turn Ideas Into
+              Showcase Your
               <br className="my-3" />
               <span className="bg-linear-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">
-                SaaS Products
+                Dream Workspace
               </span>
             </h1>
 
             {/* Subheading */}
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-              Don&apos;t bother managing your own setup. Launch your next project with our full-stack starter template
-              built with Bun, React, TanStack Router, and oRPC.
+              Curate and present your PC build with rich storytelling. Create visual showcases of your hardware,
+              peripherals, and desk setup with our interactive canvas editor.
             </p>
 
             {/* CTA Buttons */}
             <div className="mt-10 flex justify-center gap-4">
               <Link to="/dashboard">
-                <Button size="lg" variant="outline">
+                <Button size="lg" className="gap-2">
                   <TbLayoutDashboard className="h-5 w-5" />
-                  See Dashboard
+                  View Workspaces
                 </Button>
               </Link>
               <Link to="/profile">
-                <Button size="lg" className="gap-2">
+                <Button size="lg" variant="outline" className="gap-2">
                   <FaUserCircle className="h-5 w-5" />
-                  See Profile
+                  My Profile
                 </Button>
               </Link>
             </div>
@@ -130,8 +133,10 @@ function HomeComponent() {
       <section className="border-b border-border py-16 sm:py-24">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="mx-auto mb-12 max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Everything You Need!</h2>
-            <p className="mt-4 text-lg text-muted-foreground">Built for developers.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">Everything You Need</h2>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Powerful tools to create, customize, and share your workspace.
+            </p>
           </div>
 
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-4">

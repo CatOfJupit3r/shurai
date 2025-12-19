@@ -27,7 +27,8 @@ export const assetsRouter = base.assets.router({
 
     const asset = await WorkspaceAssetModel.findById(assetId);
 
-    if (!asset || asset.userId !== userId) {
+    // Allow access to assets owned by the user OR global assets
+    if (!asset || (asset.userId !== userId && !asset.isGlobal)) {
       throw ORPCNotFoundError(errorCodes.ASSET_NOT_FOUND);
     }
 

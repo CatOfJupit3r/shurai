@@ -101,7 +101,7 @@ export const devImpersonatePlugin = () =>
        * `authClient.dev.impersonateUser`
        */
       devImpersonateUser: createAuthEndpoint(
-        '/dev/impersonate-user',
+        '/dev-tools/impersonate-user',
         {
           method: 'POST',
           body: z.object({

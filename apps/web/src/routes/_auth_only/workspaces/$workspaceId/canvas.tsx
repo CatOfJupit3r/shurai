@@ -17,8 +17,6 @@ import {
 import { HiOutlineCube } from 'react-icons/hi';
 import { toast } from 'react-toastify';
 
-import { tryCatch } from '@shurai/shared/helpers/std-utils';
-
 import { Alert, AlertDescription, AlertTitle } from '@~/components/ui/alert';
 import { Button } from '@~/components/ui/button';
 import {
@@ -54,14 +52,11 @@ export const Route = createFileRoute('/_auth_only/workspaces/$workspaceId/canvas
   component: RouteComponent,
   ssr: 'data-only',
   beforeLoad: async ({ context, params }) => {
-    // Try to fetch the layout, but don't fail if it doesn't exist yet - that's okay, it will be created when needed
-    // Just ignore the error and let the component handle it
-    await tryCatch(async () =>
-      context.queryClient.ensureQueryData(
-        context.tanstackRPC.canvas.getLayout.queryOptions({
-          input: { workspaceId: params.workspaceId },
-        }),
-      ),
+    // Prefetch the canvas layout (will be auto-created by backend if it doesn't exist)
+    await context.queryClient.ensureQueryData(
+      context.tanstackRPC.canvas.getLayout.queryOptions({
+        input: { workspaceId: params.workspaceId },
+      }),
     );
   },
 });
@@ -149,22 +144,6 @@ function RouteComponent() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
-
-  // Auto-create canvas layout if it doesn't exist
-  useEffect(() => {
-    if (!isLoadingLayout && !layout && !layoutError && !isSaving) {
-      const defaultLayout = {
-        workspaceId,
-        nodes: [],
-        canvasSize,
-        gridEnabled: true,
-        gridSize: 20,
-      };
-
-      saveLayout(defaultLayout);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoadingLayout, layout, layoutError]);
 
   const handleBack = useStableCallback(() => {
     if (hasUnsavedChanges) {

@@ -14,13 +14,12 @@ const authInstance = createAuthClient({
   baseURL: getBackendURL('/auth'),
   fetchOptions: {
     throw: true,
-    headers: getInitialAuthHeaders(),
   },
 });
 
 class AuthService {
   public async getSession() {
-    return authInstance.getSession({ fetchOptions: { throw: true } });
+    return authInstance.getSession({ fetchOptions: { throw: true, headers: getInitialAuthHeaders() } });
   }
 
   public getInstance() {

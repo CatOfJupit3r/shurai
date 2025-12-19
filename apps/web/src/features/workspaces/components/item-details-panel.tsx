@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiImage, FiTrash2, FiX } from 'react-icons/fi';
 
 import { Button } from '@~/components/ui/button';
@@ -62,13 +62,16 @@ export function ItemDetailsPanel({
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Update local state when item loads
-  if (item && !name) {
-    setName(item.name);
-    setDescription(item.description ?? '');
-    setAcquireDate(item.acquireDate ? new Date(item.acquireDate).toISOString().split('T')[0] : '');
-    setAssetId(item.assetId);
-  }
+  // Update local state when item changes
+  useEffect(() => {
+    if (item) {
+      setName(item.name);
+      setDescription(item.description ?? '');
+      setAcquireDate(item.acquireDate ? new Date(item.acquireDate).toISOString().split('T')[0] : '');
+      setAssetId(item.assetId);
+      setHasChanges(false);
+    }
+  }, [item, itemId]);
 
   const handleSave = () => {
     if (!item) return;
